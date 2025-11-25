@@ -1,7 +1,10 @@
 fastapi
 uvicorn
-sqlalchemy
+python-dotenv
+SQLAlchemy
+alembic
 psycopg2-binary
-pandas
-numpy
-scikit-learn
+pydantic
+python-multipart
+httpx
+openai
