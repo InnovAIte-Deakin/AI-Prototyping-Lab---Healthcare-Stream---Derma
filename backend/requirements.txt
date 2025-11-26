@@ -5,6 +5,7 @@ sqlalchemy
 alembic
 psycopg2-binary
 pydantic
+email-validator
 python-multipart
 httpx
 openai
