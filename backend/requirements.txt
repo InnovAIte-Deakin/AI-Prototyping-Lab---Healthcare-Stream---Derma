@@ -8,3 +8,5 @@ pydantic
 python-multipart
 httpx
 openai
+pytest
+pytest-cov
