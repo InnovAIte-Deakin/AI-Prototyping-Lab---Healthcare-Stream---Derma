@@ -11,7 +11,8 @@ tests/
 ├── test_config.py        # B1: Configuration tests
 ├── test_main.py          # B1: FastAPI app and CORS tests
 ├── test_db.py            # B2: Database setup tests
-└── test_models.py        # B2: SQLAlchemy models tests
+├── test_models.py        # B2: SQLAlchemy models tests
+└── test_auth.py          # B3: Authentication tests
 ```
 
 ## Running Tests
@@ -62,6 +63,14 @@ pytest -v
 - ✅ AnalysisReport model (JSON storage)
 - ✅ Foreign key relationships validation
 - ✅ Model metadata registration
+
+### B3 Tests (Authentication)
+- ✅ User Signup (Patient & Doctor)
+- ✅ User Login (Valid & Invalid credentials)
+- ✅ Password Hashing & Verification
+- ✅ Role-Based Access Control (RBAC) helpers
+- ✅ Doctor Profile creation on signup
+- ✅ Duplicate email prevention
 
 ## Fixtures
 
