@@ -55,28 +55,36 @@ cd AI-Prototyping-Lab---Healthcare-Stream---Derma
 The backend handles the API, Database, and AI logic.
 
 ```bash
-\# Navigate to backend  
+# Navigate to backend  
 cd backend  
-<br/>\# Create a virtual environment  
+
+# Create a virtual environment  
 python -m venv venv  
-<br/>\# Activate venv  
-\# Windows:  
+
+# Activate venv  
+# Windows:  
 venv\\Scripts\\activate  
-\# Mac/Linux:  
+# Mac/Linux:  
 source venv/bin/activate  
-<br/>\# Install dependencies  
+
+# Install dependencies  
 pip install -r requirements.txt  
-<br/>\# Create .env file  
-\# (Copy the content below into a new file named .env inside /backend)  
+
+# Create .env file  
+# (Copy the content below into a new file named .env inside /backend)  
 DATABASE_URL=postgresql://skinscope:skinscope@localhost:5432/skinscope  
 OPENAI_API_KEY=your_api_key_here  
-<br/>\# Start the Database (Docker)  
+
+# Start the Database (Docker)  
 docker-compose up -d  
-<br/>\# Run Migrations  
-alembic upgrade head  
-<br/>\# Seed the Database (Create dummy doctors)  
+
+# Run Migrations  
+alembic upgrade head 
+
+# Seed the Database (Create dummy doctors)  
 python -m app.seed_doctors  
-<br/>\# Run the Server  
+
+# Run the Server  
 uvicorn app.main:app --reload  
 ```
 
@@ -86,12 +94,14 @@ _The Backend will be running at <http://localhost:8000>_
 
 The frontend handles the UI for Patients and Doctors.
 
-\# Open a new terminal and navigate to frontend  
 ```bash
+# Open a new terminal and navigate to frontend  
 cd frontend  
-<br/>\# Install dependencies  
+
+# Install dependencies  
 npm install  
-<br/>\# Run the development server  
+
+# Run the development server  
 npm run dev  
 ```
 
