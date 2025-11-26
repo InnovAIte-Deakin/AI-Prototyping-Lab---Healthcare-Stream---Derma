@@ -1,0 +1,324 @@
+# SkinScope Project Tasks
+
+This document contains all development tasks for the SkinScope application, organized by backend and frontend components.
+
+---
+
+## 🟦 Backend Tasks
+
+### 🟦 B1 – Backend Skeleton (Dev 1)
+
+**Paste this into Codex:**
+
+I need you to initialize the backend for this new project.
+
+**Context:**
+- Root folders must be `/backend` and `/frontend`.
+- Tech Stack: FastAPI, Python 3.10+, PostgreSQL.
+
+**Action:** Create the following files and structure in the repository:
+
+1. `backend/.env`:
+   - Content: `DATABASE_URL=postgresql://skinscope:skinscope@localhost:5432/skinscope` and `OPENAI_API_KEY=placeholder`.
+
+2. `backend/requirements.txt`:
+   - Add: fastapi, uvicorn, python-dotenv, sqlalchemy, alembic, psycopg2-binary, pydantic, python-multipart, httpx, openai
+
+3. `backend/app/__init__.py`: (Empty file).
+
+4. `backend/app/config.py`:
+   - Use `os.getenv` to load DATABASE_URL and OPENAI_API_KEY.
+
+5. `backend/app/main.py`:
+   - Initialize `app = FastAPI()`.
+   - Add `CORSMiddleware` allowing origins=["http://localhost:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"].
+   - Add a root GET `/` endpoint returning `{"message": "SkinScope API is running"}`.
+
+6. `backend/README.md`:
+   - Add instructions on how to create a virtual environment and run `uvicorn app.main:app --reload`.
+
+---
+
+### 🟦 B2 – Database & Models (Dev 1)
+
+**Paste this into Codex:**
+
+I need to set up the Database schema and Alembic.
+
+**Context:**
+- We are using SQLAlchemy and PostgreSQL.
+- `backend/app/main.py` already exists.
+
+**Action:** Create/Update the following files:
+
+1. `backend/docker-compose.yml`:
+   - Service: `db` using image `postgres:15`.
+   - Ports: `5432:5432`.
+   - Environment: POSTGRES_USER=skinscope, POSTGRES_PASSWORD=skinscope, POSTGRES_DB=skinscope.
+
+2. `backend/app/db.py`:
+   - Setup `create_engine` using DATABASE_URL.
+   - Setup `SessionLocal` and `Base`.
+   - Create a `get_db` dependency.
+
+3. `backend/app/models.py`:
+   - Define these exact SQLAlchemy models:
+   - `User`: id (int, pk), email (unique), password (str), role (str), created_at.
+   - `DoctorProfile`: id (pk), user_id (FK->User.id), full_name, clinic_name, bio.
+   - `PatientDoctorLink`: id (pk), patient_id (FK->User.id), doctor_id (FK->User.id), status (default="active").
+   - `Image`: id (pk), patient_id (FK->User.id), doctor_id (FK->User.id), image_url, uploaded_at.
+   - `AnalysisReport`: id (pk), image_id (FK->Image.id), patient_id, doctor_id, report_json (Text), created_at.
+
+4. `backend/alembic/env.py` (Initialize Alembic first if needed):
+   - You must modify `env.py` to import `from app.models import Base` and set `target_metadata = Base.metadata` so autogenerate works.
+
+---
+
+### 🟦 B3 – Auth System (Dev 2)
+
+**Paste this into Codex:**
+
+I need to implement simple Authentication (No JWT).
+
+**Context:**
+- Use the existing `User` model.
+- We trust headers `X-User-Id` and `X-User-Role` for this sprint.
+
+**Action:** Create the following files:
+
+1. `backend/app/schemas.py`:
+   - Pydantic models: `UserSignup` (email, password, role), `UserLogin` (email, password), `UserResponse` (id, email, role).
+
+2. `backend/app/auth_helpers.py`:
+   - Func `get_current_user(request: Request, db: Session)`: Reads `X-User-Id` header. If missing or user not found, raise 401.
+   - Func `get_current_patient()`: Verifies role is "patient".
+   - Func `get_current_doctor()`: Verifies role is "doctor".
+
+3. `backend/app/routes/auth.py`:
+   - `POST /auth/signup`: Create User. If role="doctor", also create an empty DoctorProfile row.
+   - `POST /auth/login`: Check email/password (plain text). Return {user_id, email, role}.
+
+4. Update `backend/app/main.py`:
+   - Include the auth router.
+
+---
+
+### 🟦 B4 – Doctor Logic & Seeding (Dev 3)
+
+**Paste this into Codex:**
+
+I need to implement Doctor listings and a Seeding script.
+
+**Action:** Create/Update the following:
+
+1. `backend/app/seed_doctors.py`:
+   - Create a standalone script to insert 4 test doctors (Dr. Alice, Dr. Bob, etc.) if they don't exist.
+   - Must create both `User` and `DoctorProfile` entries for them.
+   - Use `if __name__ == "__main__":` so I can run it manually.
+
+2. `backend/app/routes/doctors.py`:
+   - `GET /doctors`: List all doctors (join User + DoctorProfile).
+
+3. `backend/app/routes/patient_doctor.py`:
+   - `POST /patient/select-doctor`: (Patient only) Body {doctor_id}. Upsert a `PatientDoctorLink` record.
+   - `GET /patient/my-doctor`: Return the currently linked doctor.
+
+4. Update `backend/app/main.py`:
+   - Include these routers.
+
+---
+
+### 🟦 B5 – Image Uploads (Dev 4)
+
+**Paste this into Codex:**
+
+I need to implement Image Uploading.
+
+**Context:**
+- Images should be stored locally in `backend/media`.
+
+**Action:** Create/Update the following:
+
+1. `backend/app/main.py`:
+   - Mount `StaticFiles` at `/media` pointing to the `backend/media` directory.
+
+2. `backend/app/routes/images.py`:
+   - `POST /images`:
+     - Dependency: `get_current_patient`.
+     - **Constraint:** Check if patient has a linked doctor in `PatientDoctorLink`. If not, raise HTTP 400.
+     - Save file to `backend/media/{uuid}.png`.
+     - Save to `Image` table (patient_id, doctor_id, image_url).
+     - Return `{image_id, image_url}`.
+
+3. Update `backend/app/main.py`:
+   - Include the images router.
+
+---
+
+### 🟦 B6 – Analysis Service (Dev 5)
+
+**Paste this into Codex:**
+
+I need to implement the AI Analysis endpoint.
+
+**Context:**
+- `OPENAI_API_KEY` is in `.env`.
+
+**Action:** Create/Update the following:
+
+1. `backend/app/services/openai_service.py`:
+   - Func `analyze_image(image_url)`.
+   - Call OpenAI Vision model.
+   - **Crucial:** Strip any markdown formatting (like ```json) from the response string before parsing JSON to avoid errors.
+
+2. `backend/app/routes/analysis.py`:
+   - `POST /images/{id}/analyze`:
+     - Calculate analysis.
+     - Save to `AnalysisReport` table.
+     - Return JSON.
+   - `GET /patient/reports`: List reports for current patient.
+   - `GET /doctor/patients/{id}/reports`: List reports for specific patient (Doctor only).
+
+3. Update `backend/app/main.py`:
+   - Include the analysis router.
+
+---
+
+## 🟩 Frontend Tasks
+
+### 🟩 F1 – Frontend Skeleton (Dev 1)
+
+**Paste this into Codex:**
+
+I need to initialize the Frontend.
+
+**Context:**
+- Root folder: `/frontend`.
+- Stack: React + Vite + Tailwind.
+
+**Action:** Create the following:
+
+1. Initialize a Vite React app in `/frontend`.
+
+2. Install dependencies: `react-router-dom`, `axios`, `clsx`, `tailwind-merge`.
+
+3. Configure Tailwind CSS (create tailwind.config.js).
+
+4. Create `frontend/src/pages/` with placeholder files (just an H1 in each):
+   - LoginPage.jsx
+   - PatientDashboard.jsx
+   - PatientUpload.jsx
+   - DoctorDashboard.jsx
+   - DoctorPatientDetail.jsx
+
+5. Setup `frontend/src/App.jsx` with Routes for all the pages above.
+
+---
+
+### 🟩 F2 – Auth Logic (Dev 2)
+
+**Paste this into Codex:**
+
+I need to implement Frontend Auth.
+
+**Context:**
+- Backend is at `http://localhost:8000`.
+- We use LocalStorage for auth (no JWT).
+
+**Action:** Create the following:
+
+1. `frontend/src/context/AuthContext.jsx`:
+   - Manage state `user` ({id, email, role}).
+   - `login(email, password)`: POST to backend. Save `id/role` to localStorage.
+   - **Crucial:** Setup an Axios interceptor to inject `X-User-Id` and `X-User-Role` headers into every request.
+
+2. `frontend/src/components/ProtectedRoute.jsx`:
+   - Check if user is logged in.
+   - Check if user.role matches `allowedRoles` prop.
+   - Redirect to `/login` if failed.
+
+3. Update `App.jsx` to wrap the dashboard routes in ProtectedRoute.
+
+---
+
+### 🟩 F3 – Patient Features (Dev 3)
+
+**Paste this into Codex:**
+
+I need to build the Patient Dashboard.
+
+**Action:** Update these files:
+
+1. `frontend/src/pages/PatientDashboard.jsx`:
+   - Fetch `GET /patient/my-doctor`.
+   - If null, fetch `GET /doctors` and show a selection list.
+   - If doctor exists, show buttons for "New Upload" and "View History".
+
+2. `frontend/src/pages/PatientUpload.jsx`:
+   - File input + "Analyze" button.
+   - On submit:
+     1. `POST /images` (upload file).
+     2. `POST /images/{id}/analyze` (trigger AI).
+     3. Display the JSON result on screen.
+
+---
+
+### 🟩 F4 – Doctor Features (Dev 4)
+
+**Paste this into Codex:**
+
+I need to build the Doctor Dashboard
+
+**Action:** Update these files:
+
+1. `frontend/src/pages/DoctorDashboard.jsx`:
+   - Fetch list of patients (you may need to use `GET /doctors` endpoint logic or a new endpoint if backend provided one, to find patients linked to me).
+   - Render a table of patients.
+
+2. `frontend/src/pages/DoctorPatientDetail.jsx`:
+   - Get `patientId` from URL.
+   - Fetch `GET /doctor/patients/{id}/reports`.
+   - Display each report:
+     - Image (use `http://localhost:8000` + image_url).
+     - AI Findings (Risk, Advice).
+
+---
+
+### 🟩 F5 – Styling & Layout (Dev 5)
+
+**Paste this into Codex:**
+
+I need to Apply Styling and Layout
+
+**Action:** Create/Update:
+
+1. `frontend/src/components/Layout.jsx`:
+   - A wrapper component with a Navbar ("SkinScope", Logout button).
+   - Apply this layout to all pages in `App.jsx`.
+
+2. `frontend/src/components/Disclaimer.jsx`:
+   - A Warning Banner: "AI is not a diagnosis."
+   - Add this to `PatientUpload` and `DoctorPatientDetail`.
+
+3. Styling:
+   - Use Tailwind to make the tables clean.
+   - Style buttons (blue-600) and inputs (gray-200).
+
+---
+
+## Task Completion Checklist
+
+### Backend
+- [ ] B1 – Backend Skeleton
+- [ ] B2 – Database & Models
+- [ ] B3 – Auth System
+- [ ] B4 – Doctor Logic & Seeding
+- [ ] B5 – Image Uploads
+- [ ] B6 – Analysis Service
+
+### Frontend
+- [ ] F1 – Frontend Skeleton
+- [ ] F2 – Auth Logic
+- [ ] F3 – Patient Features
+- [ ] F4 – Doctor Features
+- [ ] F5 – Styling & Layout
