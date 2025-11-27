@@ -33,3 +33,9 @@ Key locations for context:
 ## 4. Context Links
 - **Database Schema:** See `docs/SRS.md` (Data Requirements section).
 - **API Design:** See `backend/main.py` and `routers/` for current implementation.
+
+## 5. Protocol
+- **Branching:** Follow the strict "One Task = One Branch" policy.
+  - **Start:** Always pull the latest `main` first.
+  - **Create:** Create a new branch for every task: `git checkout -b feat/task-name`.
+  - **Commit:** Never commit directly to `main`.
