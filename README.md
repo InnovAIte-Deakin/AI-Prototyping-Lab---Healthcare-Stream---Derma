@@ -16,6 +16,13 @@ DERMA (internally referred to as **SkinScope**) is a containerized web applicati
 - **Doctor Portal:** Secure dashboard for triage, reviewing high-res patient images, and managing appointment requests.
 - **AI Engine:** Modular AI architecture (currently wrapping Google Gemini/OpenAI) with future-proofing for custom fine-tuned models.
 
+## 📚 Documentation
+
+- **[AGENTS.md](AGENTS.md):** Master context for AI Agents (Mission, Rules, Tech Stack).
+- **[docs/SRS.md](docs/SRS.md):** Software Requirements Specification.
+- **[docs/TESTING.md](docs/TESTING.md):** Testing Strategy and Commands.
+- **[TASKS.md](TASKS.md):** Active Task Checklist.
+
 ## 🛠 Tech Stack
 
 ### Frontend
