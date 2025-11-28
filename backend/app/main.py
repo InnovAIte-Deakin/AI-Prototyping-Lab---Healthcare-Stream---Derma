@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth
+from app.routes import auth, doctors, patient_doctor
 
 app = FastAPI(
     title="SkinScope API",
@@ -22,6 +22,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
+app.include_router(doctors.router)
+app.include_router(patient_doctor.router)
 
 @app.get("/")
 def read_root():
