@@ -10,7 +10,7 @@ Sprint 2 Upgrade Path:
 """
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Literal
+from typing import Literal, Optional
 
 
 class UserSignup(BaseModel):
@@ -79,6 +79,26 @@ class LoginResponse(BaseModel):
     # refresh_token: str
     # token_type: str = "bearer"
     # expires_in: int
+
+
+class DoctorResponse(BaseModel):
+    """Doctor details with associated profile information."""
+    id: int
+    email: EmailStr
+    full_name: str
+    clinic_name: Optional[str] = None
+    bio: Optional[str] = None
+
+
+class PatientDoctorResponse(BaseModel):
+    """Response for patient doctor linkage operations."""
+    doctor: DoctorResponse
+    status: str
+
+
+class SelectDoctorRequest(BaseModel):
+    """Request body for selecting a doctor."""
+    doctor_id: int
 
 
 # Sprint 2: Add these additional schemas
