@@ -264,7 +264,7 @@ load_dotenv()
 
 class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "...")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
     # ✨ ADD THIS for Sprint 2
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")

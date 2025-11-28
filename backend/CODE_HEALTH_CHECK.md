@@ -36,7 +36,7 @@ All B1 and B2 components have been implemented and tested successfully. The code
 ```
 ✓ Config imports successful
   - DATABASE_URL: postgresql://skinscope:skinscope@localhost:5432/skinscope
-  - OPENAI_API_KEY: set
+  - GOOGLE_API_KEY: set
 
 ✓ DB imports successful
   - engine, SessionLocal, Base, get_db
@@ -190,7 +190,7 @@ All dependencies successfully installed:
 ✓ pydantic             - Data validation
 ✓ python-multipart     - File uploads
 ✓ httpx                - HTTP client
-✓ openai               - OpenAI API client
+✓ google-generativeai  - Google Gemini API client
 ```
 
 ---

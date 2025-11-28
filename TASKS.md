@@ -19,15 +19,15 @@ I need you to initialize the backend for this new project.
 **Action:** Create the following files and structure in the repository:
 
 1. `backend/.env`:
-   - Content: `DATABASE_URL=postgresql://skinscope:skinscope@localhost:5432/skinscope` and `OPENAI_API_KEY=placeholder`.
+   - Content: `DATABASE_URL=postgresql://skinscope:skinscope@localhost:5432/skinscope` and `GOOGLE_API_KEY=placeholder`.
 
 2. `backend/requirements.txt`:
-   - Add: fastapi, uvicorn, python-dotenv, sqlalchemy, alembic, psycopg2-binary, pydantic, python-multipart, httpx, openai
+   - Add: fastapi, uvicorn, python-dotenv, sqlalchemy, alembic, psycopg2-binary, pydantic, python-multipart, httpx, google-generativeai
 
 3. `backend/app/__init__.py`: (Empty file).
 
 4. `backend/app/config.py`:
-   - Use `os.getenv` to load DATABASE_URL and OPENAI_API_KEY.
+   - Use `os.getenv` to load DATABASE_URL and GOOGLE_API_KEY.
 
 5. `backend/app/main.py`:
    - Initialize `app = FastAPI()`.
@@ -162,13 +162,13 @@ I need to implement Image Uploading.
 I need to implement the AI Analysis endpoint.
 
 **Context:**
-- `OPENAI_API_KEY` is in `.env`.
+- `GOOGLE_API_KEY` is in `.env`.
 
 **Action:** Create/Update the following:
 
-1. `backend/app/services/openai_service.py`:
+1. `backend/app/services/gemini_service.py`:
    - Func `analyze_image(image_url)`.
-   - Call OpenAI Vision model.
+   - Call Google Gemini Vision model.
    - **Crucial:** Strip any markdown formatting (like ```json) from the response string before parsing JSON to avoid errors.
 
 2. `backend/app/routes/analysis.py`:

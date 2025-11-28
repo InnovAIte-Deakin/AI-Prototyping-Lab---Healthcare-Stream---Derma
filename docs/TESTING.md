@@ -115,7 +115,7 @@ pytest -v
 ### Test Coverage
 
 #### B1 Tests (Backend Skeleton)
-- ✅ Configuration loading (DATABASE_URL, OPENAI_API_KEY)
+- ✅ Configuration loading (DATABASE_URL, GOOGLE_API_KEY)
 - ✅ FastAPI app initialization
 - ✅ CORS middleware configuration
 - ✅ Root endpoint functionality

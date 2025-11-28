@@ -8,6 +8,6 @@ pydantic
 email-validator
 python-multipart
 httpx
-openai
+google-generativeai
 pytest
 pytest-cov
