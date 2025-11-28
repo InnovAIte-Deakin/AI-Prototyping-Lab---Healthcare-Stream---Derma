@@ -10,7 +10,7 @@ from sqlalchemy.pool import StaticPool
 
 # Set test environment variables before importing app modules
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["OPENAI_API_KEY"] = "test-key"
+os.environ["GOOGLE_API_KEY"] = "test-key"
 
 from app.main import app
 from app.db import Base, get_db

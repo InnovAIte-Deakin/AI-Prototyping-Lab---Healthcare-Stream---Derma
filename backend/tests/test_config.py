@@ -16,13 +16,13 @@ def test_config_loads_database_url():
     assert "sqlite" in DATABASE_URL.lower() or "postgresql" in DATABASE_URL.lower()
 
 
-def test_config_loads_openai_key():
-    """Test that OPENAI_API_KEY is loaded from environment"""
-    from app.config import OPENAI_API_KEY
+def test_config_loads_google_key():
+    """Test that GOOGLE_API_KEY is loaded from environment"""
+    from app.config import GOOGLE_API_KEY
 
-    assert OPENAI_API_KEY is not None
-    assert isinstance(OPENAI_API_KEY, str)
-    assert len(OPENAI_API_KEY) > 0
+    assert GOOGLE_API_KEY is not None
+    assert isinstance(GOOGLE_API_KEY, str)
+    assert len(GOOGLE_API_KEY) > 0
 
 
 def test_config_uses_dotenv():
@@ -32,13 +32,13 @@ def test_config_uses_dotenv():
 
     # Check that the module has the expected variables
     assert hasattr(app.config, 'DATABASE_URL')
-    assert hasattr(app.config, 'OPENAI_API_KEY')
+    assert hasattr(app.config, 'GOOGLE_API_KEY')
 
 
 def test_environment_variables_accessible():
     """Test that environment variables are accessible"""
     database_url = os.getenv("DATABASE_URL")
-    openai_key = os.getenv("OPENAI_API_KEY")
+    google_key = os.getenv("GOOGLE_API_KEY")
 
     assert database_url is not None, "DATABASE_URL should be set in environment"
-    assert openai_key is not None, "OPENAI_API_KEY should be set in environment"
+    assert google_key is not None, "GOOGLE_API_KEY should be set in environment"
