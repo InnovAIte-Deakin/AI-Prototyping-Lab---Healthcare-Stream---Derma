@@ -312,7 +312,7 @@ I need to Apply Styling and Layout
 - [x] B1 – Backend Skeleton
 - [x] B2 – Database & Models
 - [x] B3 – Auth System
-- [ ] B4 – Doctor Logic & Seeding
+- [x] B4 – Doctor Logic & Seeding
 - [ ] B5 – Image Uploads
 - [ ] B6 – Analysis Service
 
