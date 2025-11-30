@@ -165,7 +165,7 @@ skin-scope/
 
 - [x] **B1-B2:** Backend Skeleton & Database Setup
 - [x] **B3:** Authentication System
-- [ ] **B4:** Doctor Logic & Seeding
+- [x] **B4:** Doctor Logic & Seeding
 - [ ] **B5:** Image Upload Pipeline
 - [ ] **B6:** AI Analysis Integration
 - [ ] **F1-F2:** Frontend Setup & Auth
