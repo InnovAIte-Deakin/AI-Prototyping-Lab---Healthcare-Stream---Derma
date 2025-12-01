@@ -1,4 +1,4 @@
-# DERMA (SkinScope)
+# DERMA (DermaAI)
 
 ### AI-Powered Dermatologist Assistant
 
@@ -8,7 +8,7 @@
 
 ## 📖 Overview
 
-DERMA (internally referred to as **SkinScope**) is a containerized web application designed to bridge the gap between patients and dermatologists. It allows users to upload images of skin lesions for instant, AI-driven preliminary analysis and facilitates connection with doctors for professional review.
+DERMA (internally referred to as **DermaAI**) is a containerized web application designed to bridge the gap between patients and dermatologists. It allows users to upload images of skin lesions for instant, AI-driven preliminary analysis and facilitates connection with doctors for professional review.
 
 ### Key Features
 
@@ -79,7 +79,7 @@ pip install -r requirements.txt
 
 # Create .env file  
 # (Copy the content below into a new file named .env inside /backend)  
-DATABASE_URL=postgresql://skinscope:skinscope@localhost:5432/skinscope  
+DATABASE_URL=postgresql://dermaai:dermaai@localhost:5432/dermaai  
 GOOGLE_API_KEY=your_api_key_here  
 
 # Start the Database (Docker)  
@@ -163,12 +163,14 @@ skin-scope/
 
 ## 📅 Roadmap & Status
 
-- [x] **B1-B2:** Backend Skeleton & Database Setup
+- [x] **B1:** Backend Skeleton
+- [x] **B2:** Database Setup
 - [x] **B3:** Authentication System
 - [x] **B4:** Doctor Logic & Seeding
 - [ ] **B5:** Image Upload Pipeline
 - [ ] **B6:** AI Analysis Integration
-- [ ] **F1-F2:** Frontend Setup & Auth
+- [x] **F1:** Frontend Setup
+- [ ] **F2:** Auth Logic
 - [ ] **F3:** Patient Workflows
 - [ ] **F4:** Doctor Workflows
 - [ ] **F5:** UI Polish & Styling

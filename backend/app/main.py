@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import auth, doctors, patient_doctor
 
 app = FastAPI(
-    title="SkinScope API",
+    title="DermaAI API",
     description="AI-Powered Dermatologist Assistant",
     version="1.0.0"
 )
@@ -27,4 +27,4 @@ app.include_router(patient_doctor.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "SkinScope API is running"}
+    return {"message": "DermaAI API is running"}

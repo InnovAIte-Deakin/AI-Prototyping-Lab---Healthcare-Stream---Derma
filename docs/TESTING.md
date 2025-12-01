@@ -1,4 +1,4 @@
-# Testing Strategy for DERMA (SkinScope)
+# Testing Strategy for DERMA (DermaAI)
 
 This document outlines the testing strategy for the DERMA project, ensuring reliability and correctness across the Backend (FastAPI) and Frontend (React).
 
