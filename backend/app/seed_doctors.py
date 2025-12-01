@@ -20,7 +20,7 @@ DOCTORS = [
         "email": "alice@derma.test",
         "password": "password123",
         "full_name": "Dr. Alice Henderson",
-        "clinic_name": "SkinScope Clinic",
+        "clinic_name": "DermaAI Clinic",
         "bio": "Board-certified dermatologist specializing in acne and eczema.",
     },
     {

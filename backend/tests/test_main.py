@@ -28,7 +28,7 @@ def test_root_endpoint_exists(client):
     response = client.get("/")
 
     assert response.status_code == 200
-    assert response.json() == {"message": "SkinScope API is running"}
+    assert response.json() == {"message": "DermaAI API is running"}
 
 
 def test_root_endpoint_returns_json(client):

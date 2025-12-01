@@ -1,6 +1,6 @@
-# SkinScope Project Tasks
+# DermaAI Project Tasks
 
-This document contains all development tasks for the SkinScope application, organized by backend and frontend components.
+This document contains all development tasks for the DermaAI application, organized by backend and frontend components.
 
 ---
 
@@ -32,7 +32,7 @@ I need you to initialize the backend for this new project.
 5. `backend/app/main.py`:
    - Initialize `app = FastAPI()`.
    - Add `CORSMiddleware` allowing origins=["http://localhost:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"].
-   - Add a root GET `/` endpoint returning `{"message": "SkinScope API is running"}`.
+   - Add a root GET `/` endpoint returning `{"message": "DermaAI API is running"}`.
 
 6. `backend/README.md`:
    - Add instructions on how to create a virtual environment and run `uvicorn app.main:app --reload`.
@@ -293,7 +293,7 @@ I need to Apply Styling and Layout
 **Action:** Create/Update:
 
 1. `frontend/src/components/Layout.jsx`:
-   - A wrapper component with a Navbar ("SkinScope", Logout button).
+   - A wrapper component with a Navbar ("DermaAI", Logout button).
    - Apply this layout to all pages in `App.jsx`.
 
 2. `frontend/src/components/Disclaimer.jsx`:

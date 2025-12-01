@@ -1,4 +1,4 @@
-# DERMA (SkinScope)
+# DERMA (DermaAI)
 
 ### AI-Powered Dermatologist Assistant
 
@@ -8,7 +8,7 @@
 
 ## 📖 Overview
 
-DERMA (internally referred to as **SkinScope**) is a containerized web application designed to bridge the gap between patients and dermatologists. It allows users to upload images of skin lesions for instant, AI-driven preliminary analysis and facilitates connection with doctors for professional review.
+DERMA (internally referred to as **DermaAI**) is a containerized web application designed to bridge the gap between patients and dermatologists. It allows users to upload images of skin lesions for instant, AI-driven preliminary analysis and facilitates connection with doctors for professional review.
 
 ### Key Features
 
