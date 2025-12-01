@@ -317,7 +317,7 @@ I need to Apply Styling and Layout
 - [ ] B6 – Analysis Service
 
 ### Frontend
-- [ ] F1 – Frontend Skeleton
+- [x] F1 – Frontend Skeleton
 - [ ] F2 – Auth Logic
 - [ ] F3 – Patient Features
 - [ ] F4 – Doctor Features
