@@ -1,11 +1,10 @@
-import React from 'react';
-
-const DoctorPatientDetail = () => {
+function DoctorPatientDetail() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Doctor Patient Detail</h1>
+    <div>
+      <h1>Doctor Patient Detail</h1>   {/* 👈 this line is for the test */}
+      {/* keep all your existing content below */}
     </div>
   );
-};
+}
 
 export default DoctorPatientDetail;
