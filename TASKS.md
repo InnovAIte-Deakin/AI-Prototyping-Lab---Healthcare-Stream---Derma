@@ -318,7 +318,7 @@ I need to Apply Styling and Layout
 
 ### Frontend
 - [x] F1 – Frontend Skeleton
-- [ ] F2 – Auth Logic
-- [ ] F3 – Patient Features
+- [x] F2 – Auth Logic
+- [x] F3 – Patient Features
 - [ ] F4 – Doctor Features
 - [ ] F5 – Styling & Layout
