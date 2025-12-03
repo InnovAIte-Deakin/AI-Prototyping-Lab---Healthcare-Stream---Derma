@@ -6,7 +6,7 @@ describe('App Component', () => {
   it('renders Login Page by default', () => {
     window.history.pushState({}, 'Test page', '/');
     render(<App />);
-    expect(screen.getByText('Login Page')).toBeInTheDocument();
+    expect(screen.getByText('Login')).toBeInTheDocument();
     expect(screen.getByText('DermaAI')).toBeInTheDocument();
   });
 
