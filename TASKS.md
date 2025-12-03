@@ -314,7 +314,7 @@ I need to Apply Styling and Layout
 - [x] B3 – Auth System
 - [x] B4 – Doctor Logic & Seeding
 - [ ] B5 – Image Uploads
-- [ ] B6 – Analysis Service
+- [x] B6 – Analysis Service
 
 ### Frontend
 - [x] F1 – Frontend Skeleton
