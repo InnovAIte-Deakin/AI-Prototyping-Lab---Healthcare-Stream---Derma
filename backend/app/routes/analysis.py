@@ -6,7 +6,7 @@ import json
 
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
-from app.services.ai_service import ai_service
+from app.services.gemini_service import gemini_service
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
@@ -59,7 +59,7 @@ async def analyze_image(
             )
     
     # Perform AI analysis
-    analysis_result = ai_service.analyze_skin_lesion(image_path)
+    analysis_result = gemini_service.analyze_skin_lesion(image_path)
     
     if analysis_result["status"] == "error":
         raise HTTPException(

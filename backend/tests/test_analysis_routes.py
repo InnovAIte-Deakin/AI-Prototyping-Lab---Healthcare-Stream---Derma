@@ -7,7 +7,7 @@ from app.models import Image
 class TestAnalysisRoutes:
     """Integration tests for analysis API endpoints"""
     
-    @patch('app.routes.analysis.ai_service.analyze_skin_lesion')
+    @patch('app.routes.analysis.gemini_service.analyze_skin_lesion')
     @patch('os.path.exists')
     def test_analyze_image_success(self, mock_exists, mock_analyze, client, sample_image):
         """Test successful image analysis"""
@@ -48,7 +48,7 @@ class TestAnalysisRoutes:
         assert response.status_code == 404
         assert 'file not found' in response.json()['detail'].lower()
     
-    @patch('app.routes.analysis.ai_service.analyze_skin_lesion')
+    @patch('app.routes.analysis.gemini_service.analyze_skin_lesion')
     @patch('os.path.exists')
     def test_analyze_image_ai_error(self, mock_exists, mock_analyze, client, sample_image):
         """Test analysis when AI service fails"""
