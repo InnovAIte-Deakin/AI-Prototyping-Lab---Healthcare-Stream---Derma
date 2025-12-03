@@ -19,7 +19,7 @@ function PatientDashboard() {
       try {
         // First: see if the patient already has a doctor
         const myDoctorRes = await apiClient.get('/patient/my-doctor');
-        setCurrentDoctor(myDoctorRes.data);
+        setCurrentDoctor(myDoctorRes.data.doctor);
       } catch (err) {
         // If 404 or similar, assume no doctor yet: load list of doctors
         const status = err?.response?.status;
@@ -93,7 +93,7 @@ function PatientDashboard() {
           }}
         >
           <h2>Your Doctor</h2>
-          <p><strong>Name:</strong> {currentDoctor.name ?? 'Unknown'}</p>
+          <p><strong>Name:</strong> {currentDoctor.full_name ?? 'Unknown'}</p>
           {currentDoctor.specialty && (
             <p><strong>Specialty:</strong> {currentDoctor.specialty}</p>
           )}
@@ -131,7 +131,7 @@ function PatientDashboard() {
                       padding: '0.75rem',
                     }}
                   >
-                    <p><strong>{doctor.name ?? 'Doctor'}</strong></p>
+                    <p><strong>{doctor.full_name ?? 'Doctor'}</strong></p>
                     {doctor.specialty && <p>Specialty: {doctor.specialty}</p>}
                     <button
                       onClick={() => handleSelectDoctor(doctor)}
