@@ -17,28 +17,28 @@ from app.models import DoctorProfile, User
 
 DOCTORS = [
     {
-        "email": "alice@derma.test",
+        "email": "alice@derma.com",
         "password": "password123",
         "full_name": "Dr. Alice Henderson",
         "clinic_name": "DermaAI Clinic",
         "bio": "Board-certified dermatologist specializing in acne and eczema.",
     },
     {
-        "email": "bob@derma.test",
+        "email": "bob@derma.com",
         "password": "password123",
         "full_name": "Dr. Bob Martinez",
         "clinic_name": "Downtown Derm Care",
         "bio": "Focused on teledermatology and rapid triage workflows.",
     },
     {
-        "email": "carol@derma.test",
+        "email": "carol@derma.com",
         "password": "password123",
         "full_name": "Dr. Carol Singh",
         "clinic_name": "Sunrise Skin Center",
         "bio": "Experienced with pigmentary disorders and pediatric dermatology.",
     },
     {
-        "email": "dan@derma.test",
+        "email": "dan@derma.com",
         "password": "password123",
         "full_name": "Dr. Dan Okafor",
         "clinic_name": "Harbor Dermatology",

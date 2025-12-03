@@ -20,6 +20,7 @@ function App() {
           <Route element={<Layout />}>
             {/* Public route */}
             <Route path="/" element={<LoginPage />} />
+            <Route path="/login" element={<LoginPage />} />
 
             {/* Patient routes */}
             <Route
