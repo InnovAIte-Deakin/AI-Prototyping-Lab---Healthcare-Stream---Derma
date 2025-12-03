@@ -1,70 +1,84 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
+const AuthContext = createContext(null);
+
+// Shared Axios client for the whole frontend
 export const apiClient = axios.create({
   baseURL: 'http://localhost:8000',
 });
 
-const AuthContext = createContext(null);
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('authUser');
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
 
+  // Load user from localStorage on first mount
   useEffect(() => {
-    const interceptorId = apiClient.interceptors.request.use(
-      (config) => {
-        if (user) {
-          config.headers = {
-            ...(config.headers || {}),
-            'X-User-Id': user.id,
-            'X-User-Role': user.role,
-          };
-        }
-        return config;
-      },
-      (error) => Promise.reject(error),
-    );
+    try {
+      const stored = localStorage.getItem('authUser');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+        setHeadersFromUser(parsed);
+      }
+    } catch (err) {
+      console.error('Failed to parse authUser from localStorage', err);
+    }
+  }, []);
 
-    return () => {
-      apiClient.interceptors.request.eject(interceptorId);
-    };
+  // Whenever user changes, sync to localStorage + apiClient headers
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('authUser', JSON.stringify(user));
+      setHeadersFromUser(user);
+    } else {
+      localStorage.removeItem('authUser');
+      clearHeaders();
+    }
   }, [user]);
 
-  const login = async (email, password) => {
-    const response = await apiClient.post('/auth/login', { email, password });
-    const authUser = {
-      id: response.data.user_id,
-      email: response.data.email,
-      role: response.data.role,
+  const setHeadersFromUser = (u) => {
+    apiClient.defaults.headers['X-User-Id'] = u.id;
+    apiClient.defaults.headers['X-User-Role'] = u.role;
+  };
+
+  const clearHeaders = () => {
+    delete apiClient.defaults.headers['X-User-Id'];
+    delete apiClient.defaults.headers['X-User-Role'];
+  };
+
+  /**
+   * login({ email, role })
+   * For now this is a "fake" login:
+   * - we don't hit a real backend auth endpoint
+   * - we just set a user object that the rest of the app can use
+   *
+   * If/when the backend provides /auth/login later, you can:
+   *  - await apiClient.post('/auth/login', { email, password })
+   *  - and then setUser(response.data.user)
+   */
+  const login = async ({ email, role }) => {
+    if (!email || !role) {
+      throw new Error('Email and role are required');
+    }
+
+    // Fake user object – id could come from backend later
+    const fakeUser = {
+      id: 1,
+      email,
+      role, // 'patient' or 'doctor'
     };
-    localStorage.setItem('authUser', JSON.stringify(authUser));
-    setUser(authUser);
+
+    setUser(fakeUser);
+    return fakeUser;
   };
 
   const logout = () => {
-    localStorage.removeItem('authUser');
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = { user, login, logout };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);
