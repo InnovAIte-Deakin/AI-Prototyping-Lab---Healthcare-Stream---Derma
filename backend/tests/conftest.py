@@ -1,8 +1,12 @@
 import pytest
+import os
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
+os.environ.setdefault("GOOGLE_API_KEY", "test-api-key")
 
 from app.main import app
 from app.db import Base, get_db
