@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, doctors, patient_doctor
+from app.routes import auth, doctors, patient_doctor, analysis  # Add analysis
 
 app = FastAPI(
     title="DermaAI API",
@@ -22,8 +22,10 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
+#app.include_router(images.router) 
 app.include_router(doctors.router)
 app.include_router(patient_doctor.router)
+app.include_router(analysis.router)
 
 @app.get("/")
 def read_root():

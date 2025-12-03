@@ -1,22 +1,18 @@
-"""
-Pytest configuration and fixtures for B1 + B2 tests
-"""
-import os
 import pytest
+import os
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-# Set test environment variables before importing app modules
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["GOOGLE_API_KEY"] = "test-key"
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
+os.environ.setdefault("GOOGLE_API_KEY", "test-api-key")
 
 from app.main import app
 from app.db import Base, get_db
+from app.models import User, Image
 
-
-# Create in-memory SQLite database for testing
+# Use in-memory SQLite for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
 engine = create_engine(
@@ -27,8 +23,8 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture
-def test_db():
+@pytest.fixture(scope="function")
+def db_session():
     """Create a fresh database for each test"""
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
@@ -39,15 +35,15 @@ def test_db():
         Base.metadata.drop_all(bind=engine)
 
 
-@pytest.fixture
-def client(test_db):
-    """Create a test client with database dependency override"""
+@pytest.fixture(scope="function")
+def client(db_session):
+    """Create a test client with database override"""
     def override_get_db():
         try:
-            yield test_db
+            yield db_session
         finally:
             pass
-
+    
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
@@ -55,20 +51,29 @@ def client(test_db):
 
 
 @pytest.fixture
-def sample_user_data():
-    """Sample user data for testing"""
-    return {
-        "email": "test@example.com",
-        "password": "hashed_password_123",
-        "role": "patient"
-    }
+def sample_user(db_session):
+    """Create a sample user for testing"""
+    user = User(
+        email="test@example.com",
+        username="testuser",
+        hashed_password="hashedpassword123",
+        role="patient"
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
 
 
 @pytest.fixture
-def sample_doctor_data():
-    """Sample doctor data for testing"""
-    return {
-        "full_name": "Dr. John Smith",
-        "clinic_name": "Health Clinic",
-        "bio": "Experienced dermatologist"
-    }
+def sample_image(db_session, sample_user):
+    """Create a sample image record for testing"""
+    image = Image(
+        user_id=sample_user.id,
+        file_path="test_image.jpg",
+        analysis=None
+    )
+    db_session.add(image)
+    db_session.commit()
+    db_session.refresh(image)
+    return image
