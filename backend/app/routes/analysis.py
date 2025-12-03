@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Dict, Any
 import os
+import json
 
 from app.db import get_db
-from app.models import Image, User
+from app.models import Image, User, AnalysisReport
 from app.services.ai_service import ai_service
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
@@ -37,19 +38,25 @@ async def analyze_image(
         )
     
     # Verify user owns this image (if user_id is provided)
-    if user_id and image.user_id != user_id:
+    if user_id and image.patient_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to analyze this image"
         )
     
     # Check if image file exists
-    image_path = f"media/{image.file_path}"
+    image_path = image.image_url
+    # If image_url is relative, prepend media/ or similar if needed. 
+    # Assuming for now it's absolute or correct relative path as per test fixture.
     if not os.path.exists(image_path):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Image file not found on server"
-        )
+        # Fallback check if it's relative to project root
+        if os.path.exists(f"media/{image_path}"):
+            image_path = f"media/{image_path}"
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Image file not found on server"
+            )
     
     # Perform AI analysis
     analysis_result = ai_service.analyze_skin_lesion(image_path)
@@ -60,9 +67,13 @@ async def analyze_image(
             detail=analysis_result.get("message", "Analysis failed")
         )
     
-    # Optionally: Save analysis results to database
-    # You might want to add an 'analysis' field to your Image model
-    image.analysis = analysis_result["analysis"]
+    # Save analysis results to database
+    report = AnalysisReport(
+        image_id=image.id,
+        patient_id=image.patient_id,
+        report_json=json.dumps(analysis_result)
+    )
+    db.add(report)
     db.commit()
     
     return analysis_result
@@ -85,20 +96,21 @@ async def get_analysis(
             detail="Image not found"
         )
     
-    if user_id and image.user_id != user_id:
+    if user_id and image.patient_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to view this analysis"
         )
     
-    if not image.analysis:
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
+    
+    if not report:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No analysis found for this image"
         )
     
-    return {
-        "status": "success",
-        "analysis": image.analysis,
-        "image_id": image.id
-    }
+    analysis_data = json.loads(report.report_json)
+    analysis_data["image_id"] = image.id
+    
+    return analysis_data
