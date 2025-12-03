@@ -4,7 +4,7 @@ from pathlib import Path
 import google.generativeai as genai
 from typing import Dict, Any
 
-class AIService:
+class GeminiService:
     """Service for AI-powered skin lesion analysis using Google Gemini"""
     
     def __init__(self):
@@ -85,4 +85,4 @@ class AIService:
         return mime_types.get(extension, 'image/jpeg')
 
 # Create a singleton instance
-ai_service = AIService()
+gemini_service = GeminiService()
