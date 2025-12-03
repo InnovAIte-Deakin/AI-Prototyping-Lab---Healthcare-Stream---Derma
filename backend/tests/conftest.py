@@ -1,5 +1,15 @@
 import os
 import pytest
+
+# -------------------------------------------------------------------
+# Test database setup – use in-memory SQLite and fake env vars
+# IMPORTANT: Set environment variables BEFORE importing app modules
+# because app.db.py creates the engine at module load time.
+# -------------------------------------------------------------------
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
+os.environ.setdefault("GOOGLE_API_KEY", "test-api-key")
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -8,13 +18,6 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.db import Base, get_db
 from app.models import User, Image, DoctorProfile
-
-# -------------------------------------------------------------------
-# Test database setup – use in-memory SQLite and fake env vars
-# -------------------------------------------------------------------
-
-os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
-os.environ.setdefault("GOOGLE_API_KEY", "test-api-key")
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
