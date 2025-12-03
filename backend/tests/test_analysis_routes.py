@@ -65,7 +65,22 @@ class TestAnalysisRoutes:
     def test_get_analysis_success(self, client, db_session, sample_image):
         """Test retrieving existing analysis"""
         # Add analysis to the image
-        sample_image.analysis = "Previous analysis result"
+        from app.models import AnalysisReport
+        import json
+        
+        analysis_content = {
+            "status": "success",
+            "analysis": "Previous analysis result",
+            "model_used": "gemini-1.5-flash",
+            "disclaimer": "Test disclaimer"
+        }
+        
+        report = AnalysisReport(
+            image_id=sample_image.id,
+            patient_id=sample_image.patient_id,
+            report_json=json.dumps(analysis_content)
+        )
+        db_session.add(report)
         db_session.commit()
         
         response = client.get(f"/api/analysis/{sample_image.id}")

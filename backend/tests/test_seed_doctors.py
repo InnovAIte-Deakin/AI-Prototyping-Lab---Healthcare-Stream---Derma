@@ -91,6 +91,7 @@ def test_seed_doctors_uses_internal_session(monkeypatch):
     from app import seed_doctors as seeder
 
     monkeypatch.setattr(seeder, "SessionLocal", Session)
+    monkeypatch.setattr(seeder, "engine", engine)
     seeder.seed_doctors()
 
     with Session() as session:
