@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Dict, Any
+from typing import Dict, Any, List
 import os
 import json
 
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
 from app.services.gemini_service import gemini_service
+from app.auth_helpers import get_current_patient, get_current_doctor
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
@@ -114,3 +115,58 @@ async def get_analysis(
     analysis_data["image_id"] = image.id
     
     return analysis_data
+
+
+@router.get("/patient/reports")
+async def get_patient_reports(
+    current_patient: User = Depends(get_current_patient),
+    db: Session = Depends(get_db)
+) -> List[Dict[str, Any]]:
+    """
+    List all analysis reports for the current patient.
+    """
+    reports = db.query(AnalysisReport).filter(
+        AnalysisReport.patient_id == current_patient.id
+    ).order_by(AnalysisReport.created_at.desc()).all()
+    
+    results = []
+    for report in reports:
+        data = json.loads(report.report_json)
+        data["id"] = report.id
+        data["image_id"] = report.image_id
+        data["created_at"] = report.created_at.isoformat()
+        results.append(data)
+        
+    return results
+
+
+@router.get("/doctor/patients/{patient_id}/reports")
+async def get_doctor_patient_reports(
+    patient_id: int,
+    current_doctor: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db)
+) -> List[Dict[str, Any]]:
+    """
+    List all analysis reports for a specific patient (Doctor only).
+    """
+    # Verify patient exists
+    patient = db.query(User).filter(User.id == patient_id, User.role == "patient").first()
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found"
+        )
+        
+    reports = db.query(AnalysisReport).filter(
+        AnalysisReport.patient_id == patient_id
+    ).order_by(AnalysisReport.created_at.desc()).all()
+    
+    results = []
+    for report in reports:
+        data = json.loads(report.report_json)
+        data["id"] = report.id
+        data["image_id"] = report.image_id
+        data["created_at"] = report.created_at.isoformat()
+        results.append(data)
+        
+    return results
