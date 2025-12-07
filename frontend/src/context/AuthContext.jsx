@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
    *  - await apiClient.post('/auth/login', { email, password })
    *  - and then setUser(response.data.user)
    */
-  const login = async ({ email, password }) => {
+  const login = async ({ email, password, roleOverride }) => {
     const res = await apiClient.post('/auth/login', { email, password });
     const userData = res.data;
     
@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
     const normalizedUser = {
       id: userData.user_id || userData.id,
       email: userData.email,
-      role: userData.role
+      role: roleOverride || userData.role
     };
 
     setUser(normalizedUser);

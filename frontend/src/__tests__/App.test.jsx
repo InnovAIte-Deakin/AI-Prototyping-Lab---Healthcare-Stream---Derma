@@ -17,7 +17,8 @@ describe('App Component', () => {
     window.history.pushState({}, 'Test page', '/');
     render(<App />);
     expect(await screen.findByText('Login')).toBeInTheDocument();
-    expect(await screen.findByText('SkinScope')).toBeInTheDocument();
+    const brands = await screen.findAllByText('SkinScope');
+    expect(brands.length).toBeGreaterThan(0);
   });
 
   it('renders Patient Dashboard on /patient-dashboard', async () => {

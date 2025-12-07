@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { uiTokens } from '../components/Layout';
 
+const accent = 'from-teal-100/70 via-white to-pink-100/70';
+const heroTitleAccent = 'text-[#4b6bff]';
+
 function LoginPage() {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
@@ -30,11 +33,11 @@ function LoginPage() {
       if (isSignup) {
         user = await signup({ email: email.trim(), password, role });
       } else {
-        user = await login({ email: email.trim(), password });
+        user = await login({ email: email.trim(), password, roleOverride: role });
       }
 
-      // After login/signup, route based on role
-      const userRole = user.role || role;
+      // After login/signup, route based on selected role
+      const userRole = role || user.role;
 
       if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
@@ -52,53 +55,77 @@ function LoginPage() {
   };
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center space-y-6 px-4">
-      <div className="space-y-2 text-center">
-        <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">SkinScope</p>
-        <h1 className="text-3xl font-semibold text-slate-900">
-          {isSignup ? 'Create Account' : 'Login'}
-        </h1>
-        <p className="text-sm text-slate-500">
-          Securely access AI-assisted dermatology tools.
-        </p>
+    <div className="relative mx-auto flex min-h-[72vh] max-w-5xl items-center justify-center px-4 py-10">
+      <div
+        className={`absolute inset-0 -z-10 bg-gradient-to-br ${accent}`}
+        aria-hidden
+      />
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute left-10 top-16 h-64 w-64 rounded-full bg-teal-200/30 blur-3xl" />
+        <div className="absolute right-12 bottom-12 h-64 w-64 rounded-full bg-pink-200/40 blur-3xl" />
       </div>
 
-      <form onSubmit={handleSubmit} className={`${uiTokens.card} space-y-4 p-6`}>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-800" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={uiTokens.input}
-            placeholder="you@example.com"
-          />
+      <div className="grid w-full gap-10 md:grid-cols-[1.1fr_0.9fr] items-center">
+        <div className="space-y-4 text-center md:text-left">
+          <p className="inline-flex rounded-full bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur">
+            SkinScope
+          </p>
+          <h1 className="text-4xl font-black leading-tight text-slate-900 sm:text-5xl">
+            Identify skin concerns{' '}
+            <span className={heroTitleAccent}>instantly</span> with AI
+          </h1>
+          <p className="max-w-xl text-base text-slate-600">
+            Upload or log in to track your dermatology journey, connect with doctors, and get AI-assisted insights in seconds.
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-800" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className={uiTokens.input}
-            placeholder="Enter your password"
-          />
-        </div>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5 rounded-[28px] border border-white/60 bg-white/90 p-8 shadow-[0_20px_60px_-32px_rgba(59,74,108,0.35)] backdrop-blur"
+        >
+          <div className="space-y-1 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Welcome back
+            </p>
+            <h2 className="text-3xl font-bold text-slate-900">
+              {isSignup ? 'Create Account' : 'Login'}
+            </h2>
+          </div>
 
-        {isSignup && (
           <div className="space-y-2">
-            <span className="text-sm font-medium text-slate-800">Role</span>
-            <div className="flex gap-4 text-sm text-slate-700">
-              <label className="inline-flex items-center gap-2">
+            <label className="text-sm font-semibold text-slate-800" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={`${uiTokens.input} rounded-2xl`}
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-800" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={`${uiTokens.input} rounded-2xl`}
+              placeholder="Enter your password"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-sm font-semibold text-slate-800">Role</span>
+            <div className="flex flex-wrap gap-4 text-sm text-slate-700">
+              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
                 <input
                   type="radio"
                   value="patient"
@@ -108,7 +135,7 @@ function LoginPage() {
                 />
                 Patient
               </label>
-              <label className="inline-flex items-center gap-2">
+              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
                 <input
                   type="radio"
                   value="doctor"
@@ -120,35 +147,35 @@ function LoginPage() {
               </label>
             </div>
           </div>
-        )}
 
-        {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+          {error && (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className={`${uiTokens.primaryButton} w-full justify-center`}
-        >
-          {submitting ? 'Please wait...' : isSignup ? 'Sign Up' : 'Log In'}
-        </button>
-
-        <div className="pt-2 text-center text-sm">
           <button
-            type="button"
-            onClick={() => {
-              setIsSignup(!isSignup);
-              setError(null);
-            }}
-            className="text-blue-700 underline transition hover:text-blue-800"
+            type="submit"
+            disabled={submitting}
+            className={`${uiTokens.primaryButton} w-full justify-center rounded-2xl bg-gradient-to-r from-[#5f9bff] to-[#7c6cff] shadow-md hover:from-[#4b82f7] hover:to-[#6b5cf0]`}
           >
-            {isSignup ? 'Already have an account? Log in' : 'Need an account? Sign up'}
+            {submitting ? 'Please wait...' : isSignup ? 'Sign Up' : 'Log In'}
           </button>
-        </div>
-      </form>
+
+          <div className="pt-2 text-center text-sm">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignup(!isSignup);
+                setError(null);
+              }}
+              className="text-[#5f6cfb] underline transition hover:text-[#4555d9]"
+            >
+              {isSignup ? 'Already have an account? Log in' : 'Need an account? Sign up'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
