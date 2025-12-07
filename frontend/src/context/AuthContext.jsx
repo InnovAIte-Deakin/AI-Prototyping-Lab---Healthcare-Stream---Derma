@@ -10,6 +10,8 @@ export const apiClient = axios.create({
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const isAuthenticated = !!user;
+  const userRole = user ? user.role : null;
 
   // Load user from localStorage on first mount
   useEffect(() => {
@@ -99,7 +101,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const value = { user, login, signup, logout };
+  const value = { user, isAuthenticated, userRole, login, signup, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
