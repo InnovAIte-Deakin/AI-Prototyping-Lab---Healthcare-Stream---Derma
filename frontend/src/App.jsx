@@ -6,6 +6,7 @@ import PatientDashboard from './pages/PatientDashboard';
 import PatientUpload from './pages/PatientUpload';
 import DoctorDashboard from './pages/DoctorDashboard';
 import DoctorPatientDetail from './pages/DoctorPatientDetail';
+import PatientHistory from './pages/PatientHistory';
 
 import { AuthProvider } from './context/AuthContext';   // ✅ FIXED PATH
 import ProtectedRoute from './components/ProtectedRoute';
@@ -38,6 +39,16 @@ function App() {
               element={
                 <ProtectedRoute
                   element={<PatientUpload />}
+                  allowedRoles={['patient']}
+                />
+              }
+            />
+
+            <Route
+              path="/patient-history"
+              element={
+                <ProtectedRoute
+                  element={<PatientHistory />}
                   allowedRoles={['patient']}
                 />
               }

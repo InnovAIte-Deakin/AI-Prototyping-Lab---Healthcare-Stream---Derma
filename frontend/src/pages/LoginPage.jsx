@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { uiTokens } from '../components/Layout';
 
 function LoginPage() {
   const [isSignup, setIsSignup] = useState(false);
@@ -24,7 +25,7 @@ function LoginPage() {
 
     try {
       setSubmitting(true);
-      
+
       let user;
       if (isSignup) {
         user = await signup({ email: email.trim(), password, role });
@@ -33,9 +34,8 @@ function LoginPage() {
       }
 
       // After login/signup, route based on role
-      // Note: login response has 'role', signup response has 'role'
       const userRole = user.role || role;
-      
+
       if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
       } else {
@@ -43,7 +43,8 @@ function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.detail || 'Authentication failed. Please check your credentials.';
+      const msg =
+        err.response?.data?.detail || 'Authentication failed. Please check your credentials.';
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -51,82 +52,70 @@ function LoginPage() {
   };
 
   return (
-    <div style={{ paddingTop: '3rem', textAlign: 'center' }}>
-      <h1>{isSignup ? 'Create Account' : 'Login'}</h1>
+    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center space-y-6 px-4">
+      <div className="space-y-2 text-center">
+        <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">SkinScope</p>
+        <h1 className="text-3xl font-semibold text-slate-900">
+          {isSignup ? 'Create Account' : 'Login'}
+        </h1>
+        <p className="text-sm text-slate-500">
+          Securely access AI-assisted dermatology tools.
+        </p>
+      </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          marginTop: '1.5rem',
-          display: 'inline-block',
-          textAlign: 'left',
-          padding: '1.5rem',
-          borderRadius: '0.75rem',
-          border: '1px solid #ddd',
-          minWidth: '280px',
-          background: '#fff',
-        }}
-      >
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ fontWeight: 500 }}>
+      <form onSubmit={handleSubmit} className={`${uiTokens.card} space-y-4 p-6`}>
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-800" htmlFor="email">
             Email
-            <br />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                marginTop: '0.25rem',
-                width: '100%',
-                padding: '0.5rem',
-                borderRadius: '0.4rem',
-                border: '1px solid #ccc',
-              }}
-            />
           </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className={uiTokens.input}
+            placeholder="you@example.com"
+          />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ fontWeight: 500 }}>
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-800" htmlFor="password">
             Password
-            <br />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                marginTop: '0.25rem',
-                width: '100%',
-                padding: '0.5rem',
-                borderRadius: '0.4rem',
-                border: '1px solid #ccc',
-              }}
-            />
           </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className={uiTokens.input}
+            placeholder="Enter your password"
+          />
         </div>
 
         {isSignup && (
-          <div style={{ marginBottom: '1rem' }}>
-            <span style={{ fontWeight: 500 }}>Role</span>
-            <div style={{ marginTop: '0.25rem' }}>
-              <label style={{ marginRight: '1rem' }}>
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-slate-800">Role</span>
+            <div className="flex gap-4 text-sm text-slate-700">
+              <label className="inline-flex items-center gap-2">
                 <input
                   type="radio"
                   value="patient"
                   checked={role === 'patient'}
                   onChange={() => setRole('patient')}
-                />{' '}
+                  className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
                 Patient
               </label>
-              <label>
+              <label className="inline-flex items-center gap-2">
                 <input
                   type="radio"
                   value="doctor"
                   checked={role === 'doctor'}
                   onChange={() => setRole('doctor')}
-                />{' '}
+                  className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
                 Doctor
               </label>
             </div>
@@ -134,40 +123,27 @@ function LoginPage() {
         )}
 
         {error && (
-          <p style={{ color: 'red', marginBottom: '0.75rem' }}>{error}</p>
+          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </p>
         )}
 
         <button
           type="submit"
           disabled={submitting}
-          style={{
-            width: '100%',
-            padding: '0.6rem 1rem',
-            borderRadius: '0.5rem',
-            border: 'none',
-            background: submitting ? '#9aa6ff' : '#6675ff',
-            color: '#fff',
-            fontWeight: 600,
-            cursor: submitting ? 'default' : 'pointer',
-          }}
+          className={`${uiTokens.primaryButton} w-full justify-center`}
         >
-          {submitting ? 'Please wait...' : (isSignup ? 'Sign Up' : 'Log In')}
+          {submitting ? 'Please wait...' : isSignup ? 'Sign Up' : 'Log In'}
         </button>
 
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
+        <div className="pt-2 text-center text-sm">
           <button
             type="button"
             onClick={() => {
               setIsSignup(!isSignup);
               setError(null);
             }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#6675ff',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-            }}
+            className="text-blue-700 underline transition hover:text-blue-800"
           >
             {isSignup ? 'Already have an account? Log in' : 'Need an account? Sign up'}
           </button>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { apiClient } from '../context/AuthContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
+import { uiTokens } from '../components/Layout';
 
 const PatientUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -45,30 +47,54 @@ const PatientUpload = () => {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Patient Upload</h1>
-      <div className="space-y-3">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="block"
-        />
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold text-slate-900">Patient Upload</h1>
+        <p className="text-sm text-slate-500">
+          Upload a clear photo of the affected skin area to generate an AI-assisted report.
+        </p>
+      </div>
+
+      <DisclaimerBanner />
+
+      <div className={`${uiTokens.card} p-5 space-y-4`}>
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-800" htmlFor="upload-input">
+            Upload image
+          </label>
+          <input
+            id="upload-input"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className={uiTokens.input}
+          />
+          <p className="text-xs text-slate-500">
+            Supported formats: JPG, PNG. Ensure good lighting and focus on the lesion.
+          </p>
+        </div>
+
         <button
           type="button"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className={uiTokens.primaryButton}
           disabled={!selectedFile || isAnalyzing}
           onClick={handleAnalyze}
         >
           {isAnalyzing ? 'Analyzing...' : 'Analyze'}
         </button>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
         {result && (
-          <div className="rounded border p-3">
-            <h2 className="text-lg font-semibold">Analysis Result</h2>
-            <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-left">
+            <h2 className="text-lg font-semibold text-slate-900">Analysis Result</h2>
+            <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+              {JSON.stringify(result, null, 2)}
+            </pre>
           </div>
         )}
       </div>

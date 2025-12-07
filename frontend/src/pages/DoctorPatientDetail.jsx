@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
+import { uiTokens } from '../components/Layout';
 
 function DoctorPatientDetail() {
   const { patientId } = useParams();
@@ -67,51 +69,60 @@ function DoctorPatientDetail() {
   };
 
   return (
-    <div>
-      <h1>Doctor Patient Detail</h1>   {/* keep this heading text for the tests */}
-
-      <div className="mt-2">
-        <Link to="/doctor-dashboard" className="text-blue-600 hover:underline">
-          Back to dashboard
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-900">
+            Doctor Patient Detail
+          </h1>{' '}
+          {/* keep this heading text for the tests */}
+          <p className="text-sm text-slate-500">
+            Review AI-generated reports for this patient before clinical follow-up.
+          </p>
+        </div>
+        <Link
+          to="/doctor-dashboard"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
+        >
+          ← Back to dashboard
         </Link>
       </div>
 
-      {loading && <p className="mt-4">Loading reports...</p>}
+      <DisclaimerBanner />
+
+      {loading && <p className="text-slate-600">Loading reports...</p>}
 
       {!loading && error && (
-        <p className="mt-4 text-red-600" role="alert">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
           {error}
         </p>
       )}
 
       {!loading && !error && normalizedReports.length === 0 && (
-        <p className="mt-4 text-gray-700">No reports found for this patient yet.</p>
+        <p className="text-sm text-slate-600">No reports found for this patient yet.</p>
       )}
 
       {!loading && !error && normalizedReports.length > 0 && (
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           {normalizedReports.map((report) => {
             const imageSrc = buildImageSrc(report.imageUrl);
             return (
-              <div
-                key={report.id}
-                className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"
-              >
-                <div className="flex items-start gap-4 flex-wrap">
+              <div key={report.id} className={`${uiTokens.card} p-4`}>
+                <div className="flex flex-wrap items-start gap-4">
                   {imageSrc ? (
                     <img
                       src={imageSrc}
                       alt="Patient upload"
-                      className="w-48 h-48 object-cover rounded-md border"
+                      className="h-48 w-48 rounded-md border object-cover"
                     />
                   ) : (
-                    <div className="w-48 h-48 flex items-center justify-center bg-gray-100 text-gray-500 rounded-md border">
+                    <div className="flex h-48 w-48 items-center justify-center rounded-md border bg-slate-100 text-slate-500">
                       Image not available
                     </div>
                   )}
 
-                  <div className="flex-1 min-w-[240px]">
-                    <p className="text-sm text-gray-600">
+                  <div className="flex-1 min-w-[240px] space-y-1">
+                    <p className="text-sm text-slate-600">
                       Report ID: {report.id} |{' '}
                       {report.createdAt
                         ? new Date(report.createdAt).toLocaleString()
@@ -126,7 +137,7 @@ function DoctorPatientDetail() {
 
                     {report.analysis && (
                       <div className="mt-2">
-                        <p className="text-sm text-gray-700 whitespace-pre-line">
+                        <p className="whitespace-pre-line text-sm text-slate-700">
                           {report.analysis}
                         </p>
                       </div>
