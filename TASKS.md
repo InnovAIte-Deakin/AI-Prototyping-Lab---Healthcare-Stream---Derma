@@ -320,5 +320,5 @@ I need to Apply Styling and Layout
 - [x] F1 – Frontend Skeleton
 - [x] F2 – Auth Logic
 - [x] F3 – Patient Features
-- [ ] F4 – Doctor Features
+- [x] F4 – Doctor Features
 - [ ] F5 – Styling & Layout
