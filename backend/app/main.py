@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from app.config import MEDIA_ROOT
 from app.routes import auth, doctors, patient_doctor, analysis, doctor_dashboard  # Add doctor_dashboard
 
 app = FastAPI(
@@ -22,9 +25,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Static files
+app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")
+
 # Include routers
 app.include_router(auth.router)
-#app.include_router(images.router) 
+app.include_router(images.router)
 app.include_router(doctors.router)
 app.include_router(patient_doctor.router)
 app.include_router(analysis.router)
