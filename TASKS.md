@@ -321,4 +321,4 @@ I need to Apply Styling and Layout
 - [x] F2 – Auth Logic
 - [x] F3 – Patient Features
 - [x] F4 – Doctor Features
-- [ ] F5 – Styling & Layout
+- [x] F5 – Styling & Layout
