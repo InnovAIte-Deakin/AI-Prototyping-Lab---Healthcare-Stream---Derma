@@ -534,4 +534,4 @@ skin-scope/
 - [x] **F2:** Auth Logic
 - [x] **F3:** Patient Workflows
 - [x] **F4:** Doctor Workflows
-- [ ] **F5:** UI Polish & Styling
+- [x] **F5:** UI Polish & Styling
