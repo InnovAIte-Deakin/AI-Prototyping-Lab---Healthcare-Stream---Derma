@@ -3,7 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import MEDIA_ROOT
-from app.routes import auth, doctors, patient_doctor, analysis, doctor_dashboard  # Add doctor_dashboard
+from app.routes import (
+    auth,
+    doctors,
+    patient_doctor,
+    analysis,
+    images,
+    doctor_dashboard,
+)  # Registered routers
 
 app = FastAPI(
     title="DermaAI API",
