@@ -313,7 +313,7 @@ I need to Apply Styling and Layout
 - [x] B2 – Database & Models
 - [x] B3 – Auth System
 - [x] B4 – Doctor Logic & Seeding
-- [ ] B5 – Image Uploads
+- [x] B5 – Image Uploads
 - [x] B6 – Analysis Service
 
 ### Frontend

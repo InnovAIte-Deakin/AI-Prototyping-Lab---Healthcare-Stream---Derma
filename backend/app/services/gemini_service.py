@@ -13,7 +13,7 @@ class GeminiService:
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
         
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
     
     def analyze_skin_lesion(self, image_path: str) -> Dict[str, Any]:
         """
@@ -59,13 +59,14 @@ class GeminiService:
             analysis_result = {
                 "status": "success",
                 "analysis": response.text,
-                "model_used": "gemini-1.5-flash",
+                "model_used": "gemini-2.5-flash",
                 "disclaimer": "This analysis is for preliminary information only and does not constitute medical advice. Please consult a qualified dermatologist for proper diagnosis and treatment."
             }
             
             return analysis_result
             
         except Exception as e:
+            print(f"GEMINI ERROR: {e}")
             return {
                 "status": "error",
                 "error": str(e),

@@ -85,7 +85,7 @@ async def analyze_image(
     if analysis_result["status"] == "error":
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=analysis_result.get("message", "Analysis failed")
+            detail=f"{analysis_result.get('message', 'Analysis failed')} Details: {analysis_result.get('error')}"
         )
     
     # Save analysis results to database

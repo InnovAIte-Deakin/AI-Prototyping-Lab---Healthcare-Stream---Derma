@@ -26,7 +26,7 @@ const PatientUpload = () => {
 
     try {
       const formData = new FormData();
-      formData.append('image', selectedFile);
+      formData.append('file', selectedFile);
 
       const uploadRes = await apiClient.post('/images', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -37,10 +37,11 @@ const PatientUpload = () => {
         throw new Error('Image ID missing');
       }
 
-      const analyzeRes = await apiClient.post(`/images/${imageId}/analyze`);
+      const analyzeRes = await apiClient.post(`/api/analysis/${imageId}`);
       setResult(analyzeRes.data);
     } catch (err) {
-      setError('Something went wrong while analyzing the image.');
+      console.error('Analysis Error:', err.response?.data || err.message);
+      setError(`Analysis failed: ${err.response?.data?.detail || 'Something went wrong.'}`);
     } finally {
       setIsAnalyzing(false);
     }
