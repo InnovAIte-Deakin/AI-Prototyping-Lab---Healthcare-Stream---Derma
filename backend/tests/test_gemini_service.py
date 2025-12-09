@@ -57,7 +57,7 @@ class TestGeminiService:
             # Verify
             assert result['status'] == 'success'
             assert 'analysis' in result
-            assert result['model_used'] == 'gemini-1.5-flash'
+            assert result['model_used'] == 'gemini-2.5-flash'
             assert 'disclaimer' in result
             assert 'melanoma' in result['analysis']
     
