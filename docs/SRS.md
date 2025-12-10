@@ -48,7 +48,9 @@ The system functions as a standalone web application deployed via Docker13. It r
 
 **2.2 User Classes and Characteristics**
 
-- **Patient (User):** Individuals concerned about a skin condition. They require a simple, mobile-responsive interface to upload photos and receive immediate (disclaimed) feedback<sup>15</sup>.  
+- **Patient (User):** Registered individuals who check skin conditions and save history<sup>15</sup>.  
+    <br/>
+- **Guest (Anonymous):** Unregistered users who can perform a single "Try Now" analysis but must register to save results<sup>15b</sup>.  
     <br/>
 - **Doctor (Admin):** Medical professionals requiring a dashboard to view patient queues, review high-resolution images, and manage appointments<sup>16</sup>.  
     <br/>
@@ -82,7 +84,7 @@ The system functions as a standalone web application deployed via Docker13. It r
     <br/>
 - **Processing:** The **FastAPI backend** sends the image + System Prompt to Google Gemini API<sup>25252525</sup>.  
     <br/>
-- **Outputs:** A text response containing the preliminary classification<sup>26</sup>.  
+- **Outputs:** A text response containing the preliminary classification. For Guests, this is ephemeral; for Patients, it is saved<sup>26</sup>.  
     <br/>
 - **FR-02: Mandatory Medical Disclaimer**
 - **Description:** Every AI response must be prefixed with a strict medical disclaimer<sup>27</sup>.  
@@ -97,7 +99,7 @@ The system functions as a standalone web application deployed via Docker13. It r
 - **Processing:** The chat history is maintained in the session context sent to Gemini to allow for conversational continuity<sup>31</sup>.  
     <br/>
 - **FR-04: User Accounts & Dashboard**
-- **Description:** Users can register and login to save their case history<sup>32</sup>.  
+- **Description:** Guests can "Try Now" but must register/login to save case history. Registered users access the full Dashboard<sup>32</sup>.  
     <br/>
 - **Functionality:**
 - View past uploaded images and chat logs<sup>33</sup>.  
@@ -128,7 +130,7 @@ The system functions as a standalone web application deployed via Docker13. It r
 - **FR-08: Clinical Review & Scheduling**
 - **Description:** Doctors can open a specific case to view the high-res image and AI notes<sup>42</sup>.  
     <br/>
-- **Action:** Doctors can trigger an "Appointment Request" notification to the patient<sup>43</sup>.  
+- **Action:** Doctors can trigger an "Appointment Request" or **Join the Chat** context directly ("One Pane of Glass" workflow) to discuss results with the patient<sup>43</sup>.  
     <br/>
 
 **4\. Non-Functional Requirements**
