@@ -145,9 +145,3 @@ skin-scope/
 │   │   └── components/ # UI Components
 └── docs/               # Documentation
 ```
-
-## 📅 Roadmap & Status
-
-- [x] **Sprint 0:** MVP Core (Auth, Uploads, Gemini Analysis)
-- [ ] **Sprint 1 (Current):** UX Professionalization (Landing Page, AI Chat)
-- [ ] **Sprint 2:** Clinical Workflow (Doctor Escalation, JWT Auth)
