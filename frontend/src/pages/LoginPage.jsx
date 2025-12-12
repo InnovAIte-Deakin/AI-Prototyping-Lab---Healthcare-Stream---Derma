@@ -10,7 +10,7 @@ function LoginPage() {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('patient'); // 'patient' or 'doctor'
+  // role is detected from backend response
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -31,13 +31,15 @@ function LoginPage() {
 
       let user;
       if (isSignup) {
-        user = await signup({ email: email.trim(), password, role });
+        // Default to patient for new signups
+        user = await signup({ email: email.trim(), password, role: 'patient' });
       } else {
-        user = await login({ email: email.trim(), password, roleOverride: role });
+        // Login detects role from backend
+        user = await login({ email: email.trim(), password });
       }
 
-      // After login/signup, route based on selected role
-      const userRole = role || user.role;
+      // Route based on returned role
+      const userRole = user.role;
 
       if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
@@ -46,8 +48,19 @@ function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      const msg =
-        err.response?.data?.detail || 'Authentication failed. Please check your credentials.';
+      let msg = 'Authentication failed. Please check your credentials.';
+
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        if (typeof detail === 'string') {
+          msg = detail;
+        } else if (Array.isArray(detail)) {
+          // Handle Pydantic validation errors
+          msg = detail.map(d => d.msg).join(', ');
+        } else if (typeof detail === 'object') {
+          msg = JSON.stringify(detail);
+        }
+      }
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -122,36 +135,12 @@ function LoginPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <span className="text-sm font-semibold text-slate-800">Role</span>
-            <div className="flex flex-wrap gap-4 text-sm text-slate-700">
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                <input
-                  type="radio"
-                  value="patient"
-                  checked={role === 'patient'}
-                  onChange={() => setRole('patient')}
-                  className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                Patient
-              </label>
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                <input
-                  type="radio"
-                  value="doctor"
-                  checked={role === 'doctor'}
-                  onChange={() => setRole('doctor')}
-                  className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                Doctor
-              </label>
-            </div>
-          </div>
+
 
           {error && (
             <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
+              {error}
+            </p>
           )}
 
           <button
