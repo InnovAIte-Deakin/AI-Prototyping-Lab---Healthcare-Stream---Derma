@@ -59,9 +59,14 @@ const PatientHistory = () => {
             Review previous AI analyses and recommendations.
           </p>
         </div>
-        <Link to="/patient-upload" className={uiTokens.primaryButton}>
-          Upload New Scan
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/patient-dashboard" className="text-sm font-semibold text-blue-600 hover:text-blue-500">
+            ← Dashboard
+          </Link>
+          <Link to="/patient-upload" className={uiTokens.primaryButton}>
+            Upload New Scan
+          </Link>
+        </div>
       </div>
 
       <DisclaimerBanner />

@@ -10,13 +10,19 @@ from app.routes import (
     analysis,
     images,
     doctor_dashboard,
+    doctor_dashboard,
 )  # Registered routers
+from app.db import Base, engine
 
 app = FastAPI(
     title="DermaAI API",
     description="AI-Powered Dermatologist Assistant",
     version="1.0.0"
 )
+
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
 
 

@@ -16,7 +16,7 @@ describe('App Component', () => {
   it('renders Login Page by default', async () => {
     window.history.pushState({}, 'Test page', '/');
     render(<App />);
-    expect(await screen.findByText('Login')).toBeInTheDocument();
+    expect(await screen.findByText('Log in')).toBeInTheDocument();
     const brands = await screen.findAllByText('SkinScope');
     expect(brands.length).toBeGreaterThan(0);
   });

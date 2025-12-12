@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const uiTokens = {
@@ -12,8 +12,14 @@ export const uiTokens = {
 };
 
 const Layout = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate(); // Need to import this
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const roleLabel = user?.role
     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
@@ -34,20 +40,35 @@ const Layout = () => {
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm text-slate-600">
+
+
+            {/* ... wait let me rewrite the whole block to be cleaner */}
             <div className="hidden text-xs uppercase tracking-wide text-slate-400 sm:block">
               Current page
             </div>
             <span className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 sm:inline-flex">
               {pageHint}
             </span>
-            <div className="h-6 w-px bg-slate-200 sm:block" />
-            <div className="text-xs uppercase tracking-wide text-slate-400">
-              Current role
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
-              {roleLabel}
-            </div>
+
+            {user && (
+              <>
+                <div className="h-6 w-px bg-slate-200 sm:block" />
+                <div className="text-xs uppercase tracking-wide text-slate-400">
+                  Current role
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+                  {roleLabel}
+                </div>
+                <div className="h-6 w-px bg-slate-200 sm:block" />
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-semibold text-red-600 hover:text-red-700"
+                >
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
