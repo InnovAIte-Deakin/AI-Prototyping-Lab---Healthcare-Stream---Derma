@@ -66,19 +66,13 @@ class UserResponse(BaseModel):
 
 class LoginResponse(BaseModel):
     """
-    Login response schema.
-
-    Sprint 1: Returns user details for header-based auth
-    Sprint 2: Will return JWT tokens instead
+    Login response schema with JWT token.
     """
+    access_token: str
+    token_type: str = "bearer"
     user_id: int
     email: str
     role: str
-    # Sprint 2: Add these fields
-    # access_token: str
-    # refresh_token: str
-    # token_type: str = "bearer"
-    # expires_in: int
 
 
 class DoctorResponse(BaseModel):

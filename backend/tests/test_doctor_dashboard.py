@@ -1,5 +1,7 @@
 import pytest
 from app.models import DoctorProfile, PatientDoctorLink, User
+from app.auth_helpers import get_current_doctor, get_current_user
+from app.main import app
 
 def create_doctor(client, test_db, email: str, full_name: str) -> int:
     """Helper to create a doctor user and set profile details."""
@@ -26,11 +28,15 @@ def create_patient(client, email: str) -> int:
 
 def link_patient(client, patient_id: int, doctor_id: int):
     """Helper to link a patient to a doctor."""
+    user = User(id=patient_id, role="patient", email="p@t.com")
+    app.dependency_overrides[get_current_user] = lambda: user
+    
     client.post(
         "/patient/select-doctor",
         json={"doctor_id": doctor_id},
-        headers={"X-User-Id": str(patient_id)},
     )
+    app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_current_doctor, None)
 
 class TestDoctorDashboard:
     def test_get_my_patients_returns_list(self, client, test_db):
@@ -44,10 +50,14 @@ class TestDoctorDashboard:
         link_patient(client, patient2_id, doctor_id)
 
         # Fetch patients as doctor
+        user = User(id=doctor_id, role="doctor", email="dr.dashboard@test.com")
+        app.dependency_overrides[get_current_doctor] = lambda: user
+
         response = client.get(
             "/doctor/patients",
-            headers={"X-User-Id": str(doctor_id), "X-User-Role": "doctor"}
         )
+        app.dependency_overrides.pop(get_current_user, None)
+        app.dependency_overrides.pop(get_current_doctor, None)
 
         assert response.status_code == 200
         data = response.json()
@@ -60,10 +70,14 @@ class TestDoctorDashboard:
         """Doctor with no patients should see empty list."""
         doctor_id = create_doctor(client, test_db, "dr.lonely@test.com", "Dr. Lonely")
 
+        user = User(id=doctor_id, role="doctor", email="dr.lonely@test.com")
+        app.dependency_overrides[get_current_doctor] = lambda: user
+
         response = client.get(
             "/doctor/patients",
-            headers={"X-User-Id": str(doctor_id), "X-User-Role": "doctor"}
         )
+        app.dependency_overrides.pop(get_current_user, None)
+        app.dependency_overrides.pop(get_current_doctor, None)
 
         assert response.status_code == 200
         assert response.json() == []
@@ -72,9 +86,18 @@ class TestDoctorDashboard:
         """Patient cannot access doctor dashboard endpoints."""
         patient_id = create_patient(client, "intruder@test.com")
 
+        # Mock as patient but trying to access doctor route
+        # Dependency get_current_doctor will check role and raise 403
+        user = User(id=patient_id, role="patient", email="intruder@test.com")
+        # We need to override get_current_user only, get_current_doctor depends on it
+        # But get_current_doctor is the one explicitly called by the route
+        # So we override get_current_user to return the patient
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.get(
             "/doctor/patients",
-            headers={"X-User-Id": str(patient_id), "X-User-Role": "patient"}
         )
+        app.dependency_overrides.pop(get_current_user, None)
+        app.dependency_overrides.pop(get_current_doctor, None)
 
         assert response.status_code == 403

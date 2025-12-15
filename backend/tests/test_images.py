@@ -4,7 +4,9 @@ Tests for the image upload endpoint.
 from pathlib import Path
 
 from app.config import MEDIA_ROOT, MEDIA_URL
-from app.models import Image
+from app.models import Image, User
+from app.auth_helpers import get_current_user
+from app.main import app
 
 
 def create_user(client, email: str, role: str) -> int:
@@ -17,11 +19,14 @@ def create_user(client, email: str, role: str) -> int:
 
 
 def link_patient_to_doctor(client, patient_id: int, doctor_id: int) -> None:
+    user = User(id=patient_id, role="patient", email="link@test.com")
+    app.dependency_overrides[get_current_user] = lambda: user
+    
     response = client.post(
         "/patient/select-doctor",
         json={"doctor_id": doctor_id},
-        headers={"X-User-Id": str(patient_id)},
     )
+    app.dependency_overrides.pop(get_current_user, None)
     assert response.status_code == 200
 
 
@@ -35,11 +40,14 @@ class TestImageUpload:
         """Uploading without selecting a doctor returns 400."""
         patient_id = create_user(client, "nolink@test.com", "patient")
 
+        user = User(id=patient_id, role="patient", email="nolink@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.post(
             "/images",
             files={"file": ("lesion.png", b"fake-bytes", "image/png")},
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 400
         assert "linked doctor" in response.json()["detail"]
@@ -50,11 +58,14 @@ class TestImageUpload:
         doctor_id = create_user(client, "doctorupload@test.com", "doctor")
         link_patient_to_doctor(client, patient_id, doctor_id)
 
+        user = User(id=patient_id, role="patient", email="patientupload@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.post(
             "/images",
             files={"file": ("lesion.png", b"fake-image", "image/png")},
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 201
         payload = response.json()
