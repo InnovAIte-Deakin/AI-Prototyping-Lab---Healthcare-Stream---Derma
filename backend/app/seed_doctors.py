@@ -10,7 +10,7 @@ from typing import Optional
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from app.auth_helpers import hash_password
+from app.services.auth import get_password_hash
 from app.db import Base, SessionLocal, engine
 from app.models import DoctorProfile, User
 
@@ -62,7 +62,7 @@ def seed_doctors(
             if not user:
                 user = User(
                     email=doctor["email"],
-                    password=hash_password(doctor["password"]),
+                    password=get_password_hash(doctor["password"]),
                     role="doctor",
                 )
                 session.add(user)

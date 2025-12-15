@@ -439,7 +439,7 @@ I need to Apply Styling and Layout
 - [x] B4 – Doctor Logic & Seeding
 - [x] B5 – Image Uploads
 - [x] B6 – Analysis Service
-- [ ] B7 – Auth Overhaul to JWT + Navigation Support
+- [x] B7 – Auth Overhaul to JWT + Navigation Support
 - [ ] B8 – Doctor Profile Integrity & Seeding
 - [ ] B9 – Analysis Result Formatting & Chat Context
 - [ ] B10 – Doctor-Patient Workflow Glue
