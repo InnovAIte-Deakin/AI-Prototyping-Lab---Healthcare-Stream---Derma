@@ -200,6 +200,8 @@ I need to implement the AI Analysis endpoint.
 
 **Goal:** Mandate realistic doctor data and seed meaningful dev fixtures.
 
+**Dependencies:** Extends **B4**. Prerequisite for **F8**.
+
 **Action:**
 - Update `models.DoctorProfile` to require full_name, clinic_name, bio, avatar_url (or similar). Add alembic migration accordingly.
 - Enhance `seed_doctors.py` to populate realistic names, avatars, bios; ensure idempotent inserts. Sync with any default assets the frontend expects.
@@ -210,6 +212,8 @@ I need to implement the AI Analysis endpoint.
 ### 🟦 B9 – Analysis Result Formatting & Chat Context
 
 **Goal:** Deliver structured summaries and chat-ready analysis context.
+
+**Dependencies:** Extends **B6**. Critical Prerequisite for **F7**.
 
 **Action:**
 - Refine the AI analysis service (`services/analysis.py` or equivalent) to output condition, confidence, recommendation fields (persisted in `AnalysisReport.report_json`). Keep raw model output if useful.
@@ -222,6 +226,8 @@ I need to implement the AI Analysis endpoint.
 
 **Goal:** Connect patient doctor selection, escalation, and unified chat.
 
+**Dependencies:** Requires **B4, B5, B6**. Critical Prerequisite for **F9**.
+
 **Action:**
 - Add/extend endpoints to attach a doctor to an image/case during upload (`routes/images.py` and related services). Persist doctor_id on Image/AnalysisReport.
 - Implement “Request Doctor Review” endpoint that marks a case for doctor attention; surface status fields in responses.
@@ -233,6 +239,8 @@ I need to implement the AI Analysis endpoint.
 ### 🟦 B11 – Security Hardening & Data Safety
 
 **Goal:** Tighten storage and transport security for images and reports.
+
+**Dependencies:** System-wide hardening. No blocking dependencies.
 
 **Action:**
 - Review image persistence: if long-term storage isn’t required, add lifecycle cleanup; otherwise, encrypt at rest or store in a protected bucket. Document the decision in `docs/TESTING.md` or a new security note.
@@ -365,6 +373,8 @@ I need to Apply Styling and Layout
 
 **Goal:** Create a dedicated landing page (DermaAI branding) and clean auth navigation.
 
+**Dependencies:** Requires **B7 (Auth Overhaul)** [COMPLETED].
+
 **Action:**
 - Build a new public landing screen (e.g., `frontend/src/pages/LandingPage.jsx`) with hero copy for the fictional clinic "DermaAI" and primary buttons: **Get Started** and **Login**.
 - Route `/` should render the landing page; move the existing login UI to `/login`. Ensure router updates in `frontend/src/App.jsx` and keep layout via `components/Layout`.
@@ -379,6 +389,8 @@ I need to Apply Styling and Layout
 
 **Goal:** Replace raw JSON results with a readable card and add a conversational helper.
 
+**Dependencies:** Requires **B9 (Analysis Formatting & Chat)**.
+
 **Action:**
 - In `pages/PatientUpload.jsx` (and any place results render), swap JSON dumps for a styled summary card showing Condition, Confidence, and Recommendation. Reuse existing CSS/Tailwind patterns from `App.css` and `components`.
 - Add a chat panel beneath the result summary. It should call a new backend chat endpoint (to be delivered) with the last analysis report as system context. Allow free-form patient questions like “What does this mean?”; show streaming or simple appended messages.
@@ -391,6 +403,8 @@ I need to Apply Styling and Layout
 
 **Goal:** Handle missing doctor data gracefully on the patient-facing UI.
 
+**Dependencies:** Requires **B8 (Doctor Profile Integrity)**.
+
 **Action:**
 - Update doctor list rendering (PatientDashboard doctor selection and any doctor listings) to show placeholders for missing avatar, name, clinic, or bio rather than blank fields.
 - Add default avatar asset under `frontend/src/assets` if none exists; wire into doctor cards.
@@ -401,6 +415,8 @@ I need to Apply Styling and Layout
 ### 🟩 F9 – Patient-to-Doctor Flow & Escalation UI
 
 **Goal:** Let patients pick a doctor, request review, and share chat history once a doctor joins.
+
+**Dependencies:** Requires **B10 (Workflow Glue)**.
 
 **Action:**
 - Extend PatientDashboard/PatientUpload to prompt doctor selection before or during case creation. Persist the chosen doctor ID when uploading an image.
@@ -414,6 +430,8 @@ I need to Apply Styling and Layout
 
 **Goal:** Support a lightweight, no-login flow that still encourages signup.
 
+**Dependencies:** Independent (may require backend tweaks for unauthenticated access).
+
 **Action:**
 - Add an anonymous upload path reachable from the landing page (e.g., a CTA: “Try without signing up”).
 - Implement a limited upload+analysis experience without auth (temporary in-memory/session state). After result + chat preview, show a call-to-action: “Sign up to save this case” linking to `/login`.
@@ -424,6 +442,8 @@ I need to Apply Styling and Layout
 ### 🟩 F11 – E2E Coverage (Playwright)
 
 **Goal:** Capture the critical happy path from landing to analysis.
+
+**Dependencies:** Requires functioning flow (F6, F3, F7).
 
 **Action:**
 - Add Playwright tests under `frontend/src/__tests__/e2e/` covering: Landing → Login → Upload → Analysis display (and chat visibility if available).
