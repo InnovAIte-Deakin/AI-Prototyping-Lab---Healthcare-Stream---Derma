@@ -14,7 +14,7 @@ import { AuthProvider } from './context/AuthContext';
 
 import './App.css';
 
-const router = createBrowserRouter([
+export const routes = [
   {
     path: '/',
     element: <Layout />,
@@ -59,7 +59,9 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
+
+const router = createBrowserRouter(routes);
 
 function App() {
   return (

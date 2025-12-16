@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import App from '../App';
+
 import { apiClient } from '../context/AuthContext';
 
 beforeEach(() => {
@@ -10,27 +10,43 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  localStorage.clear();
 });
 
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { routes } from '../App';
+import { AuthProvider } from '../context/AuthContext';
+
+// Helper to render with router
+const renderWithRouter = (initialPath) => {
+  const router = createMemoryRouter(routes, {
+    initialEntries: [initialPath],
+  });
+  render(
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
+};
+
 describe('App Component', () => {
-  it('renders Login Page by default', async () => {
-    window.history.pushState({}, 'Test page', '/');
-    render(<App />);
-    expect(await screen.findByText('Login')).toBeInTheDocument();
+  it('renders Landing Page by default', async () => {
+    renderWithRouter('/');
+    expect(await screen.findByText(/Identify skin concerns/i)).toBeInTheDocument();
     const brands = await screen.findAllByText('SkinScope');
     expect(brands.length).toBeGreaterThan(0);
   });
 
   it('renders Patient Dashboard on /patient-dashboard', async () => {
-    window.history.pushState({}, 'Test page', '/patient-dashboard');
-    render(<App />);
+    localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
+    renderWithRouter('/patient-dashboard');
     expect(await screen.findByText('Patient Dashboard')).toBeInTheDocument();
     expect(await screen.findByText('SkinScope')).toBeInTheDocument();
   });
 
   it('renders Patient Upload on /patient-upload', async () => {
-    window.history.pushState({}, 'Test page', '/patient-upload');
-    render(<App />);
+    localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
+    renderWithRouter('/patient-upload');
     expect(await screen.findByText('Patient Upload')).toBeInTheDocument();
     expect(await screen.findByText('SkinScope')).toBeInTheDocument();
     expect(
@@ -41,15 +57,15 @@ describe('App Component', () => {
   });
 
   it('renders Doctor Dashboard on /doctor-dashboard', async () => {
-    window.history.pushState({}, 'Test page', '/doctor-dashboard');
-    render(<App />);
+    localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
+    renderWithRouter('/doctor-dashboard');
     expect(await screen.findByText('Doctor Dashboard')).toBeInTheDocument();
     expect(await screen.findByText('SkinScope')).toBeInTheDocument();
   });
 
   it('renders Doctor Patient Detail on /doctor/patients/:patientId', async () => {
-    window.history.pushState({}, 'Test page', '/doctor/patients/123');
-    render(<App />);
+    localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
+    renderWithRouter('/doctor/patients/123');
     expect(await screen.findByText('Doctor Patient Detail')).toBeInTheDocument();
     expect(await screen.findByText('SkinScope')).toBeInTheDocument();
     expect(
@@ -60,8 +76,8 @@ describe('App Component', () => {
   });
 
   it('renders Patient History on /patient-history', async () => {
-    window.history.pushState({}, 'Test page', '/patient-history');
-    render(<App />);
+    localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
+    renderWithRouter('/patient-history');
     expect(await screen.findByText('Patient History')).toBeInTheDocument();
     expect(await screen.findByText('SkinScope')).toBeInTheDocument();
   });

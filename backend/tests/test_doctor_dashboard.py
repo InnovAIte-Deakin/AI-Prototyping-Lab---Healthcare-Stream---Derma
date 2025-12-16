@@ -9,7 +9,7 @@ def create_doctor(client, test_db, email: str, full_name: str) -> int:
         "/auth/signup",
         json={"email": email, "password": "password123", "role": "doctor"},
     )
-    doctor_id = response.json()["id"]
+    doctor_id = response.json()["user_id"]
 
     profile = test_db.query(DoctorProfile).filter(DoctorProfile.user_id == doctor_id).first()
     profile.full_name = full_name
@@ -24,7 +24,7 @@ def create_patient(client, email: str) -> int:
         "/auth/signup",
         json={"email": email, "password": "password123", "role": "patient"},
     )
-    return response.json()["id"]
+    return response.json()["user_id"]
 
 def link_patient(client, patient_id: int, doctor_id: int):
     """Helper to link a patient to a doctor."""
