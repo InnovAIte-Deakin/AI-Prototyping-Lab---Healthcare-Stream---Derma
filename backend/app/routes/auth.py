@@ -13,10 +13,10 @@ from app.auth_helpers import get_current_user
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/signup", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
 def signup(user_data: UserSignup, db: Session = Depends(get_db)):
     """
-    Register a new user account.
+    Register a new user account and auto-login (return JWT).
     """
     # Check if email already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -52,7 +52,16 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
             db.add(doctor_profile)
             db.commit()
 
-        return new_user
+        # Auto-login: Generate JWT token
+        access_token = create_access_token(data={"sub": str(new_user.id), "role": new_user.role})
+
+        return LoginResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user_id=new_user.id,
+            email=new_user.email,
+            role=new_user.role
+        )
 
     except Exception as e:
         db.rollback()

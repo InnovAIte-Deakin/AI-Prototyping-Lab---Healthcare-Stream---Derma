@@ -15,7 +15,7 @@ def create_user(client, email: str, role: str) -> int:
         json={"email": email, "password": "password123", "role": role},
     )
     assert response.status_code == 201
-    return response.json()["id"]
+    return response.json()["user_id"]
 
 
 def link_patient_to_doctor(client, patient_id: int, doctor_id: int) -> None:

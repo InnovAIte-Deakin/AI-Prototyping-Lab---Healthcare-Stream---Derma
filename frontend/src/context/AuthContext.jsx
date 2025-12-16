@@ -41,6 +41,9 @@ export function AuthProvider({ children }) {
   const setHeadersFromUser = (u) => {
     apiClient.defaults.headers['X-User-Id'] = u.id;
     apiClient.defaults.headers['X-User-Role'] = u.role;
+    if (u.access_token) {
+      apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
+    }
   };
 
   const clearHeaders = () => {
@@ -61,7 +64,7 @@ export function AuthProvider({ children }) {
   const login = async ({ email, password, roleOverride }) => {
     const res = await apiClient.post('/auth/login', { email, password });
     const userData = res.data;
-    
+
     // Normalize to { id, email, role }
     // Backend LoginResponse returns { user_id, email, role }
     const normalizedUser = {
@@ -77,22 +80,35 @@ export function AuthProvider({ children }) {
   const signup = async ({ email, password, role }) => {
     const res = await apiClient.post('/auth/signup', { email, password, role });
     const userData = res.data;
-    // Note: The signup endpoint returns the user object but NOT the login response structure (user_id, email, role) directly in the same shape as login if not careful.
-    // Checking backend: signup returns UserResponse (id, email, role). Login returns LoginResponse (user_id, email, role).
-    // We need to normalize this.
-    
-    // LoginResponse: { user_id, email, role }
-    // UserResponse: { id, email, role }
-    
-    // Let's normalize to what our app expects: { id, email, role }
+
+    // Backend now returns LoginResponse: { access_token, user_id, email, role }
+    // Similar to login, we need to set the token for subsequent requests if we moved to Bearer auth.
+    // For now, we normalize user object and rely on `setHeadersFromUser` which sets X-User-Id/X-User-Role.
+    // TODO: Ideally, we should switch to verifying the JWT on backend for every request.
+
+    // Normalized user object for app state
     const normalizedUser = {
-        id: userData.id || userData.user_id,
-        email: userData.email,
-        role: userData.role
+      id: userData.user_id,
+      email: userData.email,
+      role: userData.role
     };
-    
-    // For signup, we might want to auto-login or just return the user. 
-    // Let's auto-login by setting the user.
+
+    // Crucial: Update the apiClient headers with the JWT token if we were using it, 
+    // OR ensure the user object has the necessary fields (id, role) for header injection.
+
+    // Since backend verify_token uses JWT from 'Authorization: Bearer ...',
+    // we MUST inject this token into apiClient defaults or localStorage.
+    // However, the current `setHeadersFromUser` in this file only sets X-User-Id.
+    // We need to FIX `setHeadersFromUser` to also set Authorization header if we have a token.
+    // But `user` state might not store the token?
+    // Let's store the token in the user object for now so `setHeadersFromUser` can use it?
+    // Or just manually set it.
+
+    if (userData.access_token) {
+      apiClient.defaults.headers['Authorization'] = `Bearer ${userData.access_token}`;
+      normalizedUser.access_token = userData.access_token; // Store token in user state for persistence
+    }
+
     setUser(normalizedUser);
     return normalizedUser;
   };

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { uiTokens } from '../components/Layout';
 
@@ -7,21 +7,31 @@ const accent = 'from-[#e7f7f4] via-white to-[#f7ecf7]';
 const heroTitleAccent = 'text-[#4c7dff]';
 
 function LoginPage() {
+  const [searchParams] = useSearchParams();
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('patient'); // 'patient' or 'doctor'
+  // Role is now auto-assigned: Patient for signup, auto-detected for login.
+  // const [role, setRole] = useState('patient'); 
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const { login, signup } = useAuth();
   const navigate = useNavigate();
 
+  // Detect mode from URL (e.g. /login?mode=signup)
+  useEffect(() => {
+    if (searchParams.get('mode') === 'signup') {
+      setIsSignup(true);
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    if (!email.trim() || !password.trim()) {
+    const emailTrim = email.trim();
+    if (!emailTrim || !password) { // Don't trim password
       setError('Please enter both email and password.');
       return;
     }
@@ -31,14 +41,15 @@ function LoginPage() {
 
       let user;
       if (isSignup) {
-        user = await signup({ email: email.trim(), password, role });
+        // Signup forces 'patient' role for now
+        user = await signup({ email: emailTrim, password, role: 'patient' });
       } else {
-        user = await login({ email: email.trim(), password, roleOverride: role });
+        // Login detects role automatically
+        user = await login({ email: emailTrim, password });
       }
 
-      // After login/signup, route based on selected role
-      const userRole = role || user.role;
-
+      // Route based on role
+      const userRole = user.role;
       if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
       } else {
@@ -46,12 +57,31 @@ function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      const msg =
-        err.response?.data?.detail || 'Authentication failed. Please check your credentials.';
+      // Enhanced Error Parsing
+      let msg = 'Authentication failed. Please check your credentials.';
+
+      if (Array.isArray(detail)) {
+        // Pydantic validation error array
+        // e.g. [{loc: ['body', 'password'], msg: 'String should have at least 6 characters', ...}]
+        msg = detail.map(d => {
+          if (d.loc.includes('password') && d.type === 'string_too_short') {
+            return 'Password has to be greater than 6 characters';
+          }
+          return d.msg;
+        }).join('. ');
+      } else {
+        msg = detail;
+      }
+
       setError(msg);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const toggleMode = () => {
+    setIsSignup(!isSignup);
+    setError(null);
   };
 
   return (
@@ -66,7 +96,8 @@ function LoginPage() {
       </div>
 
       <div className="grid w-full items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6 text-center md:text-left">
+        <div className="space-y-6 text-center md:text-left hidden md:block">
+          {/* Left side content - same as before but hidden on mobile for cleaner login focus */}
           <p className="inline-flex rounded-full bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur">
             SkinScope
           </p>
@@ -75,21 +106,21 @@ function LoginPage() {
             <span className={heroTitleAccent}>instantly</span> with AI
           </h1>
           <p className="max-w-xl text-lg text-[#333]">
-            Upload or log in to track your dermatology journey, connect with doctors, and get AI-assisted insights in seconds.
+            Login to access your dashboard.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-[32px] border border-white/70 bg-white/90 p-10 shadow-[0_25px_65px_-40px_rgba(40,50,80,0.55)] backdrop-blur"
+          className="mx-auto w-full max-w-md space-y-6 rounded-[32px] border border-white/70 bg-white/90 p-10 shadow-[0_25px_65px_-40px_rgba(40,50,80,0.55)] backdrop-blur"
         >
           <div className="space-y-1 text-center">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Welcome back
-            </p>
-            <h2 className="text-4xl font-extrabold text-slate-900">
-              {isSignup ? 'Create Account' : 'Login'}
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              {isSignup ? 'Create Account' : 'Welcome Back'}
             </h2>
+            <p className="text-slate-500 text-sm">
+              {isSignup ? 'Start your journey as a Patient' : 'Please enter your details'}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -120,38 +151,15 @@ function LoginPage() {
               className={`${uiTokens.input} rounded-[26px] text-[#1f2933]`}
               placeholder="Enter your password"
             />
+            {isSignup && <p className="text-xs text-slate-400 px-2">Must be at least 6 characters.</p>}
           </div>
 
-          <div className="space-y-2">
-            <span className="text-sm font-semibold text-slate-800">Role</span>
-            <div className="flex flex-wrap gap-4 text-sm text-slate-700">
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                <input
-                  type="radio"
-                  value="patient"
-                  checked={role === 'patient'}
-                  onChange={() => setRole('patient')}
-                  className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                Patient
-              </label>
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                <input
-                  type="radio"
-                  value="doctor"
-                  checked={role === 'doctor'}
-                  onChange={() => setRole('doctor')}
-                  className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                Doctor
-              </label>
-            </div>
-          </div>
+          {/* Role selection removed */}
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+              {error}
+            </div>
           )}
 
           <button
@@ -165,10 +173,7 @@ function LoginPage() {
           <div className="pt-2 text-center text-sm">
             <button
               type="button"
-              onClick={() => {
-                setIsSignup(!isSignup);
-                setError(null);
-              }}
+              onClick={toggleMode}
               className="text-[#4c7dff] underline transition hover:text-[#3f6ae0]"
             >
               {isSignup ? 'Already have an account? Log in' : 'Need an account? Sign up'}
