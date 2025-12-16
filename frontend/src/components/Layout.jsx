@@ -12,7 +12,7 @@ export const uiTokens = {
 };
 
 const Layout = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   const roleLabel = user?.role
@@ -26,7 +26,7 @@ const Layout = () => {
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <Link to="/" className="text-xl font-bold text-slate-900">
+            <Link to={user ? (user.role === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard') : '/'} className="text-xl font-bold text-slate-900">
               SkinScope
             </Link>
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
@@ -34,20 +34,32 @@ const Layout = () => {
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm text-slate-600">
-            <div className="hidden text-xs uppercase tracking-wide text-slate-400 sm:block">
-              Current page
-            </div>
-            <span className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 sm:inline-flex">
-              {pageHint}
-            </span>
-            <div className="h-6 w-px bg-slate-200 sm:block" />
-            <div className="text-xs uppercase tracking-wide text-slate-400">
-              Current role
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
-              {roleLabel}
-            </div>
+            {user ? (
+              <>
+                <div className="hidden text-xs uppercase tracking-wide text-slate-400 sm:block">
+                  Logged in as
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+                  {roleLabel}
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    // Redirect to landing is handled by auth state change usually, 
+                    // but explicit nav helps if needed. 
+                    // Since logout clears user, PrivateRoutes will catch it.
+                  }}
+                  className="ml-4 text-slate-500 hover:text-slate-800 transition"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="hidden text-xs uppercase tracking-wide text-slate-400 sm:block">
+                Welcome Guest
+              </div>
+            )}
           </div>
         </div>
       </header>

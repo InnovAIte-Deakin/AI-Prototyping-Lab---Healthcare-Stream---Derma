@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { uiTokens } from '../components/Layout';
@@ -49,11 +50,19 @@ const PatientUpload = () => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-slate-900">Patient Upload</h1>
-        <p className="text-sm text-slate-500">
-          Upload a clear photo of the affected skin area to generate an AI-assisted report.
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold text-slate-900">Patient Upload</h1>
+          <p className="text-sm text-slate-500">
+            Upload a clear photo of the affected skin area to generate an AI-assisted report.
+          </p>
+        </div>
+        <Link
+          to="/patient-dashboard"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
+        >
+          ← Back to dashboard
+        </Link>
       </div>
 
       <DisclaimerBanner />
