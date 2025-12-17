@@ -69,9 +69,16 @@ def seed_doctors(
                 session.commit()
                 session.refresh(user)
                 print(f"Created doctor user: {doctor['email']}")
-            elif user.role != "doctor":
+            else:
+                # Update password for existing users to ensure valid hash
+                user.password = get_password_hash(doctor["password"])
+                session.add(user)
+                session.commit()
+                print(f"Updated password for doctor: {doctor['email']}")
+
+            if user.role != "doctor":
                 print(
-                    f"Skipping {doctor['email']}: existing user has role '{user.role}'"
+                    f"Skipping profile for {doctor['email']}: User exists but has role '{user.role}'"
                 )
                 continue
 

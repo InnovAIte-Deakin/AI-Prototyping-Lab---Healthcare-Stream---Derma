@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Float, JSON
+from sqlalchemy.orm import relationship
+from datetime import datetime
 from sqlalchemy.sql import func
 from app.db import Base
 
@@ -36,13 +38,26 @@ class Image(Base):
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     image_url = Column(String, nullable=False)
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    analysis_reports = relationship("AnalysisReport", back_populates="image")
 
 class AnalysisReport(Base):
     __tablename__ = "analysis_reports"
-
+    
     id = Column(Integer, primary_key=True, index=True)
     image_id = Column(Integer, ForeignKey("images.id"), nullable=False)
-    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    report_json = Column(Text, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Structured fields (new/ensure these exist)
+    condition = Column(String, nullable=True)  # Primary detected condition
+    confidence = Column(Float, nullable=True)   # Confidence score (0-1)
+    recommendation = Column(Text, nullable=True) # Clinical recommendation
+    
+    # JSON field for complete analysis
+    report_json = Column(JSON, nullable=True)  # Full structured output
+    
+    # Keep raw output if needed
+    raw_output = Column(Text, nullable=True)   # Original model response
+    
+    # Relationships
+    image = relationship("Image", back_populates="analysis_reports")

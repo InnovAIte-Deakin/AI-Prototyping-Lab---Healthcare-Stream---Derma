@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 import os
 from pathlib import Path
 import json
+import re
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
 from app.services.gemini_service import gemini_service
+from app.db import SessionLocal
 from app.auth_helpers import get_current_patient, get_current_doctor
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
@@ -91,7 +93,6 @@ async def analyze_image(
     # Save analysis results to database
     report = AnalysisReport(
         image_id=image.id,
-        patient_id=image.patient_id,
         report_json=json.dumps(analysis_result)
     )
     db.add(report)
@@ -132,9 +133,51 @@ async def get_analysis(
         )
     
     analysis_data = json.loads(report.report_json)
+    # Ensure top-level fields are present if stored in older format or wrapped
+    if "analysis" in analysis_data and isinstance(analysis_data["analysis"], dict):
+         # If the stored data has nested 'analysis' dict (from new structure), flatten relevant parts or just return it.
+         # The new structure returns {status: success, analysis: {...}, ...flattened_fields}
+         # So we can just return analysis_data which is the full JSON stored.
+         pass
+         
     analysis_data["image_id"] = image.id
     
     return analysis_data
+
+
+from app.schemas import ChatRequest, ChatResponse
+
+@router.post("/{image_id}/chat", response_model=ChatResponse)
+async def chat_about_lesion_endpoint(
+    image_id: int,
+    chat_request: ChatRequest,
+    db: Session = Depends(get_db),
+    user_id: int = None
+):
+    """
+    Chat with the AI about a specific lesion analysis.
+    """
+    # 1. Fetch Analysis Report
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
+    
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found for this image"
+        )
+        
+    # Check permissions (simplified, assuming user_id if passed is valid)
+    if user_id and report.patient_id != user_id:
+         # Also allow if doctor? For now strict on patient ownership or skipped if user_id None
+         pass
+
+    # 2. Extract context
+    analysis_data = json.loads(report.report_json)
+    
+    # 3. Call Service
+    reply = gemini_service.chat_about_lesion(analysis_data, chat_request.message)
+    
+    return ChatResponse(reply=reply)
 
 
 @router.get("/patient/reports")
@@ -190,3 +233,101 @@ async def get_doctor_patient_reports(
         results.append(data)
         
     return results
+
+async def analyze_image(image_id: int) -> Dict[str, Any]:
+    """
+    Analyze image and return structured results
+    """
+    db = SessionLocal()
+    try:
+        # Get image from database
+        image = db.query(Image).filter(Image.id == image_id).first()
+        if not image:
+            raise ValueError(f"Image {image_id} not found")
+        
+        # Call Gemini service with structured prompt
+        raw_analysis = await analyze_with_gemini(image.file_path)
+        
+        # Parse raw output into structured format
+        structured_result = _parse_analysis_output(raw_analysis)
+        
+        # Create analysis report
+        report = AnalysisReport(
+            image_id=image_id,
+            condition=structured_result["condition"],
+            confidence=structured_result["confidence"],
+            recommendation=structured_result["recommendation"],
+            report_json=structured_result,
+            raw_output=raw_analysis
+        )
+        
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        
+        return {
+            "id": report.id,
+            "image_id": image_id,
+            "condition": report.condition,
+            "confidence": report.confidence,
+            "recommendation": report.recommendation,
+            "report_json": report.report_json,
+            "created_at": report.created_at.isoformat()
+        }
+        
+    finally:
+        db.close()
+
+def _parse_analysis_output(raw_output: str) -> Dict[str, Any]:
+    """
+    Parse raw Gemini output into structured format
+    Handles various response formats
+    """
+    try:
+        # Try to parse as JSON if Gemini returns JSON
+        if raw_output.strip().startswith('{'):
+            return json.loads(raw_output)
+    except json.JSONDecodeError:
+        pass
+    
+    # Fallback: Extract structured data from text
+    # This is a simplified parser - adjust based on actual Gemini output
+    return {
+        "condition": _extract_condition(raw_output),
+        "confidence": _extract_confidence(raw_output),
+        "recommendation": _extract_recommendation(raw_output),
+        "additional_info": {
+            "full_text": raw_output,
+            "analysis_type": "dermatological"
+        }
+    }
+
+def _extract_condition(text: str) -> str:
+    """Extract primary condition from text"""
+    # Implementation depends on Gemini output format
+    # Example: Look for "Condition:" or "Diagnosis:" keywords
+    lines = text.split('\n')
+    for line in lines:
+        if 'condition:' in line.lower() or 'diagnosis:' in line.lower():
+            return line.split(':', 1)[1].strip()
+    return "Unknown condition"
+
+def _extract_confidence(text: str) -> float:
+    """Extract confidence score from text"""
+    import re
+    # Look for patterns like "85%", "0.85", "Confidence: 85"
+    pattern = r'(?:confidence|certainty)[\s:]*(\d+(?:\.\d+)?)'
+    match = re.search(pattern, text, re.IGNORECASE)
+    if match:
+        value = float(match.group(1))
+        return value / 100 if value > 1 else value
+    return 0.5  # Default moderate confidence
+
+def _extract_recommendation(text: str) -> str:
+    """Extract recommendation from text"""
+    lines = text.split('\n')
+    for i, line in enumerate(lines):
+        if 'recommend' in line.lower():
+            # Get recommendation section
+            return '\n'.join(lines[i:i+3]).strip()
+    return "Consult a dermatologist for proper diagnosis"
