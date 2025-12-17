@@ -60,16 +60,17 @@ function LoginPage() {
       // Enhanced Error Parsing
       let msg = 'Authentication failed. Please check your credentials.';
 
+      const detail = err.response?.data?.detail;
+      
       if (Array.isArray(detail)) {
         // Pydantic validation error array
-        // e.g. [{loc: ['body', 'password'], msg: 'String should have at least 6 characters', ...}]
         msg = detail.map(d => {
           if (d.loc.includes('password') && d.type === 'string_too_short') {
             return 'Password has to be greater than 6 characters';
           }
           return d.msg;
         }).join('. ');
-      } else {
+      } else if (detail) {
         msg = detail;
       }
 
