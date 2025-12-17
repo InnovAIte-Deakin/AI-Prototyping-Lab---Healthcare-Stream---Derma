@@ -1,17 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Dict, Any, List, Union
-import os
-from pathlib import Path
+from typing import Dict, Any, List
 import json
-import re
+from pathlib import Path
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
 from app.services.gemini_service import gemini_service
-from app.db import SessionLocal
 from app.auth_helpers import get_current_patient, get_current_doctor
+from app.schemas import ChatRequest, ChatResponse
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
@@ -25,7 +23,7 @@ def _resolve_image_path(image_url: str) -> Path:
         return candidate
 
     if image_url.startswith(MEDIA_URL):
-        relative_path = image_url[len(MEDIA_URL) :].lstrip("/")
+        relative_path = image_url[len(MEDIA_URL):].lstrip("/")
         candidate = MEDIA_ROOT / relative_path
         if candidate.exists():
             return candidate
@@ -49,7 +47,7 @@ def _resolve_image_path(image_url: str) -> Path:
 async def analyze_image(
     image_id: int,
     db: Session = Depends(get_db),
-    user_id: int = None  # This should come from auth middleware
+    current_user: dict = Depends(get_current_patient)
 ) -> Dict[str, Any]:
     """
     Analyze an uploaded skin lesion image using AI
@@ -57,7 +55,7 @@ async def analyze_image(
     Args:
         image_id: ID of the uploaded image to analyze
         db: Database session
-        user_id: ID of the authenticated user
+        current_user: Authenticated patient user
         
     Returns:
         AI analysis results
@@ -71,8 +69,8 @@ async def analyze_image(
             detail="Image not found"
         )
     
-    # Verify user owns this image (if user_id is provided)
-    if user_id and image.patient_id != user_id:
+    # Verify user owns this image
+    if image.patient_id != current_user["user_id"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to analyze this image"
@@ -97,18 +95,57 @@ async def analyze_image(
     )
     db.add(report)
     db.commit()
+    db.refresh(report)
+    
+    # Add report ID to response
+    analysis_result["report_id"] = report.id
+    analysis_result["image_id"] = image.id
     
     return analysis_result
 
 
-@router.get("/{image_id}")
-async def get_analysis(
+@router.get("/report/{report_id}")
+async def get_analysis_by_report_id(
+    report_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = None
+) -> Dict[str, Any]:
+    """
+    Retrieve existing analysis by report ID
+    """
+    report = db.query(AnalysisReport).filter(AnalysisReport.id == report_id).first()
+    
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis report not found"
+        )
+    
+    # Get associated image for permission check
+    image = db.query(Image).filter(Image.id == report.image_id).first()
+    
+    if user_id and image and image.patient_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to view this analysis"
+        )
+    
+    analysis_data = json.loads(report.report_json)
+    analysis_data["report_id"] = report.id
+    analysis_data["image_id"] = report.image_id
+    analysis_data["created_at"] = report.created_at.isoformat()
+    
+    return analysis_data
+
+
+@router.get("/image/{image_id}")
+async def get_analysis_by_image_id(
     image_id: int,
     db: Session = Depends(get_db),
     user_id: int = None
 ) -> Dict[str, Any]:
     """
-    Retrieve existing analysis for an image
+    Retrieve existing analysis for an image by image ID
     """
     image = db.query(Image).filter(Image.id == image_id).first()
     
@@ -133,19 +170,12 @@ async def get_analysis(
         )
     
     analysis_data = json.loads(report.report_json)
-    # Ensure top-level fields are present if stored in older format or wrapped
-    if "analysis" in analysis_data and isinstance(analysis_data["analysis"], dict):
-         # If the stored data has nested 'analysis' dict (from new structure), flatten relevant parts or just return it.
-         # The new structure returns {status: success, analysis: {...}, ...flattened_fields}
-         # So we can just return analysis_data which is the full JSON stored.
-         pass
-         
+    analysis_data["report_id"] = report.id
     analysis_data["image_id"] = image.id
+    analysis_data["created_at"] = report.created_at.isoformat()
     
     return analysis_data
 
-
-from app.schemas import ChatRequest, ChatResponse
 
 @router.post("/{image_id}/chat", response_model=ChatResponse)
 async def chat_about_lesion_endpoint(
@@ -157,7 +187,7 @@ async def chat_about_lesion_endpoint(
     """
     Chat with the AI about a specific lesion analysis.
     """
-    # 1. Fetch Analysis Report
+    # Fetch Analysis Report by image_id
     report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
     
     if not report:
@@ -165,16 +195,11 @@ async def chat_about_lesion_endpoint(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Analysis not found for this image"
         )
-        
-    # Check permissions (simplified, assuming user_id if passed is valid)
-    if user_id and report.patient_id != user_id:
-         # Also allow if doctor? For now strict on patient ownership or skipped if user_id None
-         pass
 
-    # 2. Extract context
+    # Extract context
     analysis_data = json.loads(report.report_json)
     
-    # 3. Call Service
+    # Call Service
     reply = gemini_service.chat_about_lesion(analysis_data, chat_request.message)
     
     return ChatResponse(reply=reply)
@@ -195,7 +220,7 @@ async def get_patient_reports(
     results = []
     for report in reports:
         data = json.loads(report.report_json)
-        data["id"] = report.id
+        data["report_id"] = report.id
         data["image_id"] = report.image_id
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
@@ -227,107 +252,9 @@ async def get_doctor_patient_reports(
     results = []
     for report in reports:
         data = json.loads(report.report_json)
-        data["id"] = report.id
+        data["report_id"] = report.id
         data["image_id"] = report.image_id
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
         
     return results
-
-async def analyze_image(image_id: int) -> Dict[str, Any]:
-    """
-    Analyze image and return structured results
-    """
-    db = SessionLocal()
-    try:
-        # Get image from database
-        image = db.query(Image).filter(Image.id == image_id).first()
-        if not image:
-            raise ValueError(f"Image {image_id} not found")
-        
-        # Call Gemini service with structured prompt
-        raw_analysis = await analyze_with_gemini(image.file_path)
-        
-        # Parse raw output into structured format
-        structured_result = _parse_analysis_output(raw_analysis)
-        
-        # Create analysis report
-        report = AnalysisReport(
-            image_id=image_id,
-            condition=structured_result["condition"],
-            confidence=structured_result["confidence"],
-            recommendation=structured_result["recommendation"],
-            report_json=structured_result,
-            raw_output=raw_analysis
-        )
-        
-        db.add(report)
-        db.commit()
-        db.refresh(report)
-        
-        return {
-            "id": report.id,
-            "image_id": image_id,
-            "condition": report.condition,
-            "confidence": report.confidence,
-            "recommendation": report.recommendation,
-            "report_json": report.report_json,
-            "created_at": report.created_at.isoformat()
-        }
-        
-    finally:
-        db.close()
-
-def _parse_analysis_output(raw_output: str) -> Dict[str, Any]:
-    """
-    Parse raw Gemini output into structured format
-    Handles various response formats
-    """
-    try:
-        # Try to parse as JSON if Gemini returns JSON
-        if raw_output.strip().startswith('{'):
-            return json.loads(raw_output)
-    except json.JSONDecodeError:
-        pass
-    
-    # Fallback: Extract structured data from text
-    # This is a simplified parser - adjust based on actual Gemini output
-    return {
-        "condition": _extract_condition(raw_output),
-        "confidence": _extract_confidence(raw_output),
-        "recommendation": _extract_recommendation(raw_output),
-        "additional_info": {
-            "full_text": raw_output,
-            "analysis_type": "dermatological"
-        }
-    }
-
-def _extract_condition(text: str) -> str:
-    """Extract primary condition from text"""
-    # Implementation depends on Gemini output format
-    # Example: Look for "Condition:" or "Diagnosis:" keywords
-    lines = text.split('\n')
-    for line in lines:
-        if 'condition:' in line.lower() or 'diagnosis:' in line.lower():
-            return line.split(':', 1)[1].strip()
-    return "Unknown condition"
-
-def _extract_confidence(text: str) -> float:
-    """Extract confidence score from text"""
-    import re
-    # Look for patterns like "85%", "0.85", "Confidence: 85"
-    pattern = r'(?:confidence|certainty)[\s:]*(\d+(?:\.\d+)?)'
-    match = re.search(pattern, text, re.IGNORECASE)
-    if match:
-        value = float(match.group(1))
-        return value / 100 if value > 1 else value
-    return 0.5  # Default moderate confidence
-
-def _extract_recommendation(text: str) -> str:
-    """Extract recommendation from text"""
-    lines = text.split('\n')
-    for i, line in enumerate(lines):
-        if 'recommend' in line.lower():
-            # Get recommendation section
-            return '\n'.join(lines[i:i+3]).strip()
-    return "Consult a dermatologist for proper diagnosis"
