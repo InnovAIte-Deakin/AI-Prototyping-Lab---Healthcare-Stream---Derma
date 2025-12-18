@@ -153,7 +153,7 @@ function DoctorPatientDetail() {
                         
                         <div className="bg-blue-50 p-2 rounded">
                             <p className="text-sm text-blue-900" data-testid={`report-${report.id}-advice`}>
-                            <strong>Values:</strong> {report.advice}
+                            <strong>Recommendation:</strong> {report.advice}
                             </p>
                         </div>
 
