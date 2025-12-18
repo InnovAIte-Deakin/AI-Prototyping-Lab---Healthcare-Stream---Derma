@@ -35,16 +35,23 @@ const PatientHistory = () => {
   const normalizedReports = useMemo(() => {
     return reports.map((report, index) => {
       const createdAt = report.created_at || report.createdAt;
+      
+      // Handle structured analysis data vs legacy string
+      // Backend now returns flattened fields (condition, severity) AND 'analysis' object
+      
       return {
-        id: report.id ?? index,
-        risk: report.risk || report.severity || 'Unknown',
+        id: report.report_id || report.id || index,
+        risk: report.severity || report.risk || 'Unknown',
+        condition: report.condition || 'Assessment Pending',
+        confidence: report.confidence ? Math.round(report.confidence * 100) : null,
         advice:
-          report.advice ||
-          report.recommendations ||
           report.recommendation ||
-          report.analysis ||
+          report.advice ||
+          (typeof report.analysis === 'string' ? report.analysis : '') ||
           'No advice provided.',
-        analysis: report.analysis || report.summary || '',
+        characteristics: Array.isArray(report.characteristics) 
+          ? report.characteristics.join(', ') 
+          : '',
         createdAt,
       };
     });
@@ -102,17 +109,27 @@ const PatientHistory = () => {
                     : 'Date unknown'}
                 </p>
               </div>
-              <p className="mt-2 text-base">
-                <strong>Risk:</strong> {report.risk}
-              </p>
-              <p className="mt-1 text-base">
-                <strong>Advice:</strong> {report.advice}
-              </p>
-              {report.analysis && (
-                <p className="mt-2 text-sm text-slate-600 whitespace-pre-line">
-                  {report.analysis}
+              
+              <div className="mt-3 space-y-2">
+                <p className="text-base font-medium text-slate-900">
+                  Condition: <span className="font-normal">{report.condition}</span>
+                  {report.confidence && <span className="ml-2 text-slate-500 text-sm">({report.confidence}%)</span>}
                 </p>
-              )}
+
+                <p className="text-sm">
+                  <strong className="text-slate-700">Severity:</strong> {report.risk}
+                </p>
+                
+                {report.characteristics && (
+                  <p className="text-sm text-slate-600">
+                    <strong className="text-slate-700">Features:</strong> {report.characteristics}
+                  </p>
+                )}
+
+                <p className="mt-2 text-sm bg-blue-50 p-2 rounded text-blue-800">
+                  <strong>Recommendation:</strong> {report.advice}
+                </p>
+              </div>
             </div>
           ))}
         </div>

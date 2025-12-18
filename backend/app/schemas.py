@@ -10,7 +10,8 @@ Sprint 2 Upgrade Path:
 """
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Literal, Optional
+from typing import Literal, Optional, List, Dict, Any
+from datetime import datetime
 
 
 class UserSignup(BaseModel):
@@ -106,3 +107,44 @@ class SelectDoctorRequest(BaseModel):
 #     email: str
 #     role: str
 #     exp: datetime
+
+class AnalysisResult(BaseModel):
+    """
+    Structured analysis result from Gemini.
+    """
+    condition: str = Field(..., description="Predicted skin condition")
+    confidence: float = Field(..., description="Confidence score 0-100")
+    severity: Literal["Low", "Moderate", "High"] = Field(..., description="Severity level")
+    characteristics: List[str] = Field(..., description="List of visible features")
+    recommendation: str = Field(..., description="Actionable recommendation")
+    disclaimer: str
+
+class AnalysisReportResponse(BaseModel):
+    """Response schema for analysis reports"""
+    id: int
+    image_id: int
+    condition: str
+    confidence: float
+    recommendation: str
+    report_json: Dict[str, Any]
+    raw_output: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class ChatMessage(BaseModel):
+    """Schema for chat messages"""
+    role: str = Field(..., description="Role: 'user' or 'Doctor'")
+    content: str = Field(..., description="Message content")
+
+class ChatRequest(BaseModel):
+    """Request schema for chat endpoint"""
+    message: str = Field(..., min_length=1, max_length=2000, description="User's message")
+
+class ChatResponse(BaseModel):
+    """Response schema for chat endpoint"""
+    image_id: int
+    user_message: str
+    ai_response: str
+    context_used: bool = Field(default=True, description="Whether analysis context was used")

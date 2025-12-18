@@ -46,16 +46,22 @@ function DoctorPatientDetail() {
     return reports.map((report, index) => {
       const createdAt = report.created_at || report.createdAt;
       const imageUrl = report.image_url || report.imageUrl || report.image;
+      
+      // Handle structured analysis data
       return {
-        id: report.id ?? index,
-        risk: report.risk || report.severity || 'Unknown',
+        id: report.report_id || report.id || index,
+        risk: report.severity || report.risk || 'Unknown',
+        condition: report.condition || 'Assessment Pending',
+        confidence: report.confidence ? Math.round(report.confidence * 100) : null,
         advice:
-          report.advice ||
-          report.recommendations ||
           report.recommendation ||
-          report.analysis ||
+          report.advice ||
+          (typeof report.analysis === 'string' ? report.analysis : '') ||
           'No advice provided.',
-        analysis: report.analysis || report.summary || '',
+        characteristics: Array.isArray(report.characteristics) 
+          ? report.characteristics.join(', ') 
+          : '',
+        analysis: typeof report.analysis === 'string' ? report.analysis : '',
         createdAt,
         imageUrl,
       };
@@ -128,20 +134,37 @@ function DoctorPatientDetail() {
                         ? new Date(report.createdAt).toLocaleString()
                         : 'Date unknown'}
                     </p>
-                    <p className="mt-2 text-base" data-testid={`report-${report.id}-risk`}>
-                      <strong>Risk:</strong> {report.risk}
-                    </p>
-                    <p className="mt-1 text-base" data-testid={`report-${report.id}-advice`}>
-                      <strong>Advice:</strong> {report.advice}
-                    </p>
-
-                    {report.analysis && (
-                      <div className="mt-2">
-                        <p className="whitespace-pre-line text-sm text-slate-700">
-                          {report.analysis}
+                    
+                    <div className="mt-2 space-y-2">
+                        <p className="text-base font-medium text-slate-900">
+                        Condition: <span className="font-normal">{report.condition}</span>
+                        {report.confidence && <span className="ml-2 text-slate-500 text-sm">({report.confidence}%)</span>}
                         </p>
-                      </div>
-                    )}
+
+                        <p className="text-sm" data-testid={`report-${report.id}-risk`}>
+                        <strong className="text-slate-700">Severity:</strong> {report.risk}
+                        </p>
+                        
+                        {report.characteristics && (
+                        <p className="text-sm text-slate-600">
+                            <strong className="text-slate-700">Features:</strong> {report.characteristics}
+                        </p>
+                        )}
+                        
+                        <div className="bg-blue-50 p-2 rounded">
+                            <p className="text-sm text-blue-900" data-testid={`report-${report.id}-advice`}>
+                            <strong>Recommendation:</strong> {report.advice}
+                            </p>
+                        </div>
+
+                        {report.analysis && (
+                        <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-100">
+                            <p className="whitespace-pre-line text-xs text-slate-500">
+                            {report.analysis}
+                            </p>
+                        </div>
+                        )}
+                    </div>
                   </div>
                 </div>
               </div>

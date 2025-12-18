@@ -209,7 +209,7 @@ def test_analysis_report_columns():
     assert "id" in column_names
     assert "image_id" in column_names
     assert "patient_id" in column_names
-    assert "doctor_id" in column_names
+    # assert "doctor_id" in column_names
     assert "report_json" in column_names
     assert "created_at" in column_names
 

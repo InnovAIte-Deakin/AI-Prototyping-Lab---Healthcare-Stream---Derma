@@ -10,6 +10,7 @@ from app.routes import (
     analysis,
     images,
     doctor_dashboard,
+    doctor_dashboard
 )  # Registered routers
 
 app = FastAPI(
@@ -22,6 +23,7 @@ app = FastAPI(
 
 origins = [
     "http://localhost:5173",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
