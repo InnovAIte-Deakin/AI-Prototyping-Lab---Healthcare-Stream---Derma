@@ -46,6 +46,11 @@ class AnalysisReport(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     image_id = Column(Integer, ForeignKey("images.id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Check if we want nullable=False. Let's make it True for migration ease, or False if we are resetting. User reset DB recently. Let's make it nullable=True first to avoid immediate constraint errors if rows exist, but ideally False.
+    # Actually, the user just reset the DB. So I can make it nullable=False if I want.
+    # But wait, the previous code tried to insert it.
+    # Let's match the code structure.
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Structured fields (new/ensure these exist)
