@@ -15,7 +15,7 @@ class GeminiService:
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-2.5-flash')
     
-    def analyze_skin_lesion(self, image_path: str) -> Dict[str, Any]:
+    async def analyze_skin_lesion(self, image_path: str) -> Dict[str, Any]:
         """
         Analyze a skin lesion image and return AI analysis results
         
@@ -57,17 +57,15 @@ class GeminiService:
             ]
             
             # Generate analysis
-            response = self.model.generate_content([prompt, image_parts[0]])
+            response = await self.model.generate_content_async([prompt, image_parts[0]])
             
             # Parse and structure the response
             analysis_data = self._parse_json_response(response.text)
             
             return {
                 "status": "success",
-                "analysis": analysis_data, # For backward compatibility or if we want the full object
-                **analysis_data # Flatten for easier access if needed, but keeping structure is better. 
-                                # Actually, based on previous code, it returned a dict. 
-                                # Let's stick to returning a dict that matches the requested structure + status.
+                "analysis": analysis_data, 
+                **analysis_data
             }
             
         except Exception as e:
@@ -78,7 +76,7 @@ class GeminiService:
                 "message": "Failed to analyze the image. Please try again or consult a healthcare professional."
             }
 
-    def chat_about_lesion(self, analysis_context: Dict[str, Any], user_message: str) -> str:
+    async def chat_about_lesion(self, analysis_context: Dict[str, Any], user_message: str) -> str:
         """
         Chat with the AI about a specific lesion analysis.
         
@@ -106,7 +104,7 @@ class GeminiService:
             Keep your answers concise and relevant to the context.
             """
             
-            response = self.model.generate_content(context_prompt)
+            response = await self.model.generate_content_async(context_prompt)
             return response.text
         except Exception as e:
             print(f"GEMINI CHAT ERROR: {e}")
@@ -143,8 +141,6 @@ class GeminiService:
             }
 
             
-
-    
     def _get_mime_type(self, file_path: str) -> str:
         """Determine MIME type based on file extension"""
         extension = Path(file_path).suffix.lower()
@@ -157,73 +153,6 @@ class GeminiService:
         }
         return mime_types.get(extension, 'image/jpeg')
 
-async def analyze_with_gemini(image_path: str) -> str:
-    """
-    Analyze dermatological image using Gemini
-    Returns structured analysis
-    """
-    # Read image
-    with open(image_path, 'rb') as f:
-        image_data = f.read()
-    
-    # Structured prompt for consistent output
-    prompt = """
-    Analyze this dermatological image and provide a structured response in JSON format:
-    
-    {
-        "condition": "Primary skin condition detected",
-        "confidence": 0.85,  // Float between 0 and 1
-        "recommendation": "Specific clinical recommendation",
-        "observations": [
-            "Key observation 1",
-            "Key observation 2"
-        ],
-        "severity": "mild|moderate|severe|critical",
-        "urgency": "routine|prompt|urgent|emergency"
-    }
-    
-    Important:
-    - Be specific about the condition
-    - Provide realistic confidence based on image quality
-    - Always recommend consulting a dermatologist
-    - Note any limitations in the assessment
-    """
-    
-    # Call Gemini API (adjust based on your current implementation)
-    response = await gemini_service.model.generate_content_async([prompt, image_data])
-    
-    return response.text
 
-# gemini_service.py - Add chat function
-
-async def chat_with_context(
-    user_message: str, 
-    analysis_context: str
-) -> str:
-    """
-    Generate contextual chat response using Gemini
-    
-    Args:
-        user_message: User's question
-        analysis_context: System context with analysis results
-        
-    Returns:
-        AI's contextual response
-    """
-    # Combine context and user message
-    full_prompt = f"{analysis_context}\n\n{user_message}"
-    
-    try:
-        # Call Gemini API using the singleton instance's model
-        # Use generate_content_async for async context
-        response = await gemini_service.model.generate_content_async(full_prompt)
-        return response.text
-        
-    except Exception as e:
-        # Fallback response if API fails
-        return (
-            "I apologize, but I'm having trouble processing your question. "
-            "Please try again or consult with a dermatologist directly."
-        )
 # Create a singleton instance
 gemini_service = GeminiService()

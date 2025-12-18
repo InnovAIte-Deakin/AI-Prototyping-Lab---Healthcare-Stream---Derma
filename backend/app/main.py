@@ -10,7 +10,7 @@ from app.routes import (
     analysis,
     images,
     doctor_dashboard,
-    chat
+    doctor_dashboard
 )  # Registered routers
 
 app = FastAPI(
@@ -43,7 +43,6 @@ app.include_router(images.router)
 app.include_router(doctors.router)
 app.include_router(patient_doctor.router)
 app.include_router(analysis.router)
-app.include_router(chat.router)
 app.include_router(doctor_dashboard.router)
 
 @app.get("/")

@@ -461,7 +461,7 @@ I need to Apply Styling and Layout
 - [x] B6 – Analysis Service
 - [x] B7 – Auth Overhaul to JWT + Navigation Support
 - [ ] B8 – Doctor Profile Integrity & Seeding
-- [ ] B9 – Analysis Result Formatting & Chat Context
+- [x] B9 – Analysis Result Formatting & Chat Context
 - [ ] B10 – Doctor-Patient Workflow Glue
 - [ ] B11 – Security Hardening & Data Safety
 

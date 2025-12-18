@@ -47,7 +47,7 @@ def _resolve_image_path(image_url: str) -> Path:
 async def analyze_image(
     image_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_patient)
+    current_user: User = Depends(get_current_patient)
 ) -> Dict[str, Any]:
     """
     Analyze an uploaded skin lesion image using AI
@@ -70,7 +70,7 @@ async def analyze_image(
         )
     
     # Verify user owns this image
-    if image.patient_id != current_user["user_id"]:
+    if image.patient_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to analyze this image"
@@ -80,7 +80,7 @@ async def analyze_image(
     image_path = str(_resolve_image_path(image.image_url))
     
     # Perform AI analysis
-    analysis_result = gemini_service.analyze_skin_lesion(image_path)
+    analysis_result = await gemini_service.analyze_skin_lesion(image_path)
     
     if analysis_result["status"] == "error":
         raise HTTPException(
@@ -91,7 +91,8 @@ async def analyze_image(
     # Save analysis results to database
     report = AnalysisReport(
         image_id=image.id,
-        report_json=json.dumps(analysis_result)
+        report_json=json.dumps(analysis_result),
+        patient_id=current_user.id
     )
     db.add(report)
     db.commit()
@@ -182,7 +183,7 @@ async def chat_about_lesion_endpoint(
     image_id: int,
     chat_request: ChatRequest,
     db: Session = Depends(get_db),
-    user_id: int = None
+    current_user: User = Depends(get_current_patient)
 ):
     """
     Chat with the AI about a specific lesion analysis.
@@ -196,13 +197,25 @@ async def chat_about_lesion_endpoint(
             detail="Analysis not found for this image"
         )
 
+    # Verify ownership
+    if report.patient_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to chat about this analysis"
+        )
+
     # Extract context
     analysis_data = json.loads(report.report_json)
     
     # Call Service
-    reply = gemini_service.chat_about_lesion(analysis_data, chat_request.message)
+    reply = await gemini_service.chat_about_lesion(analysis_data, chat_request.message)
     
-    return ChatResponse(reply=reply)
+    return ChatResponse(
+        image_id=image_id,
+        user_message=chat_request.message,
+        ai_response=reply,
+        context_used=True
+    )
 
 
 @router.get("/patient/reports")
