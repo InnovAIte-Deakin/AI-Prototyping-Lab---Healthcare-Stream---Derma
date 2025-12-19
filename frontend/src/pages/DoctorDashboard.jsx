@@ -5,17 +5,23 @@ import { apiClient } from '../context/AuthContext';
 const DoctorDashboard = () => {
   const [pendingCases, setPendingCases] = useState([]);
   const [allCases, setAllCases] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState('patients');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCases = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
 
       try {
+        // Fetch patients linked to this doctor
+        const patientsRes = await apiClient.get('/doctor/patients');
+        const patientsData = Array.isArray(patientsRes.data) ? patientsRes.data : (patientsRes.data?.patients || []);
+        setPatients(patientsData);
+
         // Fetch pending cases
         const pendingRes = await apiClient.get('/cases/doctor/pending');
         setPendingCases(pendingRes.data?.cases || []);
@@ -24,18 +30,22 @@ const DoctorDashboard = () => {
         const allRes = await apiClient.get('/cases/doctor/all');
         setAllCases(allRes.data?.cases || []);
       } catch (err) {
-        console.error('Failed to fetch cases:', err);
-        setError('Failed to load cases. Please try again.');
+        console.error('Failed to fetch data:', err);
+        setError('Failed to load data. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCases();
+    fetchData();
   }, []);
 
   const handleCaseClick = (reportId) => {
     navigate(`/doctor/case/${reportId}`);
+  };
+
+  const handlePatientClick = (patientId) => {
+    navigate(`/doctor/patients/${patientId}`);
   };
 
   const getStatusBadge = (status) => {
@@ -93,7 +103,7 @@ const DoctorDashboard = () => {
                   />
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-900">
-                  {caseItem.patient_email || `Patient #${caseItem.patient_id}`}
+                  {caseItem.patient_full_name || caseItem.full_name || caseItem.patient_email || `Patient #${caseItem.patient_id}`}
                 </td>
                 <td className="px-4 py-3">
                   {getStatusBadge(caseItem.review_status)}
@@ -109,7 +119,7 @@ const DoctorDashboard = () => {
                       handleCaseClick(caseItem.id);
                     }}
                   >
-                    View →
+                    View Reports
                   </button>
                 </td>
               </tr>
@@ -154,6 +164,15 @@ const DoctorDashboard = () => {
           <div className="border-b border-gray-200 mb-4">
             <nav className="flex space-x-4">
               <button
+                className={`py-2 px-4 border-b-2 font-medium text-sm ${activeTab === 'patients'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                onClick={() => setActiveTab('patients')}
+              >
+                Patients ({patients.length})
+              </button>
+              <button
                 className={`py-2 px-4 border-b-2 font-medium text-sm ${activeTab === 'pending'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -173,6 +192,37 @@ const DoctorDashboard = () => {
               </button>
             </nav>
           </div>
+
+          {/* Patients List */}
+          {activeTab === 'patients' && (
+            <div className="space-y-3">
+              {patients.length === 0 ? (
+                <p className="text-center py-8 text-gray-500">No patients linked to your account.</p>
+              ) : (
+                patients.map((patient) => (
+                  <div
+                    key={patient.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handlePatientClick(patient.id)}
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">{patient.full_name}</p>
+                      <p className="text-sm text-gray-500">{patient.email}</p>
+                    </div>
+                    <button
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePatientClick(patient.id);
+                      }}
+                    >
+                      View Reports
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
 
           {/* Case Table */}
           {activeTab === 'pending' && renderCaseTable(pendingCases)}

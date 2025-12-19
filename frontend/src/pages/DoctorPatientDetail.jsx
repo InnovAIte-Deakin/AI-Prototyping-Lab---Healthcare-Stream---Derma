@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
 
 function DoctorPatientDetail() {
-  const { reportId } = useParams();
+  const { patientId, reportId } = useParams();
+  // Support both patientId (from /doctor/patients/:patientId) and reportId routes
+  const caseId = reportId || patientId;
   const navigate = useNavigate();
   const chatEndRef = useRef(null);
 
@@ -15,6 +18,9 @@ function DoctorPatientDetail() {
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Store reports for patient detail view
+  const [reports, setReports] = useState([]);
+
   // Fetch case and chat data
   useEffect(() => {
     const fetchData = async () => {
@@ -22,20 +28,38 @@ function DoctorPatientDetail() {
       setError(null);
 
       try {
-        // Fetch chat history (includes report status)
-        const chatRes = await apiClient.get(`/cases/${reportId}/chat`);
-        setChatHistory(chatRes.data.messages || []);
-        setCaseData({
-          report_id: chatRes.data.report_id,
-          doctor_active: chatRes.data.doctor_active,
-          review_status: chatRes.data.review_status,
-        });
+        // If using patientId route, fetch patient reports
+        if (patientId) {
+          const reportsRes = await apiClient.get(`/api/analysis/doctor/patients/${patientId}/reports`);
+          const reportsData = Array.isArray(reportsRes.data) ? reportsRes.data : (reportsRes.data?.reports || []);
+          setReports(reportsData);
 
-        // Fetch full case details from doctor's all cases
-        const casesRes = await apiClient.get('/cases/doctor/all');
-        const thisCase = casesRes.data?.cases?.find(c => c.id === parseInt(reportId));
-        if (thisCase) {
-          setCaseData(prev => ({ ...prev, ...thisCase }));
+          // Use first report as case data if available
+          if (reportsData.length > 0) {
+            const firstReport = reportsData[0];
+            setCaseData({
+              id: firstReport.id,
+              image_url: firstReport.image_url,
+              report_json: firstReport.analysis || firstReport.report_json,
+              review_status: firstReport.review_status || 'none',
+            });
+          }
+        } else if (caseId) {
+          // Fetch chat history (includes report status)
+          const chatRes = await apiClient.get(`/cases/${caseId}/chat`);
+          setChatHistory(chatRes.data.messages || []);
+          setCaseData({
+            report_id: chatRes.data.report_id,
+            doctor_active: chatRes.data.doctor_active,
+            review_status: chatRes.data.review_status,
+          });
+
+          // Fetch full case details from doctor's all cases
+          const casesRes = await apiClient.get('/cases/doctor/all');
+          const thisCase = casesRes.data?.cases?.find(c => c.id === parseInt(caseId));
+          if (thisCase) {
+            setCaseData(prev => ({ ...prev, ...thisCase }));
+          }
         }
       } catch (err) {
         console.error('Failed to fetch case:', err);
@@ -46,10 +70,10 @@ function DoctorPatientDetail() {
       }
     };
 
-    if (reportId) {
+    if (caseId || patientId) {
       fetchData();
     }
-  }, [reportId]);
+  }, [caseId, patientId]);
 
   // Scroll to bottom of chat
   useEffect(() => {
@@ -166,12 +190,41 @@ function DoctorPatientDetail() {
           >
             ← Back to Dashboard
           </button>
-          <h1 className="text-2xl font-bold">Case Review</h1>
+          <h1 className="text-2xl font-bold">Doctor Patient Detail</h1>
         </div>
         {caseData && getStatusBadge(caseData.review_status)}
       </div>
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <DisclaimerBanner className="mb-4" />
+
+      {/* Patient Reports List (for /doctor/patients/:patientId route) */}
+      {reports.length > 0 && (
+        <div className="mb-6 space-y-4">
+          <h2 className="text-lg font-semibold">Patient Reports</h2>
+          {reports.map((report) => (
+            <div key={report.id} className="border rounded-lg p-4 bg-white shadow-sm">
+              {report.image_url && (
+                <img
+                  src={`http://localhost:8000${report.image_url}`}
+                  alt="Patient upload"
+                  className="w-32 h-32 object-cover rounded mb-3"
+                />
+              )}
+              <p data-testid={`report-${report.id}-risk`}>
+                Severity: {report.risk || report.severity || 'Unknown'}
+              </p>
+              <p data-testid={`report-${report.id}-advice`}>
+                Recommendation: {report.advice || report.recommendation || 'No advice provided'}
+              </p>
+              <p className="text-xs text-gray-500 mt-2">
+                {report.created_at ? new Date(report.created_at).toLocaleString() : ''}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Column: Image & AI Analysis */}

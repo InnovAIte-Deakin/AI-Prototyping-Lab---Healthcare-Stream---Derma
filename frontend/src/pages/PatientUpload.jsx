@@ -131,6 +131,8 @@ const PatientUpload = () => {
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Patient Upload</h1>
 
+      <DisclaimerBanner />
+
       {/* Doctor Info */}
       {loadingDoctor ? (
         <p className="text-gray-500">Loading doctor info...</p>
