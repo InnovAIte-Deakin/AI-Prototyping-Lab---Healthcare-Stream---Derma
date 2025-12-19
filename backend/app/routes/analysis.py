@@ -69,8 +69,7 @@ async def analyze_image(
         )
     
     # Verify user owns this image
-    if image.patient_id != current_user.id:
-    # Verify user owns this image
+
     if image.patient_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
