@@ -104,24 +104,26 @@ function PatientDashboard() {
       )}
 
       {!loading && !error && currentDoctor && (
-        <div className={`${uiTokens.card} p-5`}>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Your doctor</p>
-              <h2 className="text-xl font-semibold text-slate-900">
-                {currentDoctor.full_name ?? 'Unknown'}
-              </h2>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-              Active care team
-            </div>
-          </div>
-
-          <div className="mt-3 space-y-1 text-sm text-slate-600">
-            {currentDoctor.specialty && <p>Specialty: {currentDoctor.specialty}</p>}
-            {currentDoctor.email && <p>Email: {currentDoctor.email}</p>}
-          </div>
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '1rem',
+            border: '1px solid #ccc',
+            borderRadius: '0.5rem',
+          }}
+        >
+          <h2>Your Doctor</h2>
+          <p><strong>Name:</strong> {currentDoctor.doctor?.full_name || currentDoctor.full_name || currentDoctor.name || 'Unknown'}</p>
+          <p>
+            <strong>Clinic:</strong>{' '}
+            {currentDoctor.doctor?.clinic_name || currentDoctor.clinic_name || 'Clinic unavailable'}
+          </p>
+          {(currentDoctor.doctor?.bio || currentDoctor.bio) && (
+            <p><strong>Bio:</strong> {currentDoctor.doctor?.bio || currentDoctor.bio}</p>
+          )}
+          {(currentDoctor.doctor?.email || currentDoctor.email) && (
+            <p><strong>Email:</strong> {currentDoctor.doctor?.email || currentDoctor.email}</p>
+          )}
 
           <div className="mt-4 flex flex-wrap gap-2">
             <button className={uiTokens.primaryButton} onClick={handleNewScan}>
@@ -157,23 +159,26 @@ function PatientDashboard() {
                 return (
                   <div
                     key={id}
-                    className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                    style={{
+                      border: '1px solid #ddd',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem',
+                    }}
                   >
-                    <p className="text-base font-semibold text-slate-900">
-                      {doctor.full_name ?? 'Doctor'}
+                    <p><strong>{doctor.full_name || doctor.name || 'Doctor'}</strong></p>
+                    <p style={{ fontSize: '0.875rem', color: '#666' }}>
+                      {doctor.clinic_name || 'Clinic unavailable'}
                     </p>
-                    {doctor.specialty && (
-                      <p className="text-sm text-slate-600">Specialty: {doctor.specialty}</p>
+                    {doctor.bio && (
+                      <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>{doctor.bio}</p>
                     )}
-                    <div className="mt-3">
-                      <button
-                        onClick={() => handleSelectDoctor(doctor)}
-                        disabled={selectingDoctorId === id}
-                        className={uiTokens.primaryButton}
-                      >
-                        {selectingDoctorId === id ? 'Selecting...' : 'Select'}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleSelectDoctor(doctor)}
+                      disabled={selectingDoctorId === id}
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      {selectingDoctorId === id ? 'Selecting…' : 'Select'}
+                    </button>
                   </div>
                 );
               })}

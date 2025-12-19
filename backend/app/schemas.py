@@ -10,7 +10,7 @@ Sprint 2 Upgrade Path:
 """
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Literal, Optional, List, Dict, Any
+from typing import Literal, Optional, List
 from datetime import datetime
 
 
@@ -96,6 +96,99 @@ class SelectDoctorRequest(BaseModel):
     doctor_id: int
 
 
+# ============================================================================
+# IMAGE UPLOAD SCHEMAS
+# ============================================================================
+
+class ImageUploadResponse(BaseModel):
+    """Response after uploading an image."""
+    image_id: int
+    image_url: str
+    doctor_id: Optional[int] = None
+
+
+# ============================================================================
+# CASE/ANALYSIS WORKFLOW SCHEMAS
+# ============================================================================
+
+class CaseResponse(BaseModel):
+    """Response for a case/analysis report with workflow status."""
+    id: int
+    image_id: int
+    image_url: str
+    patient_id: int
+    doctor_id: Optional[int] = None
+    review_status: str
+    doctor_active: bool
+    created_at: datetime
+    report_json: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CaseListResponse(BaseModel):
+    """List of cases for a patient or doctor."""
+    cases: List[CaseResponse]
+
+
+class RequestReviewResponse(BaseModel):
+    """Response after requesting doctor review."""
+    report_id: int
+    review_status: str
+    message: str
+
+
+class AcceptReviewResponse(BaseModel):
+    """Response after doctor accepts a review."""
+    report_id: int
+    review_status: str
+    doctor_active: bool
+    message: str
+
+
+# ============================================================================
+# CHAT SCHEMAS
+# ============================================================================
+
+class ChatMessageCreate(BaseModel):
+    """Request body for creating a chat message."""
+    message: str = Field(..., min_length=1, max_length=5000)
+
+
+class ChatMessageResponse(BaseModel):
+    """Response for a single chat message."""
+    id: int
+    sender_id: int
+    sender_role: str
+    message: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ChatHistoryResponse(BaseModel):
+    """Response containing chat history for a case."""
+    report_id: int
+    doctor_active: bool
+    review_status: str
+    messages: List[ChatMessageResponse]
+
+
+class ChatRequest(BaseModel):
+    """Request body for AI chat about a lesion."""
+    message: str = Field(..., min_length=1, max_length=5000)
+
+
+class ChatResponse(BaseModel):
+    """Response from AI chat about a lesion."""
+    image_id: int
+    user_message: str
+    ai_response: str
+    context_used: bool = True
+
+
 # Sprint 2: Add these additional schemas
 # class Token(BaseModel):
 #     access_token: str
@@ -108,43 +201,3 @@ class SelectDoctorRequest(BaseModel):
 #     role: str
 #     exp: datetime
 
-class AnalysisResult(BaseModel):
-    """
-    Structured analysis result from Gemini.
-    """
-    condition: str = Field(..., description="Predicted skin condition")
-    confidence: float = Field(..., description="Confidence score 0-100")
-    severity: Literal["Low", "Moderate", "High"] = Field(..., description="Severity level")
-    characteristics: List[str] = Field(..., description="List of visible features")
-    recommendation: str = Field(..., description="Actionable recommendation")
-    disclaimer: str
-
-class AnalysisReportResponse(BaseModel):
-    """Response schema for analysis reports"""
-    id: int
-    image_id: int
-    condition: str
-    confidence: float
-    recommendation: str
-    report_json: Dict[str, Any]
-    raw_output: Optional[str] = None
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
-
-class ChatMessage(BaseModel):
-    """Schema for chat messages"""
-    role: str = Field(..., description="Role: 'user' or 'Doctor'")
-    content: str = Field(..., description="Message content")
-
-class ChatRequest(BaseModel):
-    """Request schema for chat endpoint"""
-    message: str = Field(..., min_length=1, max_length=2000, description="User's message")
-
-class ChatResponse(BaseModel):
-    """Response schema for chat endpoint"""
-    image_id: int
-    user_message: str
-    ai_response: str
-    context_used: bool = Field(default=True, description="Whether analysis context was used")

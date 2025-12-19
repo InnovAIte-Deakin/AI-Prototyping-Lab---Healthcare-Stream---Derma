@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 import json
+import os
 from pathlib import Path
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
 from app.services.gemini_service import gemini_service
-from app.auth_helpers import get_current_patient, get_current_doctor
+from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.schemas import ChatRequest, ChatResponse
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
@@ -47,7 +48,7 @@ def _resolve_image_path(image_url: str) -> Path:
 async def analyze_image(
     image_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_patient)
+    current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
     Analyze an uploaded skin lesion image using AI
@@ -55,7 +56,7 @@ async def analyze_image(
     Args:
         image_id: ID of the uploaded image to analyze
         db: Database session
-        current_user: Authenticated patient user
+        current_user: The authenticated user
         
     Returns:
         AI analysis results
@@ -70,14 +71,47 @@ async def analyze_image(
         )
     
     # Verify user owns this image
+
     if image.patient_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to analyze this image"
         )
     
-    # Resolve image path on disk
-    image_path = str(_resolve_image_path(image.image_url))
+    # Check if there's an existing report with doctor_active flag
+    existing_report = db.query(AnalysisReport).filter(
+        AnalysisReport.image_id == image_id
+    ).first()
+    
+    if existing_report and existing_report.doctor_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="AI analysis is paused. A doctor is actively reviewing this case."
+        )
+    
+    # If report already exists, return it instead of re-analyzing
+    if existing_report:
+        analysis_data = json.loads(existing_report.report_json)
+        analysis_data["report_id"] = existing_report.id
+        analysis_data["review_status"] = existing_report.review_status
+        analysis_data["doctor_active"] = existing_report.doctor_active
+        return analysis_data
+    
+    # Check if image file exists
+    image_path = image.image_url
+    # Handle both absolute and relative paths
+    if image_path.startswith("/media/"):
+        # Convert URL path to filesystem path
+        image_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            image_path.lstrip("/")
+        )
+    
+    if not os.path.exists(image_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image file not found on server"
+        )
     
     # Perform AI analysis
     analysis_result = await gemini_service.analyze_skin_lesion(image_path)
@@ -88,65 +122,35 @@ async def analyze_image(
             detail=f"{analysis_result.get('message', 'Analysis failed')} Details: {analysis_result.get('error')}"
         )
     
-    # Save analysis results to database
+    # Save analysis results to database - include doctor_id from image
     report = AnalysisReport(
         image_id=image.id,
+        patient_id=image.patient_id,
+        doctor_id=image.doctor_id,  # Include doctor from image upload
         report_json=json.dumps(analysis_result),
-        patient_id=current_user.id
+        review_status="none",
+        doctor_active=False
     )
     db.add(report)
     db.commit()
     db.refresh(report)
     
-    # Add report ID to response
+    # Add report metadata to response
     analysis_result["report_id"] = report.id
-    analysis_result["image_id"] = image.id
+    analysis_result["review_status"] = report.review_status
+    analysis_result["doctor_active"] = report.doctor_active
     
     return analysis_result
 
 
-@router.get("/report/{report_id}")
-async def get_analysis_by_report_id(
-    report_id: int,
-    db: Session = Depends(get_db),
-    user_id: int = None
-) -> Dict[str, Any]:
-    """
-    Retrieve existing analysis by report ID
-    """
-    report = db.query(AnalysisReport).filter(AnalysisReport.id == report_id).first()
-    
-    if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis report not found"
-        )
-    
-    # Get associated image for permission check
-    image = db.query(Image).filter(Image.id == report.image_id).first()
-    
-    if user_id and image and image.patient_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to view this analysis"
-        )
-    
-    analysis_data = json.loads(report.report_json)
-    analysis_data["report_id"] = report.id
-    analysis_data["image_id"] = report.image_id
-    analysis_data["created_at"] = report.created_at.isoformat()
-    
-    return analysis_data
-
-
-@router.get("/image/{image_id}")
-async def get_analysis_by_image_id(
+@router.get("/{image_id}")
+async def get_analysis(
     image_id: int,
     db: Session = Depends(get_db),
-    user_id: int = None
+    current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """
-    Retrieve existing analysis for an image by image ID
+    Retrieve existing analysis for an image
     """
     image = db.query(Image).filter(Image.id == image_id).first()
     
@@ -156,7 +160,7 @@ async def get_analysis_by_image_id(
             detail="Image not found"
         )
     
-    if user_id and image.patient_id != user_id:
+    if image.patient_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to view this analysis"
@@ -173,7 +177,9 @@ async def get_analysis_by_image_id(
     analysis_data = json.loads(report.report_json)
     analysis_data["report_id"] = report.id
     analysis_data["image_id"] = image.id
-    analysis_data["created_at"] = report.created_at.isoformat()
+    analysis_data["report_id"] = report.id
+    analysis_data["review_status"] = report.review_status
+    analysis_data["doctor_active"] = report.doctor_active
     
     return analysis_data
 

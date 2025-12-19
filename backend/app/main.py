@@ -1,17 +1,8 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
-from app.config import MEDIA_ROOT
-from app.routes import (
-    auth,
-    doctors,
-    patient_doctor,
-    analysis,
-    images,
-    doctor_dashboard,
-    doctor_dashboard
-)  # Registered routers
+from app.routes import auth, doctors, patient_doctor, analysis, images, cases, doctor_dashboard
 
 app = FastAPI(
     title="DermaAI API",
@@ -34,17 +25,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files
-app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")
+# Mount static files for image uploads
+MEDIA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "media")
+os.makedirs(MEDIA_DIR, exist_ok=True)
+app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 # Include routers
 app.include_router(auth.router)
-app.include_router(images.router)
 app.include_router(doctors.router)
 app.include_router(patient_doctor.router)
 app.include_router(analysis.router)
+app.include_router(images.router)
+app.include_router(cases.router)
 app.include_router(doctor_dashboard.router)
+
 
 @app.get("/")
 def read_root():
     return {"message": "DermaAI API is running"}
+
