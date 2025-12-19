@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../context/AuthContext';
+import DisclaimerBanner from '../components/DisclaimerBanner';
+import { uiTokens } from '../components/Layout';
 
 const PatientUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -50,7 +52,7 @@ const PatientUpload = () => {
 
     try {
       const formData = new FormData();
-      formData.append('image', selectedFile);
+      formData.append('file', selectedFile);
 
       // Upload image (now requires linked doctor)
       const uploadRes = await apiClient.post('/images', formData, {
@@ -166,7 +168,11 @@ const PatientUpload = () => {
           {isAnalyzing ? 'Analyzing...' : 'Analyze'}
         </button>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
         {/* Analysis Result */}
         {result && (

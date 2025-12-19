@@ -10,6 +10,8 @@ export const apiClient = axios.create({
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const isAuthenticated = !!user;
+  const userRole = user ? user.role : null;
 
   // Load user from localStorage on first mount
   useEffect(() => {
@@ -39,44 +41,59 @@ export function AuthProvider({ children }) {
   const setHeadersFromUser = (u) => {
     apiClient.defaults.headers['X-User-Id'] = u.id;
     apiClient.defaults.headers['X-User-Role'] = u.role;
+    if (u.access_token) {
+      apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
+    }
   };
 
   const clearHeaders = () => {
     delete apiClient.defaults.headers['X-User-Id'];
     delete apiClient.defaults.headers['X-User-Role'];
+    delete apiClient.defaults.headers['Authorization'];
   };
 
   /**
-   * login({ email, role })
-   * For now this is a "fake" login:
-   * - we don't hit a real backend auth endpoint
-   * - we just set a user object that the rest of the app can use
-   *
-   * If/when the backend provides /auth/login later, you can:
-   *  - await apiClient.post('/auth/login', { email, password })
-   *  - and then setUser(response.data.user)
+   * login({ email, password, roleOverride })
+   * Authenticates with the backend and stores the JWT token.
    */
-  const login = async ({ email, role }) => {
-    if (!email || !role) {
-      throw new Error('Email and role are required');
-    }
+  const login = async ({ email, password, roleOverride }) => {
+    const res = await apiClient.post('/auth/login', { email, password });
+    const userData = res.data;
 
-    // Fake user object – id could come from backend later
-    const fakeUser = {
-      id: 1,
-      email,
-      role, // 'patient' or 'doctor'
+    // Normalize to { id, email, role, access_token }
+    // Backend LoginResponse returns { access_token, user_id, email, role }
+    const normalizedUser = {
+      id: userData.user_id || userData.id,
+      email: userData.email,
+      role: roleOverride || userData.role,
+      access_token: userData.access_token
     };
 
-    setUser(fakeUser);
-    return fakeUser;
+    setUser(normalizedUser);
+    return normalizedUser;
+  };
+
+  const signup = async ({ email, password, role }) => {
+    const res = await apiClient.post('/auth/signup', { email, password, role });
+    const userData = res.data;
+
+    // Backend returns LoginResponse: { access_token, user_id, email, role }
+    const normalizedUser = {
+      id: userData.user_id,
+      email: userData.email,
+      role: userData.role,
+      access_token: userData.access_token
+    };
+
+    setUser(normalizedUser);
+    return normalizedUser;
   };
 
   const logout = () => {
     setUser(null);
   };
 
-  const value = { user, login, logout };
+  const value = { user, isAuthenticated, userRole, login, signup, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

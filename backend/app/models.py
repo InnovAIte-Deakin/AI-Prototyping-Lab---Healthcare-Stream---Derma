@@ -44,7 +44,7 @@ class Image(Base):
 
 class AnalysisReport(Base):
     __tablename__ = "analysis_reports"
-
+    
     id = Column(Integer, primary_key=True, index=True)
     image_id = Column(Integer, ForeignKey("images.id"), nullable=False)
     patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)

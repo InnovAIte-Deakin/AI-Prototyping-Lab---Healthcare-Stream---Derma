@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
+import { uiTokens } from '../components/Layout';
 
 function PatientDashboard() {
   const [loading, setLoading] = useState(true);
@@ -19,7 +20,7 @@ function PatientDashboard() {
       try {
         // First: see if the patient already has a doctor
         const myDoctorRes = await apiClient.get('/patient/my-doctor');
-        setCurrentDoctor(myDoctorRes.data);
+        setCurrentDoctor(myDoctorRes.data.doctor);
       } catch (err) {
         // If 404 or similar, assume no doctor yet: load list of doctors
         const status = err?.response?.status;
@@ -72,17 +73,36 @@ function PatientDashboard() {
   };
 
   return (
-    <div style={{ padding: '1.5rem' }}>
-      {/* 👇 This heading text is important for the tests */}
-      <h1>Patient Dashboard</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          {/* dY`Ø This heading text is important for the tests */}
+          <h1 className="text-3xl font-semibold text-slate-900">Patient Dashboard</h1>
+          <p className="text-sm text-slate-500">
+            Manage your dermatologist connection and keep track of your scans.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button className={uiTokens.primaryButton} onClick={handleNewScan}>
+            New Scan
+          </button>
+          <button
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onClick={handleViewHistory}
+          >
+            View History
+          </button>
+        </div>
+      </div>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="text-slate-600">Loading...</p>}
 
       {!loading && error && (
-        <p style={{ color: 'red', marginTop: '0.5rem' }}>{error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
       )}
 
-      {/* If the patient already has a doctor */}
       {!loading && !error && currentDoctor && (
         <div
           style={{
@@ -105,24 +125,34 @@ function PatientDashboard() {
             <p><strong>Email:</strong> {currentDoctor.doctor?.email || currentDoctor.email}</p>
           )}
 
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button onClick={handleNewScan}>New Scan</button>
-            <button onClick={handleViewHistory}>View History</button>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button className={uiTokens.primaryButton} onClick={handleNewScan}>
+              New Scan
+            </button>
+            <button
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              onClick={handleViewHistory}
+            >
+              View History
+            </button>
           </div>
         </div>
       )}
 
-      {/* If no doctor yet: show list to pick from */}
       {!loading &&
         !error &&
         !currentDoctor &&
         availableDoctors &&
         availableDoctors.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
-            <h2>Select a Doctor</h2>
-            <p>Please choose a doctor to link with your account.</p>
+          <div className={`${uiTokens.card} p-5`}>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-xl font-semibold text-slate-900">Select a Doctor</h2>
+              <p className="text-sm text-slate-600">
+                Choose a dermatologist to link with your account.
+              </p>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem' }}>
+            <div className="mt-4 space-y-3">
               {availableDoctors.map((doctor) => {
                 const id = doctor.id ?? doctor.doctor_id;
 
@@ -156,12 +186,11 @@ function PatientDashboard() {
           </div>
         )}
 
-      {/* If we tried to load doctors but got none */}
       {!loading &&
         !error &&
         !currentDoctor &&
         (!availableDoctors || availableDoctors.length === 0) && (
-          <p style={{ marginTop: '1rem' }}>
+          <p className="text-sm text-slate-600">
             No available doctors found yet. Please check back later.
           </p>
         )}

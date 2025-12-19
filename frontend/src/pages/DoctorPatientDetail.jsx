@@ -245,10 +245,10 @@ function DoctorPatientDetail() {
                 >
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${msg.sender_role === 'doctor'
-                        ? 'bg-blue-600 text-white'
-                        : msg.sender_role === 'ai'
-                          ? 'bg-purple-100 text-purple-900'
-                          : 'bg-gray-100 text-gray-900'
+                      ? 'bg-blue-600 text-white'
+                      : msg.sender_role === 'ai'
+                        ? 'bg-purple-100 text-purple-900'
+                        : 'bg-gray-100 text-gray-900'
                       }`}
                   >
                     <p className="text-xs font-medium mb-1 opacity-75">

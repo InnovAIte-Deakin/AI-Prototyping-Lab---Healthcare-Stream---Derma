@@ -86,3 +86,24 @@ def get_patient_doctor(db: Session, patient_id: int) -> Dict[str, object]:
 
     doctor, profile = _get_doctor_with_profile(db, link.doctor_id)
     return {"doctor": _doctor_response(doctor, profile), "status": link.status}
+
+
+def get_doctor_patients(db: Session, doctor_id: int) -> List[Dict[str, object]]:
+    """Return all patients linked to the doctor."""
+    links = (
+        db.query(PatientDoctorLink, User)
+        .join(User, PatientDoctorLink.patient_id == User.id)
+        .filter(PatientDoctorLink.doctor_id == doctor_id)
+        .all()
+    )
+
+    results = []
+    for link, patient in links:
+        results.append({
+            "id": patient.id,
+            "name": patient.email.split("@")[0],  # Fallback since User doesn't have full_name
+            "email": patient.email,
+            "status": link.status,
+            "linked_at": "2023-01-01" # Placeholder or add created_at to Link model if needed
+        })
+    return results

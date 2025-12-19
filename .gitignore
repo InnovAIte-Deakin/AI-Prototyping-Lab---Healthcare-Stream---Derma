@@ -6,3 +6,7 @@ backend/venv/
 htmlcov/
 .pytest_cache/
 *.db
+task-b9-plan.md
+backend/media/
+*.log
+test_image.jpg

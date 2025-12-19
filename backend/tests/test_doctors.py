@@ -4,6 +4,8 @@ Tests for doctor listing and patient-doctor linking (B4).
 import pytest
 
 from app.models import DoctorProfile, PatientDoctorLink, User
+from app.auth_helpers import get_current_user
+from app.main import app
 
 
 def create_doctor(client, test_db, email: str, full_name: str) -> int:
@@ -12,8 +14,8 @@ def create_doctor(client, test_db, email: str, full_name: str) -> int:
         "/auth/signup",
         json={"email": email, "password": "password123", "role": "doctor"},
     )
-    doctor_id = response.json()["id"]
-
+    doctor_id = response.json()["user_id"]
+    
     profile = test_db.query(DoctorProfile).filter(DoctorProfile.user_id == doctor_id).first()
     profile.full_name = full_name
     profile.clinic_name = "Test Clinic"
@@ -28,7 +30,7 @@ def create_patient(client, email: str) -> int:
         "/auth/signup",
         json={"email": email, "password": "password123", "role": "patient"},
     )
-    return response.json()["id"]
+    return response.json()["user_id"]
 
 
 class TestDoctorListing:
@@ -55,11 +57,14 @@ class TestPatientDoctorLinking:
         patient_id = create_patient(client, "patient@test.com")
         doctor_id = create_doctor(client, test_db, "doctor2@test.com", "Dr. Link Target")
 
+        user = User(id=patient_id, role="patient", email="patient@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.post(
             "/patient/select-doctor",
             json={"doctor_id": doctor_id},
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 200
         payload = response.json()
@@ -80,17 +85,19 @@ class TestPatientDoctorLinking:
         first_doctor = create_doctor(client, test_db, "doctor3@test.com", "Dr. First")
         second_doctor = create_doctor(client, test_db, "doctor4@test.com", "Dr. Second")
 
+        user = User(id=patient_id, role="patient", email="patient2@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         client.post(
             "/patient/select-doctor",
             json={"doctor_id": first_doctor},
-            headers={"X-User-Id": str(patient_id)},
         )
 
         response = client.post(
             "/patient/select-doctor",
             json={"doctor_id": second_doctor},
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 200
         payload = response.json()
@@ -108,16 +115,18 @@ class TestPatientDoctorLinking:
         patient_id = create_patient(client, "patient3@test.com")
         doctor_id = create_doctor(client, test_db, "doctor5@test.com", "Dr. Current")
 
+        user = User(id=patient_id, role="patient", email="patient3@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         client.post(
             "/patient/select-doctor",
             json={"doctor_id": doctor_id},
-            headers={"X-User-Id": str(patient_id)},
         )
 
         response = client.get(
             "/patient/my-doctor",
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 200
         payload = response.json()
@@ -129,11 +138,14 @@ class TestPatientDoctorLinking:
         doctor_as_user = create_doctor(client, test_db, "doctor6@test.com", "Dr. Not Patient")
         target_doctor = create_doctor(client, test_db, "doctor7@test.com", "Dr. Target")
 
+        user = User(id=doctor_as_user, role="doctor", email="doctor6@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.post(
             "/patient/select-doctor",
             json={"doctor_id": target_doctor},
-            headers={"X-User-Id": str(doctor_as_user)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 403
         assert "Patient role required" in response.json()["detail"]
@@ -142,11 +154,14 @@ class TestPatientDoctorLinking:
         """Selecting a non-existent doctor returns 404."""
         patient_id = create_patient(client, "patient4@test.com")
 
+        user = User(id=patient_id, role="patient", email="patient4@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.post(
             "/patient/select-doctor",
             json={"doctor_id": 9999},
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 404
         assert "Doctor not found" in response.json()["detail"]
@@ -161,11 +176,14 @@ class TestPatientDoctorLinking:
         test_db.delete(profile)
         test_db.commit()
 
+        user = User(id=patient_id, role="patient", email="patient5@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.post(
             "/patient/select-doctor",
             json={"doctor_id": doctor_id},
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.pop(get_current_user, None)
 
         assert response.status_code == 404
         assert "Doctor profile not found" in response.json()["detail"]
@@ -174,10 +192,13 @@ class TestPatientDoctorLinking:
         """Fetching current doctor without link returns 404."""
         patient_id = create_patient(client, "patient6@test.com")
 
+        user = User(id=patient_id, role="patient", email="patient6@test.com")
+        app.dependency_overrides[get_current_user] = lambda: user
+
         response = client.get(
             "/patient/my-doctor",
-            headers={"X-User-Id": str(patient_id)},
         )
+        app.dependency_overrides.clear()
 
         assert response.status_code == 404
         assert "No doctor linked" in response.json()["detail"]

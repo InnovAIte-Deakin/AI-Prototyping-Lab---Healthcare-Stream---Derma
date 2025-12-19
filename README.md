@@ -4,7 +4,8 @@
 
 **Deakin University Capstone Project**
 
-**⚠️ MEDICAL DISCLAIMER** > This application is a Proof of Concept (POC) designed for educational and informational purposes only. It uses Artificial Intelligence to provide preliminary analysis of skin conditions. **It is NOT a diagnostic tool.** Users must always consult a qualified medical professional for diagnosis and treatment.
+> **⚠️ MEDICAL DISCLAIMER**
+> This application is a Proof of Concept (POC) designed for educational and informational purposes only. It uses Artificial Intelligence to provide preliminary analysis of skin conditions. **It is NOT a diagnostic tool.** Users must always consult a qualified medical professional for diagnosis and treatment.
 
 ## 📖 Overview
 
@@ -21,156 +22,126 @@ DERMA (internally referred to as **DermaAI**) is a containerized web application
 - **[AGENTS.md](AGENTS.md):** Master context for AI Agents (Mission, Rules, Tech Stack).
 - **[docs/SRS.md](docs/SRS.md):** Software Requirements Specification.
 - **[docs/TESTING.md](docs/TESTING.md):** Testing Strategy and Commands.
+- **[docs/WEEK_6_STATUS_REPORT.md](docs/WEEK_6_STATUS_REPORT.md):** Week 6 Project Status Report.
 - **[TASKS.md](TASKS.md):** Active Task Checklist.
 
 ## 🛠 Tech Stack
 
 ### Frontend
-
 - **Framework:** React (Vite)
 - **Styling:** Tailwind CSS
 - **Routing:** React Router DOM
 
 ### Backend
-
 - **Framework:** FastAPI (Python 3.10+)
 - **Database:** PostgreSQL (via Docker)
 - **ORM:** SQLAlchemy + Alembic (Migrations)
 - **Auth:** RBAC (Patient vs. Doctor) via LocalStorage & Custom Headers (POC Level)
 
 ### Infrastructure
-
 - **Containerization:** Docker & Docker Compose
 - **Version Control:** GitHub
 
-## 🚀 Getting Started
+---
+
+## 🚀 Getting Started (Local Launch)
+
+Follow these steps to set up and run the DermaAI application locally.
 
 ### Prerequisites
+- **Python** (3.10+)
+- **Node.js** (v16+)
+- **Docker Desktop** (Running)
+- **Google Gemini API Key** (Get one [here](https://makersuite.google.com/app/apikey))
 
-- Node.js & npm
-- Python 3.10+
-- Docker Desktop (for the Database)
-
-### 1\. Clone the Repository
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/InnovAIte-Deakin/AI-Prototyping-Lab---Healthcare-Stream---Derma.git 
 cd AI-Prototyping-Lab---Healthcare-Stream---Derma 
 ```
 
-### 2\. Backend Setup
-
+### 2. Backend Setup
 The backend handles the API, Database, and AI logic.
 
 ```bash
-# Navigate to backend  
-cd backend  
+# 1. Navigate to backend
+cd backend
 
-# Create a virtual environment  
-python -m venv venv  
+# 2. Create and Activate Virtual Environment
+# Windows:
+python -m venv venv
+.\venv\Scripts\Activate
+# Mac/Linux:
+python3 -m venv venv
+source venv/bin/activate
 
-# Activate venv  
-# Windows:  
-venv\\Scripts\\activate  
-# Mac/Linux:  
-source venv/bin/activate  
+# 3. Install Dependencies
+pip install -r requirements.txt
 
-# Install dependencies  
-pip install -r requirements.txt  
+# 4. Configure Environment
+# Create a .env file in the /backend folder with the following:
+# DATABASE_URL=postgresql://dermaai:dermaai@localhost:5432/dermaai
+# GOOGLE_API_KEY=your_actual_api_key_here
 
-# Create .env file  
-# (Copy the content below into a new file named .env inside /backend)  
-DATABASE_URL=postgresql://dermaai:dermaai@localhost:5432/dermaai  
-GOOGLE_API_KEY=your_api_key_here  
+# 5. Start Database (Docker)
+docker-compose up -d
 
-# Start the Database (Docker)  
-docker-compose up -d  
+# 6. Setup Database
+alembic upgrade head
+python -m app.seed_doctors
 
-# Run Migrations  
-alembic upgrade head 
-
-# Seed the Database (Create dummy doctors)  
-python -m app.seed_doctors  
-
-# Run the Server  
-uvicorn app.main:app --reload  
+# 7. Run Server
+uvicorn app.main:app --reload
 ```
+_Backend running at: http://localhost:8000_
 
-_The Backend will be running at <http://localhost:8000>_
-
-### 3\. Frontend Setup
-
-The frontend handles the UI for Patients and Doctors.
+### 3. Frontend Setup
+Open a **new terminal** (keep backend running).
 
 ```bash
-# Open a new terminal and navigate to frontend  
-cd frontend  
+# 1. Navigate to frontend
+cd frontend
 
-# Install dependencies  
-npm install  
+# 2. Install Dependencies
+npm install
 
-# Run the development server  
-npm run dev  
+# 3. Run Development Server
+npm run dev
 ```
+_Frontend running at: http://localhost:5173_
 
-_The Frontend will be running at <http://localhost:5173>_
+### 4. Access the App
+Open your browser to **http://localhost:5173**.
 
-## 🤝 Development Workflow (Strict)
+**Test Credentials:**
+- **Patient:** Register a new account.
+- **Doctors:** `alice@derma.com` / `password123` (See `seed_doctors.py` for more).
 
-We follow a strict **"One Task = One Branch"** policy to avoid conflicts.
+---
 
-### The Cycle
+## 🤝 Development Workflow
 
-- **Pull Latest Main:** Always start fresh.  
-    git checkout main  
-    git pull origin main  
+We follow a strict **"One Task = One Branch"** policy.
 
-- **Create Task Branch:** Name it clearly.  
-    git checkout -b feat/task-name-here  
-    \# Example: git checkout -b feat/patient-upload  
-
-- **Code (The Codex Routine):**
-  - Use the **Master Prompts** provided in the project documentation.
-  - Feed prompts into ChatGPT/Codex to generate code.
-  - Paste code into VS Code.
-- **Commit & Push:**  
-    git add .  
-    git commit -m "feat: implemented patient upload logic"  
-    git push origin feat/patient-upload  
-
-- **Pull Request (PR):**
-  - Go to GitHub.
-  - Open a Pull Request from feat/your-branch to main.
-  - Wait for approval/merge.
+1.  **Pull Latest Main:** `git checkout main && git pull origin main`
+2.  **Create Task Branch:** `git checkout -b feat/task-name`
+3.  **Code & Commit:** `git add . && git commit -m "feat: description"`
+4.  **Push:** `git push origin feat/task-name`
+5.  **Pull Request:** Open PR on GitHub.
 
 ## 📂 Project Structure
 
+```
 skin-scope/  
-├── backend/ # FastAPI Application  
-│ ├── app/  
-│ │ ├── routes/ # API Endpoints (auth, images, doctors)  
-│ │ ├── services/ # AI Integration Logic  
-│ │ ├── models.py # Database Schemas  
-│ │ └── main.py # App Entry Point  
-│ ├── alembic/ # DB Migrations  
-│ └── media/ # Local storage for uploaded images  
-├── frontend/ # React Application  
-│ ├── src/  
-│ │ ├── components/ # Reusable UI (Layout, Disclaimer)  
-│ │ ├── pages/ # Full Views (Dashboard, Login)  
-│ │ └── context/ # Auth State Management  
-│ └── tailwind.config.js  
-└── README.md  
-
-## 📅 Roadmap & Status
-
-- [x] **B1:** Backend Skeleton
-- [x] **B2:** Database Setup
-- [x] **B3:** Authentication System
-- [x] **B4:** Doctor Logic & Seeding
-- [ ] **B5:** Image Upload Pipeline
-- [ ] **B6:** AI Analysis Integration
-- [x] **F1:** Frontend Setup
-- [ ] **F2:** Auth Logic
-- [ ] **F3:** Patient Workflows
-- [ ] **F4:** Doctor Workflows
-- [ ] **F5:** UI Polish & Styling
+├── backend/            # FastAPI Application  
+│   ├── app/            # Source Code
+│   │   ├── routes/     # API Endpoints
+│   │   ├── services/   # Business Logic
+│   │   └── models.py   # DB Models
+│   └── media/          # Uploaded Images
+├── frontend/           # React Application  
+│   ├── src/            # Source Code
+│   │   ├── pages/      # Views
+│   │   └── components/ # UI Components
+└── docs/               # Documentation
+```

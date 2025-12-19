@@ -10,35 +10,35 @@ from typing import Optional
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from app.auth_helpers import hash_password
+from app.services.auth import get_password_hash
 from app.db import Base, SessionLocal, engine
 from app.models import DoctorProfile, User
 
 
 DOCTORS = [
     {
-        "email": "alice@derma.test",
+        "email": "alice@derma.com",
         "password": "password123",
         "full_name": "Dr. Alice Henderson",
         "clinic_name": "DermaAI Clinic",
         "bio": "Board-certified dermatologist specializing in acne and eczema.",
     },
     {
-        "email": "bob@derma.test",
+        "email": "bob@derma.com",
         "password": "password123",
         "full_name": "Dr. Bob Martinez",
         "clinic_name": "Downtown Derm Care",
         "bio": "Focused on teledermatology and rapid triage workflows.",
     },
     {
-        "email": "carol@derma.test",
+        "email": "carol@derma.com",
         "password": "password123",
         "full_name": "Dr. Carol Singh",
         "clinic_name": "Sunrise Skin Center",
         "bio": "Experienced with pigmentary disorders and pediatric dermatology.",
     },
     {
-        "email": "dan@derma.test",
+        "email": "dan@derma.com",
         "password": "password123",
         "full_name": "Dr. Dan Okafor",
         "clinic_name": "Harbor Dermatology",
@@ -62,16 +62,23 @@ def seed_doctors(
             if not user:
                 user = User(
                     email=doctor["email"],
-                    password=hash_password(doctor["password"]),
+                    password=get_password_hash(doctor["password"]),
                     role="doctor",
                 )
                 session.add(user)
                 session.commit()
                 session.refresh(user)
                 print(f"Created doctor user: {doctor['email']}")
-            elif user.role != "doctor":
+            else:
+                # Update password for existing users to ensure valid hash
+                user.password = get_password_hash(doctor["password"])
+                session.add(user)
+                session.commit()
+                print(f"Updated password for doctor: {doctor['email']}")
+
+            if user.role != "doctor":
                 print(
-                    f"Skipping {doctor['email']}: existing user has role '{user.role}'"
+                    f"Skipping profile for {doctor['email']}: User exists but has role '{user.role}'"
                 )
                 continue
 
