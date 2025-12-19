@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routes import auth, doctors, patient_doctor, analysis, images, cases
+from app.routes import auth, doctors, patient_doctor, analysis, images, cases, doctor_dashboard
 
 app = FastAPI(
     title="DermaAI API",
@@ -37,6 +37,7 @@ app.include_router(patient_doctor.router)
 app.include_router(analysis.router)
 app.include_router(images.router)
 app.include_router(cases.router)
+app.include_router(doctor_dashboard.router)
 
 
 @app.get("/")

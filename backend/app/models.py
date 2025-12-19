@@ -50,6 +50,10 @@ class AnalysisReport(Base):
     patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     report_json = Column(Text, nullable=False)
+    # Structured analysis fields (used by tests and endpoints)
+    condition = Column(String, nullable=True)
+    confidence = Column(String, nullable=True)
+    recommendation = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     # Workflow status: none | pending | accepted | reviewed
     review_status = Column(String, default="none", nullable=False)
