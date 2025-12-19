@@ -176,6 +176,19 @@ class ChatHistoryResponse(BaseModel):
     messages: List[ChatMessageResponse]
 
 
+class ChatRequest(BaseModel):
+    """Request body for AI chat about a lesion."""
+    message: str = Field(..., min_length=1, max_length=5000)
+
+
+class ChatResponse(BaseModel):
+    """Response from AI chat about a lesion."""
+    image_id: int
+    user_message: str
+    ai_response: str
+    context_used: bool = True
+
+
 # Sprint 2: Add these additional schemas
 # class Token(BaseModel):
 #     access_token: str

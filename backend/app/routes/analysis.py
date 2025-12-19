@@ -2,13 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 import json
+import os
 from pathlib import Path
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
-from app.services.gemini_service import gemini_service as ai_service
-from app.auth_helpers import get_current_user
+from app.services.gemini_service import gemini_service
+from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
+from app.schemas import ChatRequest, ChatResponse
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
