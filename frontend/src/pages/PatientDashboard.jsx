@@ -93,12 +93,16 @@ function PatientDashboard() {
           }}
         >
           <h2>Your Doctor</h2>
-          <p><strong>Name:</strong> {currentDoctor.name ?? 'Unknown'}</p>
-          {currentDoctor.specialty && (
-            <p><strong>Specialty:</strong> {currentDoctor.specialty}</p>
+          <p><strong>Name:</strong> {currentDoctor.doctor?.full_name || currentDoctor.full_name || currentDoctor.name || 'Unknown'}</p>
+          <p>
+            <strong>Clinic:</strong>{' '}
+            {currentDoctor.doctor?.clinic_name || currentDoctor.clinic_name || 'Clinic unavailable'}
+          </p>
+          {(currentDoctor.doctor?.bio || currentDoctor.bio) && (
+            <p><strong>Bio:</strong> {currentDoctor.doctor?.bio || currentDoctor.bio}</p>
           )}
-          {currentDoctor.email && (
-            <p><strong>Email:</strong> {currentDoctor.email}</p>
+          {(currentDoctor.doctor?.email || currentDoctor.email) && (
+            <p><strong>Email:</strong> {currentDoctor.doctor?.email || currentDoctor.email}</p>
           )}
 
           <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
@@ -131,11 +135,17 @@ function PatientDashboard() {
                       padding: '0.75rem',
                     }}
                   >
-                    <p><strong>{doctor.name ?? 'Doctor'}</strong></p>
-                    {doctor.specialty && <p>Specialty: {doctor.specialty}</p>}
+                    <p><strong>{doctor.full_name || doctor.name || 'Doctor'}</strong></p>
+                    <p style={{ fontSize: '0.875rem', color: '#666' }}>
+                      {doctor.clinic_name || 'Clinic unavailable'}
+                    </p>
+                    {doctor.bio && (
+                      <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>{doctor.bio}</p>
+                    )}
                     <button
                       onClick={() => handleSelectDoctor(doctor)}
                       disabled={selectingDoctorId === id}
+                      style={{ marginTop: '0.5rem' }}
                     >
                       {selectingDoctorId === id ? 'Selecting…' : 'Select'}
                     </button>

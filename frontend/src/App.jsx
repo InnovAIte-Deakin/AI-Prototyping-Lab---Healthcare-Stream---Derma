@@ -54,7 +54,7 @@ function App() {
             />
 
             <Route
-              path="/doctor-patient-detail"
+              path="/doctor/case/:reportId"
               element={
                 <ProtectedRoute
                   element={<DoctorPatientDetail />}

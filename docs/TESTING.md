@@ -57,12 +57,110 @@ We will use **Vitest** (compatible with Vite) and **React Testing Library**.
 2.  Configure `vite.config.ts` for testing.
 3.  Create `frontend/src/__tests__/` directory.
 
-## 3. End-to-End (E2E) Testing (Future Scope)
-**Goal:** Verify the entire user flow from browser to backend to database.
-**Tools:** Playwright or Cypress.
-**Scope:**
-- Patient Login -> Upload Image -> View Result.
-- Doctor Login -> View Dashboard -> Review Case.
+## 3. End-to-End (E2E) Testing
+
+We use **Playwright** for E2E testing to verify complete user flows.
+
+### 3.1 Setup
+
+Install Playwright and browsers:
+```bash
+cd frontend
+npm install
+npx playwright install
+```
+
+### 3.2 Running E2E Tests
+
+#### Run all E2E tests (headless):
+```bash
+npm run test:e2e
+```
+
+#### Run with interactive UI:
+```bash
+npm run test:e2e:ui
+```
+
+#### Run with visible browser:
+```bash
+npm run test:e2e:headed
+```
+
+#### Run all tests (unit + E2E):
+```bash
+npm run test:all
+```
+
+### 3.3 E2E Test Structure
+
+```
+frontend/src/__tests__/e2e/
+└── patient-workflow.spec.js    # Patient happy path tests
+```
+
+### 3.4 Test Coverage
+
+#### Patient Workflow Happy Path
+- ✅ Landing page loads with login form
+- ✅ Patient login and dashboard navigation
+- ✅ Dashboard shows linked doctor information
+- ✅ Navigation to upload page
+- ✅ Complete flow: Upload → Analysis → Request Review
+- ✅ Analysis displays with disclaimer
+
+#### Error Handling
+- ✅ Shows message when no doctor is linked
+
+### 3.5 API Mocking
+
+Tests use **Playwright route mocks** to simulate backend responses without requiring a live database. Mocked endpoints include:
+
+| Endpoint | Method | Mock Response |
+|----------|--------|---------------|
+| `/patient/my-doctor` | GET | Linked doctor info |
+| `/doctors` | GET | Available doctors list |
+| `/images` | POST | Image upload response |
+| `/api/analysis/{id}` | POST | AI analysis result |
+| `/cases` | GET | Patient cases list |
+| `/cases/{id}/request-review` | POST | Review request status |
+
+### 3.6 Configuration
+
+Playwright configuration is in `frontend/playwright.config.js`:
+- **Dev server**: Automatically starts on port 5173
+- **Browser**: Chromium (default)
+- **Screenshots**: On failure only
+- **Traces**: On first retry
+
+### 3.7 CI/CD Integration
+
+```yaml
+# Example GitHub Actions workflow
+- name: Install Playwright Browsers
+  run: npx playwright install --with-deps
+
+- name: Run E2E Tests
+  run: npm run test:e2e
+```
+
+### 3.8 Debugging
+
+View the HTML test report after running tests:
+```bash
+npx playwright show-report
+```
+
+Run a specific test file:
+```bash
+npx playwright test patient-workflow.spec.js
+```
+
+Run tests in debug mode:
+```bash
+npx playwright test --debug
+```
+
 
 ## 4. CI/CD Integration
 - Configure GitHub Actions to run `pytest` and `npm test` on every Pull Request to `main`.

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.sql import func
 from app.db import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -11,6 +12,7 @@ class User(Base):
     role = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
 class DoctorProfile(Base):
     __tablename__ = "doctor_profiles"
 
@@ -20,6 +22,7 @@ class DoctorProfile(Base):
     clinic_name = Column(String)
     bio = Column(Text)
 
+
 class PatientDoctorLink(Base):
     __tablename__ = "patient_doctor_links"
 
@@ -27,6 +30,7 @@ class PatientDoctorLink(Base):
     patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     status = Column(String, default="active", nullable=False)
+
 
 class Image(Base):
     __tablename__ = "images"
@@ -37,6 +41,7 @@ class Image(Base):
     image_url = Column(String, nullable=False)
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
 class AnalysisReport(Base):
     __tablename__ = "analysis_reports"
 
@@ -45,4 +50,20 @@ class AnalysisReport(Base):
     patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     report_json = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Workflow status: none | pending | accepted | reviewed
+    review_status = Column(String, default="none", nullable=False)
+    # When True, AI replies are paused (doctor is actively responding)
+    doctor_active = Column(Boolean, default=False, nullable=False)
+
+
+class ChatMessage(Base):
+    """Messages in the doctor-patient chat for a case/report."""
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, ForeignKey("analysis_reports.id"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    sender_role = Column(String, nullable=False)  # patient | doctor | ai
+    message = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
