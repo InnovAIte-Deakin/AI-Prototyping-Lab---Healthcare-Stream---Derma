@@ -7,7 +7,7 @@ from pathlib import Path
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
 from app.models import Image, User, AnalysisReport
-from app.services.gemini_service import ai_service
+from app.services.gemini_service import gemini_service as ai_service
 from app.auth_helpers import get_current_user
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
