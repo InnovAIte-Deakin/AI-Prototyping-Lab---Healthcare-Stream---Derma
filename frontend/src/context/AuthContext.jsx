@@ -8,6 +8,21 @@ export const apiClient = axios.create({
   baseURL: 'http://localhost:8000',
 });
 
+// Helper functions for managing API client headers (defined outside component to avoid re-creation)
+const setHeadersFromUser = (u) => {
+  apiClient.defaults.headers['X-User-Id'] = u.id;
+  apiClient.defaults.headers['X-User-Role'] = u.role;
+  if (u.access_token) {
+    apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
+  }
+};
+
+const clearHeaders = () => {
+  delete apiClient.defaults.headers['X-User-Id'];
+  delete apiClient.defaults.headers['X-User-Role'];
+  delete apiClient.defaults.headers['Authorization'];
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const isAuthenticated = !!user;
@@ -37,20 +52,6 @@ export function AuthProvider({ children }) {
       clearHeaders();
     }
   }, [user]);
-
-  const setHeadersFromUser = (u) => {
-    apiClient.defaults.headers['X-User-Id'] = u.id;
-    apiClient.defaults.headers['X-User-Role'] = u.role;
-    if (u.access_token) {
-      apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
-    }
-  };
-
-  const clearHeaders = () => {
-    delete apiClient.defaults.headers['X-User-Id'];
-    delete apiClient.defaults.headers['X-User-Role'];
-    delete apiClient.defaults.headers['Authorization'];
-  };
 
   /**
    * login({ email, password, roleOverride })

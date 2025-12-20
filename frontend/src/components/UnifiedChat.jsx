@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+// eslint-disable-next-line no-unused-vars
 const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -43,7 +44,9 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) 
       if (wsRef.current) {
         try {
           wsRef.current.close(1000, 'Reconnecting');
-        } catch (e) {}
+        } catch {
+          // Ignore close errors on reconnect
+        }
         wsRef.current = null;
       }
 
@@ -142,7 +145,9 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) 
       if (wsRef.current) {
         try {
           wsRef.current.close(1000, 'Component unmounting');
-        } catch (e) {}
+        } catch {
+          // Ignore close errors on unmount
+        }
         wsRef.current = null;
       }
     };
