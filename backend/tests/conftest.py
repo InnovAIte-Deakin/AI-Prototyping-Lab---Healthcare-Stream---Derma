@@ -1,5 +1,20 @@
 import os
 import pytest
+import bcrypt
+from unittest.mock import patch
+
+@pytest.fixture(scope="session", autouse=True)
+def fast_bcrypt():
+    """
+    Force bcrypt to use minimum rounds (4) for speed during tests.
+    """
+    original_gensalt = bcrypt.gensalt
+    
+    def fast_gensalt(rounds=None, prefix=b"2b"):
+        return original_gensalt(rounds=4, prefix=prefix)
+        
+    with patch("bcrypt.gensalt", side_effect=fast_gensalt):
+        yield
 
 # -------------------------------------------------------------------
 # Test database setup – use in-memory SQLite and fake env vars
