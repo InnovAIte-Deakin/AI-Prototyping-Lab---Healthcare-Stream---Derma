@@ -66,56 +66,7 @@ const router = createBrowserRouter(routes);
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route element={<Layout />}>
-            {/* Public route */}
-            <Route path="/" element={<LoginPage />} />
-
-            {/* Patient routes */}
-            <Route
-              path="/patient-dashboard"
-              element={
-                <ProtectedRoute
-                  element={<PatientDashboard />}
-                  allowedRoles={['patient']}
-                />
-              }
-            />
-
-            <Route
-              path="/patient-upload"
-              element={
-                <ProtectedRoute
-                  element={<PatientUpload />}
-                  allowedRoles={['patient']}
-                />
-              }
-            />
-
-            {/* Doctor routes */}
-            <Route
-              path="/doctor-dashboard"
-              element={
-                <ProtectedRoute
-                  element={<DoctorDashboard />}
-                  allowedRoles={['doctor']}
-                />
-              }
-            />
-
-            <Route
-              path="/doctor/case/:reportId"
-              element={
-                <ProtectedRoute
-                  element={<DoctorPatientDetail />}
-                  allowedRoles={['doctor']}
-                />
-              }
-            />
-          </Route>
-        </Routes>
-      </Router>
+      <RouterProvider router={router} />
     </AuthProvider>
   );
 }
