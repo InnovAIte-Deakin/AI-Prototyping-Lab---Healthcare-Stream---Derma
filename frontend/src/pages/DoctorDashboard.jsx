@@ -86,9 +86,9 @@ const DoctorDashboard = () => {
                 </span>
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {pendingCases.map((task) => (
-                  <div 
-                    key={task.report_id} 
+                {pendingCases.map((task, index) => (
+                  <div
+                    key={task.report_id ?? task.id ?? `pending-${index}`}
                     className={`${uiTokens.card} p-4 border-l-4 border-l-red-500 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer`}
                     onClick={() => navigate(`/doctor/case/${task.report_id}`)}
                   >
@@ -139,10 +139,10 @@ const DoctorDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white">
-                {patients.map((patient) => {
+                {patients.map((patient, index) => {
                   const hasPending = pendingCases.some((c) => c.patient_id === patient.id);
                   return (
-                    <tr key={patient.id}>
+                    <tr key={patient.id ?? `patient-${index}`}>
                       <td className="px-4 py-3 text-sm font-medium text-slate-900">
                         <div className="flex items-center gap-2">
                           {patient.name}

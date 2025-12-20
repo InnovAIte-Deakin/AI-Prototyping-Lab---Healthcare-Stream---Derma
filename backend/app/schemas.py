@@ -9,7 +9,7 @@ Sprint 2 Upgrade Path:
 - Add email validation and password strength requirements
 """
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Literal, Optional, List, Dict, Any
 from datetime import datetime
 
@@ -57,12 +57,11 @@ class UserResponse(BaseModel):
     - Add expires_at timestamp
     - Remove sensitive data exposure
     """
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: str
     role: str
-
-    class Config:
-        from_attributes = True  # Allows conversion from ORM models
 
 
 class LoginResponse(BaseModel):
@@ -121,6 +120,8 @@ class AnalysisResult(BaseModel):
 
 class AnalysisReportResponse(BaseModel):
     """Response schema for analysis reports"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     image_id: int
     condition: str
@@ -129,9 +130,6 @@ class AnalysisReportResponse(BaseModel):
     report_json: Dict[str, Any]
     raw_output: Optional[str] = None
     created_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 class ChatMessage(BaseModel):
     """Schema for chat messages"""

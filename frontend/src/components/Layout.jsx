@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const uiTokens = {
@@ -13,13 +13,10 @@ export const uiTokens = {
 
 const Layout = () => {
   const { user, logout } = useAuth();
-  const location = useLocation();
 
   const roleLabel = user?.role
     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
     : 'Guest';
-
-  const pageHint = location?.pathname || '/';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
