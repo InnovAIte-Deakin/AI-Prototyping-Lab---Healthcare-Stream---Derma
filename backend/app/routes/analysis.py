@@ -319,10 +319,17 @@ async def chat_about_lesion_endpoint(
 
     db.commit()
     
+    response_msg = ai_reply
+    if not response_msg:
+        if is_patient and report.doctor_active:
+            response_msg = "Message sent to doctor."
+        else:
+            response_msg = "Message sent to patient."
+
     return ChatResponse(
         image_id=image_id,
         user_message=chat_request.message,
-        ai_response=ai_reply or "Message sent to doctor." if is_patient and report.doctor_active else "Message sent to patient.",
+        ai_response=response_msg,
         context_used=True if ai_reply else False
     )
 

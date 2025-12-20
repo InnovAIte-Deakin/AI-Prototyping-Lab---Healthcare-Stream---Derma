@@ -3,12 +3,12 @@ import json
 from unittest.mock import AsyncMock, patch
 from app.models import AnalysisReport
 from app.main import app
-from app.auth_helpers import get_current_patient
+from app.auth_helpers import get_current_user
 
 def test_chat_endpoint_success(client, db_session, sample_image, sample_user):
     """Test successful chat interaction"""
     # Override auth
-    app.dependency_overrides[get_current_patient] = lambda: sample_user
+    app.dependency_overrides[get_current_user] = lambda: sample_user
 
     try:
         # Create analysis report for the image
@@ -50,7 +50,7 @@ def test_chat_endpoint_success(client, db_session, sample_image, sample_user):
 
 def test_chat_endpoint_missing_image(client, sample_user):
     """Test chat with non-existent image"""
-    app.dependency_overrides[get_current_patient] = lambda: sample_user
+    app.dependency_overrides[get_current_user] = lambda: sample_user
     try:
         response = client.post(
             "/api/analysis/99999/chat",
@@ -62,7 +62,7 @@ def test_chat_endpoint_missing_image(client, sample_user):
 
 def test_chat_endpoint_empty_message(client, sample_image, sample_user):
     """Test chat with empty message"""
-    app.dependency_overrides[get_current_patient] = lambda: sample_user
+    app.dependency_overrides[get_current_user] = lambda: sample_user
     try:
         # Create dummy report to pass initial checks if needed, or endpoint validates body first
         # Chat endpoint fetches report first.
