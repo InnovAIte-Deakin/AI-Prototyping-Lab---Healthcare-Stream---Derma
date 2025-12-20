@@ -7,7 +7,9 @@ import PatientDashboard from './pages/PatientDashboard';
 import PatientUpload from './pages/PatientUpload';
 import DoctorDashboard from './pages/DoctorDashboard';
 import DoctorPatientDetail from './pages/DoctorPatientDetail';
+import DoctorCasePage from './pages/DoctorCasePage';
 import PatientHistory from './pages/PatientHistory';
+import PatientCasePage from './pages/PatientCasePage';
 
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -46,6 +48,12 @@ export const routes = [
         ),
       },
       {
+        path: '/patient/case/:imageId',
+        element: (
+          <PrivateRoute allowedRoles={['patient']} element={<PatientCasePage />} />
+        ),
+      },
+      {
         path: '/doctor-dashboard',
         element: (
           <PrivateRoute allowedRoles={['doctor']} element={<DoctorDashboard />} />
@@ -55,6 +63,12 @@ export const routes = [
         path: '/doctor/patients/:patientId',
         element: (
           <PrivateRoute allowedRoles={['doctor']} element={<DoctorPatientDetail />} />
+        ),
+      },
+      {
+        path: '/doctor/case/:reportId',
+        element: (
+          <PrivateRoute allowedRoles={['doctor']} element={<DoctorCasePage />} />
         ),
       },
     ],

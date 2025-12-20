@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { uiTokens } from '../components/Layout';
@@ -8,6 +8,7 @@ const PatientHistory = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -53,6 +54,8 @@ const PatientHistory = () => {
           ? report.characteristics.join(', ') 
           : '',
         createdAt,
+        reviewStatus: report.review_status || 'none',
+        imageId: report.image_id,
       };
     });
   }, [reports]);
@@ -98,16 +101,35 @@ const PatientHistory = () => {
       {!loading && !error && normalizedReports.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2">
           {normalizedReports.map((report) => (
-            <div key={report.id} className={`${uiTokens.card} p-4`}>
+            <div 
+              key={report.id} 
+              className={`${uiTokens.card} p-4 cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all border-l-4 ${
+                report.reviewStatus === 'accepted' ? 'border-l-indigo-500' : 
+                report.reviewStatus === 'pending' ? 'border-l-yellow-500' : 
+                report.reviewStatus === 'reviewed' ? 'border-l-green-500' : 'border-l-slate-200'
+              }`}
+              onClick={() => navigate(`/patient/case/${report.imageId}`)}
+            >
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Report #{report.id}
                 </p>
-                <p className="text-xs text-slate-500">
-                  {report.createdAt
-                    ? new Date(report.createdAt).toLocaleString()
-                    : 'Date unknown'}
-                </p>
+                <div className="flex items-center gap-2">
+                  {report.reviewStatus === 'pending' && (
+                    <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">⏳ Pending</span>
+                  )}
+                  {report.reviewStatus === 'accepted' && (
+                    <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">👨‍⚕️ Active</span>
+                  )}
+                  {report.reviewStatus === 'reviewed' && (
+                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">✅ Done</span>
+                  )}
+                  <p className="text-xs text-slate-500">
+                    {report.createdAt
+                      ? new Date(report.createdAt).toLocaleString()
+                      : 'Date unknown'}
+                  </p>
+                </div>
               </div>
               
               <div className="mt-3 space-y-2">
@@ -119,16 +141,14 @@ const PatientHistory = () => {
                 <p className="text-sm">
                   <strong className="text-slate-700">Severity:</strong> {report.risk}
                 </p>
-                
-                {report.characteristics && (
-                  <p className="text-sm text-slate-600">
-                    <strong className="text-slate-700">Features:</strong> {report.characteristics}
-                  </p>
-                )}
 
-                <p className="mt-2 text-sm bg-blue-50 p-2 rounded text-blue-800">
+                <p className="mt-2 text-sm bg-blue-50 p-2 rounded text-blue-800 line-clamp-2">
                   <strong>Recommendation:</strong> {report.advice}
                 </p>
+              </div>
+
+              <div className="mt-3 flex justify-end">
+                <span className="text-xs font-bold text-indigo-600">Open Conversation →</span>
               </div>
             </div>
           ))}

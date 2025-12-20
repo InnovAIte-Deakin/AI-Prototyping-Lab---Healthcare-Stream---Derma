@@ -462,7 +462,7 @@ I need to Apply Styling and Layout
 - [x] B7 – Auth Overhaul to JWT + Navigation Support
 - [ ] B8 – Doctor Profile Integrity & Seeding
 - [x] B9 – Analysis Result Formatting & Chat Context
-- [ ] B10 – Doctor-Patient Workflow Glue
+- [x] B10 – Doctor-Patient Workflow Glue
 - [ ] B11 – Security Hardening & Data Safety
 
 ### Frontend
@@ -471,9 +471,9 @@ I need to Apply Styling and Layout
 - [x] F3 – Patient Features
 - [x] F4 – Doctor Features
 - [x] F5 – Styling & Layout
-- [ ] F6 – Landing, Auth Navigation, and Logout
-- [ ] F7 – Results UI & AI Chat Surface
+- [x] F6 – Landing, Auth Navigation, and Logout
+- [x] F7 – Results UI & AI Chat Surface
 - [ ] F8 – Doctor Profile Display Robustness
-- [ ] F9 – Patient-to-Doctor Flow & Escalation UI
+- [x] F9 – Patient-to-Doctor Flow & Escalation UI
 - [ ] F10 – Anonymous/Public Flow
 - [ ] F11 – E2E Coverage (Playwright)

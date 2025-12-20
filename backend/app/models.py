@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Float, JSON
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Float, JSON, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql import func
@@ -53,7 +53,12 @@ class AnalysisReport(Base):
     
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    # Structured fields (new/ensure these exist)
+    # Relationships and tracking (Phase 1 updates)
+    doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    review_status = Column(String, default="none", nullable=False) # none, pending, accepted, reviewed
+    doctor_active = Column(Boolean, default=False, nullable=False)
+    
+    # Structured fields 
     condition = Column(String, nullable=True)  # Primary detected condition
     confidence = Column(Float, nullable=True)   # Confidence score (0-1)
     recommendation = Column(Text, nullable=True) # Clinical recommendation
@@ -66,3 +71,17 @@ class AnalysisReport(Base):
     
     # Relationships
     image = relationship("Image", back_populates="analysis_reports")
+    chat_messages = relationship("ChatMessage", back_populates="report", cascade="all, delete-orphan")
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, ForeignKey("analysis_reports.id"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Null for AI
+    sender_role = Column(String, nullable=False) # "patient", "doctor", or "ai"
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    report = relationship("AnalysisReport", back_populates="chat_messages")

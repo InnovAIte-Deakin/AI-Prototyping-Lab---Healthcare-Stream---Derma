@@ -76,32 +76,46 @@ class GeminiService:
                 "message": "Failed to analyze the image. Please try again or consult a healthcare professional."
             }
 
-    async def chat_about_lesion(self, analysis_context: Dict[str, Any], user_message: str) -> str:
+    async def chat_about_lesion(self, analysis_context: Dict[str, Any], user_message: str, history: list = None) -> str:
         """
         Chat with the AI about a specific lesion analysis.
         
         Args:
             analysis_context: The structured analysis result from a previous run
             user_message: The user's question or comment
+            history: Optional list of ChatMessage objects for history
             
         Returns:
             String response from the AI
         """
         try:
+            # Construct history string
+            history_str = ""
+            if history:
+                for msg in history:
+                    # Map sender roles to clear labels for the AI
+                    role_label = "Patient" if msg.sender_role == "patient" else "AI Assistant"
+                    if msg.sender_role == "doctor": role_label = "Doctor (Human)"
+                    history_str += f"{role_label}: {msg.message}\n"
+
             context_prompt = f"""
             You are a helpful medical AI assistant. You are discussing a specific skin lesion analysis with a user.
             
             Here is the analysis of the lesion in question:
             Condition: {analysis_context.get('condition', 'Unknown')}
+            Confidence: {analysis_context.get('confidence', 0)}%
             Severity: {analysis_context.get('severity', 'Unknown')}
             Characteristics: {', '.join(analysis_context.get('characteristics', []))}
             Recommendation: {analysis_context.get('recommendation', 'N/A')}
             
+            Previous Conversation:
+            {history_str}
+            
             User Message: {user_message}
             
-            Please answer the user's question based on the analysis context. 
+            Please answer the user's question based on the analysis context and history. 
             Be helpful, empathetic, but always remind them that you are an AI and this is not a professional diagnosis if they ask for medical advice.
-            Keep your answers concise and relevant to the context.
+            Keep your answers concise and relevant to the context. Do not use markdown.
             """
             
             response = await self.model.generate_content_async(context_prompt)

@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { uiTokens } from '../components/Layout';
+import UnifiedChat from '../components/UnifiedChat';
 
 const PatientUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isRequestingReview, setIsRequestingReview] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [reviewStatus, setReviewStatus] = useState('none');
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0] || null;
@@ -40,11 +43,36 @@ const PatientUpload = () => {
 
       const analyzeRes = await apiClient.post(`/api/analysis/${imageId}`);
       setResult(analyzeRes.data);
+      if (analyzeRes.data?.report_id) {
+        setReviewStatus(analyzeRes.data.review_status || 'none');
+      }
     } catch (err) {
       console.error('Analysis Error:', err.response?.data || err.message);
       setError(`Analysis failed: ${err.response?.data?.detail || 'Something went wrong.'}`);
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleRequestReview = async () => {
+    const reportId = result?.report_id;
+    if (!reportId) {
+      setError('No analysis to request review for.');
+      return;
+    }
+
+    setIsRequestingReview(true);
+    setError(null);
+
+    try {
+      const res = await apiClient.post(`/cases/${reportId}/request-review`);
+      setReviewStatus(res.data.review_status);
+    } catch (err) {
+      console.error('Request review error:', err);
+      const detail = err?.response?.data?.detail;
+      setError(detail || 'Failed to request doctor review.');
+    } finally {
+      setIsRequestingReview(false);
     }
   };
 
@@ -94,17 +122,47 @@ const PatientUpload = () => {
         </button>
 
         {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
             {error}
           </p>
         )}
 
-        {result && (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-left">
-            <h2 className="text-lg font-semibold text-slate-900">Analysis Result</h2>
-            <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-              {JSON.stringify(result, null, 2)}
-            </pre>
+        {result && result.report_id && (
+          <div className="space-y-4">
+            <UnifiedChat 
+              imageId={result.image_id}
+              reportId={result.report_id}
+              isPaused={reviewStatus === 'accepted'}
+              userRole="patient"
+              onStatusChange={() => setReviewStatus(prev => prev === 'pending' ? 'accepted' : prev)}
+            />
+
+            {reviewStatus === 'none' && result.report_id && (
+              <div className={`${uiTokens.card} p-4 bg-purple-50 border-purple-100`}>
+                <div className="flex flex-col sm:flex-row items-center gap-4 justify-between">
+                  <div>
+                    <h3 className="text-purple-900 font-bold">Unsure about the AI's assessment?</h3>
+                    <p className="text-purple-700 text-sm">Escalate this case to a human dermatologist for a professional review.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="whitespace-nowrap rounded-xl bg-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-purple-700 transition-all hover:scale-105 disabled:opacity-50"
+                    disabled={isRequestingReview}
+                    onClick={handleRequestReview}
+                  >
+                    {isRequestingReview ? 'Requesting...' : '📨 Request Physician Review'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {reviewStatus === 'pending' && (
+              <div className="rounded-xl bg-yellow-50 border border-yellow-100 p-4 text-center">
+                <p className="text-yellow-800 text-sm font-bold uppercase tracking-widest">
+                  ⏳ Review Pending - A physician will be with you shortly
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

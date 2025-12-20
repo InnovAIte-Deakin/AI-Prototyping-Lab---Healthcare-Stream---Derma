@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from typing import Dict, Any, List
 import json
 from pathlib import Path
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
-from app.models import Image, User, AnalysisReport
+from app.models import Image, User, AnalysisReport, ChatMessage
 from app.services.gemini_service import gemini_service
-from app.auth_helpers import get_current_patient, get_current_doctor
+from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.schemas import ChatRequest, ChatResponse
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
@@ -83,10 +84,47 @@ async def analyze_image(
     analysis_result = await gemini_service.analyze_skin_lesion(image_path)
     
     if analysis_result["status"] == "error":
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"{analysis_result.get('message', 'Analysis failed')} Details: {analysis_result.get('error')}"
+        error_msg = analysis_result.get('error', 'Unknown error')
+        print(f"[Analysis] Error encountered: {error_msg}")
+        
+        # Create fallback result so user flow isn't blocked
+        analysis_result = {
+            "status": "error",
+            "condition": "Service Unavailable",
+            "severity": "Unknown",
+            "confidence": 0,
+            "recommendation": "The AI service is currently unavailable due to high demand (Quota Exceeded). Please escalate to a human physician.",
+            "explanation": f"Service Error: {error_msg}. Please try again later or consult a doctor directly.",
+            "precautions": ["Consult a doctor"]
+        }
+        
+        # We continue to save this as a valid (but error-state) report
+        # This allows the user to still use the chat and escalate features
+        report = AnalysisReport(
+            image_id=image.id,
+            report_json=json.dumps(analysis_result),
+            patient_id=current_user.id
         )
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        
+        # Add a system message to the chat explaning the situation
+        system_msg = ChatMessage(
+            report_id=report.id,
+            sender_role="system",
+            message=f"⚠️ I was unable to perform the visual analysis due to a service limit ({error_msg}).\n\nHowever, a case has been created. You can using the button below to escalate this directly to a human dermatologist for review."
+        )
+        db.add(system_msg)
+        db.commit()
+        
+        # Add return fields
+        analysis_result["report_id"] = report.id
+        analysis_result["image_id"] = image.id
+        analysis_result["review_status"] = report.review_status
+        analysis_result["doctor_active"] = report.doctor_active
+        
+        return analysis_result
     
     # Save analysis results to database
     report = AnalysisReport(
@@ -98,9 +136,22 @@ async def analyze_image(
     db.commit()
     db.refresh(report)
     
-    # Add report ID to response
+    # Add report ID and tracking to response
     analysis_result["report_id"] = report.id
     analysis_result["image_id"] = image.id
+    analysis_result["review_status"] = report.review_status
+    analysis_result["doctor_active"] = report.doctor_active
+    
+    # --- PHASE 4: Seed initial AI message ---
+    msg_text = f"Hello! I've analyzed your image. Based on the scan, I detect signs of {analysis_result.get('condition', 'Unknown')}. My confidence is {int(analysis_result.get('confidence', 0)) or 0}%. {analysis_result.get('recommendation', '')}"
+    
+    first_msg = ChatMessage(
+        report_id=report.id,
+        sender_role="ai",
+        message=msg_text
+    )
+    db.add(first_msg)
+    db.commit()
     
     return analysis_result
 
@@ -134,6 +185,8 @@ async def get_analysis_by_report_id(
     analysis_data = json.loads(report.report_json)
     analysis_data["report_id"] = report.id
     analysis_data["image_id"] = report.image_id
+    analysis_data["review_status"] = report.review_status
+    analysis_data["doctor_active"] = report.doctor_active
     analysis_data["created_at"] = report.created_at.isoformat()
     
     return analysis_data
@@ -162,7 +215,7 @@ async def get_analysis_by_image_id(
             detail="You don't have permission to view this analysis"
         )
     
-    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
     
     if not report:
         raise HTTPException(
@@ -173,48 +226,104 @@ async def get_analysis_by_image_id(
     analysis_data = json.loads(report.report_json)
     analysis_data["report_id"] = report.id
     analysis_data["image_id"] = image.id
+    analysis_data["review_status"] = report.review_status
+    analysis_data["doctor_active"] = report.doctor_active
     analysis_data["created_at"] = report.created_at.isoformat()
     
     return analysis_data
 
+
+@router.get("/{image_id}/chat")
+async def get_chat_history(
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get chat history for a specific analysis (Patient or Doctor).
+    """
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
+    
+    if not report:
+        raise HTTPException(status_code=404, detail="Analysis report not found")
+        
+    # Permission check: Patient owner OR associated Doctor
+    is_patient = current_user.role == "patient" and report.patient_id == current_user.id
+    is_doctor = current_user.role == "doctor" and (report.doctor_id == current_user.id or report.review_status == "pending")
+    
+    if not (is_patient or is_doctor):
+        raise HTTPException(status_code=403, detail="Forbidden")
+        
+    messages = db.query(ChatMessage).filter(ChatMessage.report_id == report.id).order_by(ChatMessage.created_at.asc()).all()
+    
+    return [
+        {
+            "id": m.id,
+            "sender_role": m.sender_role,
+            "sender_id": m.sender_id,
+            "message": m.message,
+            "created_at": m.created_at.isoformat()
+        } for m in messages
+    ]
 
 @router.post("/{image_id}/chat", response_model=ChatResponse)
 async def chat_about_lesion_endpoint(
     image_id: int,
     chat_request: ChatRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_patient)
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Chat with the AI about a specific lesion analysis.
+    Unified chat endpoint. Handles Patient -> AI, Patient -> Doctor, and Doctor -> Patient.
+    AI responds only if doctor_active is False.
     """
     # Fetch Analysis Report by image_id
-    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
     
     if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis not found for this image"
-        )
+        raise HTTPException(status_code=404, detail="Analysis not found")
 
-    # Verify ownership
-    if report.patient_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to chat about this analysis"
-        )
-
-    # Extract context
-    analysis_data = json.loads(report.report_json)
+    # Permission check
+    is_patient = current_user.role == "patient" and report.patient_id == current_user.id
+    is_doctor = current_user.role == "doctor" and report.doctor_id == current_user.id
     
-    # Call Service
-    reply = await gemini_service.chat_about_lesion(analysis_data, chat_request.message)
+    if not (is_patient or is_doctor):
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
+    # Save incoming message
+    new_msg = ChatMessage(
+        report_id=report.id,
+        sender_id=current_user.id,
+        sender_role=current_user.role,
+        message=chat_request.message
+    )
+    db.add(new_msg)
+    
+    ai_reply = None
+    # AI responds ONLY to patient and ONLY if doctor is not active
+    if is_patient and not report.doctor_active:
+        # Get history for context
+        history = db.query(ChatMessage).filter(ChatMessage.report_id == report.id).all()
+        
+        # Call AI
+        analysis_data = json.loads(report.report_json)
+        ai_reply = await gemini_service.chat_about_lesion(analysis_data, chat_request.message, history=history)
+        
+        # Save AI message
+        ai_msg = ChatMessage(
+            report_id=report.id,
+            sender_role="ai",
+            message=ai_reply
+        )
+        db.add(ai_msg)
+
+    db.commit()
     
     return ChatResponse(
         image_id=image_id,
         user_message=chat_request.message,
-        ai_response=reply,
-        context_used=True
+        ai_response=ai_reply or "Message sent to doctor." if is_patient and report.doctor_active else "Message sent to patient.",
+        context_used=True if ai_reply else False
     )
 
 
@@ -235,6 +344,8 @@ async def get_patient_reports(
         data = json.loads(report.report_json)
         data["report_id"] = report.id
         data["image_id"] = report.image_id
+        data["review_status"] = report.review_status
+        data["doctor_active"] = report.doctor_active
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
         
@@ -267,6 +378,8 @@ async def get_doctor_patient_reports(
         data = json.loads(report.report_json)
         data["report_id"] = report.id
         data["image_id"] = report.image_id
+        data["review_status"] = report.review_status
+        data["doctor_active"] = report.doctor_active
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
         

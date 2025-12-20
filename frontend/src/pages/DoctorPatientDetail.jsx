@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { uiTokens } from '../components/Layout';
 
 function DoctorPatientDetail() {
   const { patientId } = useParams();
+  const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,131 +46,124 @@ function DoctorPatientDetail() {
   const normalizedReports = useMemo(() => {
     return reports.map((report, index) => {
       const createdAt = report.created_at || report.createdAt;
-      const imageUrl = report.image_url || report.imageUrl || report.image;
       
-      // Handle structured analysis data
       return {
         id: report.report_id || report.id || index,
         risk: report.severity || report.risk || 'Unknown',
         condition: report.condition || 'Assessment Pending',
-        confidence: report.confidence ? Math.round(report.confidence * 100) : null,
-        advice:
-          report.recommendation ||
-          report.advice ||
-          (typeof report.analysis === 'string' ? report.analysis : '') ||
-          'No advice provided.',
-        characteristics: Array.isArray(report.characteristics) 
-          ? report.characteristics.join(', ') 
-          : '',
-        analysis: typeof report.analysis === 'string' ? report.analysis : '',
+        confidence: report.confidence ? Math.round(report.confidence) : null,
+        advice: report.recommendation || report.advice || 'No advice provided.',
         createdAt,
-        imageUrl,
+        reviewStatus: report.review_status || 'none',
+        imageId: report.image_id,
       };
     });
   }, [reports]);
 
-  const buildImageSrc = (imageUrl) => {
-    if (!imageUrl) return null;
-    if (imageUrl.startsWith('http')) return imageUrl;
-    return `http://localhost:8000${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'pending':
+        return <span className="bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-lg text-xs font-black uppercase">⏳ Pending</span>;
+      case 'accepted':
+        return <span className="bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-black uppercase">🔵 In Progress</span>;
+      case 'reviewed':
+        return <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-lg text-xs font-black uppercase">✅ Completed</span>;
+      default:
+        return <span className="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg text-xs font-black uppercase">AI Only</span>;
+    }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900">
-            Doctor Patient Detail
-          </h1>{' '}
-          {/* keep this heading text for the tests */}
+          <Link
+            to="/doctor-dashboard"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 mb-2"
+          >
+            ← Back to Dashboard
+          </Link>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Patient Reports
+          </h1>
           <p className="text-sm text-slate-500">
-            Review AI-generated reports for this patient before clinical follow-up.
+            View all analysis reports for this patient. Click on a case to manage it.
           </p>
         </div>
-        <Link
-          to="/doctor-dashboard"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
-        >
-          ← Back to dashboard
-        </Link>
       </div>
 
       <DisclaimerBanner />
 
-      {loading && <p className="text-slate-600">Loading reports...</p>}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="h-10 w-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+      )}
 
       {!loading && error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
           {error}
         </p>
       )}
 
       {!loading && !error && normalizedReports.length === 0 && (
-        <p className="text-sm text-slate-600">No reports found for this patient yet.</p>
+        <div className="text-center py-12">
+          <p className="text-slate-500">No reports found for this patient yet.</p>
+        </div>
       )}
 
       {!loading && !error && normalizedReports.length > 0 && (
-        <div className="space-y-4">
-          {normalizedReports.map((report) => {
-            const imageSrc = buildImageSrc(report.imageUrl);
-            return (
-              <div key={report.id} className={`${uiTokens.card} p-4`}>
-                <div className="flex flex-wrap items-start gap-4">
-                  {imageSrc ? (
-                    <img
-                      src={imageSrc}
-                      alt="Patient upload"
-                      className="h-48 w-48 rounded-md border object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-48 w-48 items-center justify-center rounded-md border bg-slate-100 text-slate-500">
-                      Image not available
-                    </div>
-                  )}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {normalizedReports.map((report) => (
+            <div 
+              key={report.id} 
+              className={`${uiTokens.card} p-5 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all border-l-4 ${
+                report.reviewStatus === 'accepted' ? 'border-l-indigo-500' : 
+                report.reviewStatus === 'pending' ? 'border-l-yellow-500' : 
+                report.reviewStatus === 'reviewed' ? 'border-l-green-500' : 'border-l-slate-200'
+              }`}
+              onClick={() => navigate(`/doctor/case/${report.id}`)}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                    Case #{report.id}
+                  </p>
+                  <h3 className="font-bold text-slate-900">{report.condition}</h3>
+                </div>
+                {getStatusBadge(report.reviewStatus)}
+              </div>
 
-                  <div className="flex-1 min-w-[240px] space-y-1">
-                    <p className="text-sm text-slate-600">
-                      Report ID: {report.id} |{' '}
-                      {report.createdAt
-                        ? new Date(report.createdAt).toLocaleString()
-                        : 'Date unknown'}
-                    </p>
-                    
-                    <div className="mt-2 space-y-2">
-                        <p className="text-base font-medium text-slate-900">
-                        Condition: <span className="font-normal">{report.condition}</span>
-                        {report.confidence && <span className="ml-2 text-slate-500 text-sm">({report.confidence}%)</span>}
-                        </p>
-
-                        <p className="text-sm" data-testid={`report-${report.id}-risk`}>
-                        <strong className="text-slate-700">Severity:</strong> {report.risk}
-                        </p>
-                        
-                        {report.characteristics && (
-                        <p className="text-sm text-slate-600">
-                            <strong className="text-slate-700">Features:</strong> {report.characteristics}
-                        </p>
-                        )}
-                        
-                        <div className="bg-blue-50 p-2 rounded">
-                            <p className="text-sm text-blue-900" data-testid={`report-${report.id}-advice`}>
-                            <strong>Recommendation:</strong> {report.advice}
-                            </p>
-                        </div>
-
-                        {report.analysis && (
-                        <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-100">
-                            <p className="whitespace-pre-line text-xs text-slate-500">
-                            {report.analysis}
-                            </p>
-                        </div>
-                        )}
-                    </div>
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Severity</span>
+                  <span className={`font-bold ${report.risk === 'High' ? 'text-red-600' : 'text-slate-700'}`}>
+                    {report.risk}
+                  </span>
+                </div>
+                {report.confidence && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Confidence</span>
+                    <span className="font-bold text-slate-700">{report.confidence}%</span>
                   </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Date</span>
+                  <span className="text-slate-600">
+                    {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'Unknown'}
+                  </span>
                 </div>
               </div>
-            );
-          })}
+
+              <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <span className="text-xs font-bold text-indigo-600">
+                  {report.reviewStatus === 'pending' ? 'Review Case →' : 
+                   report.reviewStatus === 'accepted' ? 'Continue Consultation →' : 
+                   'View Details →'}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

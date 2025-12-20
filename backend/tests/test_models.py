@@ -209,7 +209,9 @@ def test_analysis_report_columns():
     assert "id" in column_names
     assert "image_id" in column_names
     assert "patient_id" in column_names
-    # assert "doctor_id" in column_names
+    assert "doctor_id" in column_names
+    assert "review_status" in column_names
+    assert "doctor_active" in column_names
     assert "report_json" in column_names
     assert "created_at" in column_names
 
@@ -241,6 +243,8 @@ def test_analysis_report_can_be_created(test_db, sample_user_data):
     assert report.image_id == image.id
     assert report.patient_id == patient.id
     assert report.report_json == '{"diagnosis": "test"}'
+    assert report.review_status == "none"
+    assert report.doctor_active is False
     assert report.created_at is not None
 
 

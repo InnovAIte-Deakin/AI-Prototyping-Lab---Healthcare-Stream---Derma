@@ -9,8 +9,9 @@ from app.routes import (
     patient_doctor,
     analysis,
     images,
+    cases,
     doctor_dashboard,
-    doctor_dashboard
+    websocket
 )  # Registered routers
 
 app = FastAPI(
@@ -34,8 +35,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files
-app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")
+# Include WebSocket router FIRST (before static files)
+app.include_router(websocket.router)
 
 # Include routers
 app.include_router(auth.router)
@@ -43,7 +44,11 @@ app.include_router(images.router)
 app.include_router(doctors.router)
 app.include_router(patient_doctor.router)
 app.include_router(analysis.router)
+app.include_router(cases.router)
 app.include_router(doctor_dashboard.router)
+
+# Static files (must be AFTER WebSocket routes)
+app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")
 
 @app.get("/")
 def read_root():

@@ -93,7 +93,10 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const value = { user, isAuthenticated, userRole, login, signup, logout };
+  // Expose the raw token for WebSocket connections
+  const token = user?.access_token || null;
+
+  const value = { user, isAuthenticated, userRole, token, login, signup, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
