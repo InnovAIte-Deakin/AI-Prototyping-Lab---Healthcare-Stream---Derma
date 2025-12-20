@@ -135,8 +135,8 @@ function DoctorPatientDetail() {
               </div>
 
               <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Severity</span>
+                <div className="flex justify-between text-sm" data-testid={`report-${report.id}-risk`}>
+                  <span className="text-slate-500">Severity:</span>
                   <span className={`font-bold ${report.risk === 'High' ? 'text-red-600' : 'text-slate-700'}`}>
                     {report.risk}
                   </span>
@@ -147,6 +147,12 @@ function DoctorPatientDetail() {
                     <span className="font-bold text-slate-700">{report.confidence}%</span>
                   </div>
                 )}
+                <div className="flex justify-between text-sm" data-testid={`report-${report.id}-advice`}>
+                  <span className="text-slate-500">Recommendation:</span>
+                  <span className="text-slate-600 text-right max-w-[200px]">
+                    {report.advice}
+                  </span>
+                </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Date</span>
                   <span className="text-slate-600">
