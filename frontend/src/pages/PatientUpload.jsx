@@ -134,7 +134,16 @@ const PatientUpload = () => {
               reportId={result.report_id}
               isPaused={reviewStatus === 'accepted'}
               userRole="patient"
-              onStatusChange={() => setReviewStatus(prev => prev === 'pending' ? 'accepted' : prev)}
+              onStatusChange={async () => {
+                try {
+                  const res = await apiClient.get(`/api/analysis/report/${result.report_id}`);
+                  if (res.data?.review_status) {
+                    setReviewStatus(res.data.review_status);
+                  }
+                } catch (err) {
+                  console.error('Failed to refresh status:', err);
+                }
+              }}
             />
 
             {reviewStatus === 'none' && result.report_id && (
