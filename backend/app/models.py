@@ -19,8 +19,9 @@ class DoctorProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     full_name = Column(String, nullable=False)
-    clinic_name = Column(String)
-    bio = Column(Text)
+    clinic_name = Column(String, nullable=False)
+    bio = Column(Text, nullable=False)
+    avatar_url = Column(String, nullable=False)
 
 class PatientDoctorLink(Base):
     __tablename__ = "patient_doctor_links"
