@@ -22,6 +22,7 @@ DOCTORS = [
         "full_name": "Dr. Alice Henderson",
         "clinic_name": "DermaAI Clinic",
         "bio": "Board-certified dermatologist specializing in acne and eczema.",
+        "avatar_url": "https://i.pravatar.cc/300?img=47",
     },
     {
         "email": "bob@derma.com",
@@ -29,6 +30,7 @@ DOCTORS = [
         "full_name": "Dr. Bob Martinez",
         "clinic_name": "Downtown Derm Care",
         "bio": "Focused on teledermatology and rapid triage workflows.",
+        "avatar_url": "https://i.pravatar.cc/300?img=12",
     },
     {
         "email": "carol@derma.com",
@@ -36,6 +38,7 @@ DOCTORS = [
         "full_name": "Dr. Carol Singh",
         "clinic_name": "Sunrise Skin Center",
         "bio": "Experienced with pigmentary disorders and pediatric dermatology.",
+        "avatar_url": "https://i.pravatar.cc/300?img=56",
     },
     {
         "email": "dan@derma.com",
@@ -43,6 +46,7 @@ DOCTORS = [
         "full_name": "Dr. Dan Okafor",
         "clinic_name": "Harbor Dermatology",
         "bio": "Passionate about patient education and preventive care.",
+        "avatar_url": "https://i.pravatar.cc/300?img=32",
     },
 ]
 
@@ -93,6 +97,7 @@ def seed_doctors(
                     full_name=doctor["full_name"],
                     clinic_name=doctor["clinic_name"],
                     bio=doctor["bio"],
+                    avatar_url=doctor["avatar_url"],
                 )
                 session.add(profile)
                 session.commit()
@@ -107,6 +112,9 @@ def seed_doctors(
                     updated = True
                 if not profile.bio:
                     profile.bio = doctor["bio"]
+                    updated = True
+                if not profile.avatar_url:
+                    profile.avatar_url = doctor["avatar_url"]
                     updated = True
                 if updated:
                     session.commit()
