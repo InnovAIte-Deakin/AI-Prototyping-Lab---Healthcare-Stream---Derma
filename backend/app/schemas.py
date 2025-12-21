@@ -147,3 +147,17 @@ class ChatResponse(BaseModel):
     user_message: str
     ai_response: str
     context_used: bool = Field(default=True, description="Whether analysis context was used")
+
+
+
+class PublicChatRequest(BaseModel):
+    """Request body for anonymous chat preview."""
+    session_id: str = Field(..., description="Anonymous session identifier")
+    message: str = Field(..., min_length=1, max_length=1000)
+
+
+class PublicChatResponse(BaseModel):
+    """Response for anonymous chat preview."""
+    session_id: str
+    reply: str
+    analysis: Dict[str, Any]
