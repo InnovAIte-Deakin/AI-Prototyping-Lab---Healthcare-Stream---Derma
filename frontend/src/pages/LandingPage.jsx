@@ -43,6 +43,12 @@ function LandingPage() {
                     >
                         Log In
                     </button>
+                    <button
+                        onClick={() => navigate('/try-anonymous')}
+                        className="h-12 rounded-full border border-indigo-100 bg-indigo-50 px-8 text-base font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-100"
+                    >
+                        Try without signing up
+                    </button>
                 </div>
             </div>
         </div>

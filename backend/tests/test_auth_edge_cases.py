@@ -338,9 +338,11 @@ class TestAPIEndpointSecurity:
 
     def test_signup_missing_content_type(self, client):
         """Test signup without Content-Type header"""
+        payload = b'{"email":"user@example.com","password":"password123","role":"patient"}'
         response = client.post(
             "/auth/signup",
-            data='{"email":"user@example.com","password":"password123","role":"patient"}'
+            content=payload,
+            headers={}
         )
         # Should still work with FastAPI
         assert response.status_code in [201, 422]
