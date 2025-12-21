@@ -79,9 +79,10 @@ class DoctorResponse(BaseModel):
     """Doctor details with associated profile information."""
     id: int
     email: EmailStr
-    full_name: str
+    full_name: Optional[str] = None
     clinic_name: Optional[str] = None
     bio: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class PatientDoctorResponse(BaseModel):
