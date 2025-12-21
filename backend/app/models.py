@@ -1,8 +1,14 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Float, JSON, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.sql import func
 from app.db import Base
+
+
+def _utc_now():
+    """Return an aware UTC datetime."""
+    return datetime.now(timezone.utc)
+
 
 class User(Base):
     __tablename__ = "users"
@@ -51,7 +57,7 @@ class AnalysisReport(Base):
     # But wait, the previous code tried to insert it.
     # Let's match the code structure.
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utc_now)
     
     # Relationships and tracking (Phase 1 updates)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -81,7 +87,7 @@ class ChatMessage(Base):
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Null for AI
     sender_role = Column(String, nullable=False) # "patient", "doctor", or "ai"
     message = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utc_now)
 
     # Relationships
     report = relationship("AnalysisReport", back_populates="chat_messages")
