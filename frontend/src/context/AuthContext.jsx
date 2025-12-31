@@ -74,8 +74,8 @@ export function AuthProvider({ children }) {
     return normalizedUser;
   };
 
-  const signup = async ({ email, password, role }) => {
-    const res = await apiClient.post('/auth/signup', { email, password, role });
+  const signup = async ({ email, password, role, public_session_id }) => {
+    const res = await apiClient.post('/auth/signup', { email, password, role, public_session_id });
     const userData = res.data;
 
     // Backend returns LoginResponse: { access_token, user_id, email, role }

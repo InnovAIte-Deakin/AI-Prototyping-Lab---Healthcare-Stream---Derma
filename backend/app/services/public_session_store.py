@@ -29,7 +29,7 @@ class PublicSessionStore:
         for session_id in expired_ids:
             self.sessions.pop(session_id, None)
 
-    def create_session(self, analysis: Dict[str, Any]) -> str:
+    def create_session(self, analysis: Dict[str, Any], image_path: str = None) -> str:
         """Create a new anonymous session and return its ID."""
         self._prune()
         session_id = uuid4().hex
@@ -37,6 +37,7 @@ class PublicSessionStore:
             "analysis": analysis,
             "created_at": datetime.now(timezone.utc),
             "messages": [],  # List[SimpleNamespace] with sender_role/message for chat context
+            "image_path": image_path,
         }
         return session_id
 
