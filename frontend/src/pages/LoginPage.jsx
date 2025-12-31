@@ -42,7 +42,12 @@ function LoginPage() {
       let user;
       if (isSignup) {
         // Signup forces 'patient' role for now
-        user = await signup({ email: emailTrim, password, role: 'patient' });
+        user = await signup({ 
+          email: emailTrim, 
+          password, 
+          role: 'patient',
+          public_session_id: searchParams.get('public_session_id')
+        });
       } else {
         // Login detects role automatically
         user = await login({ email: emailTrim, password });

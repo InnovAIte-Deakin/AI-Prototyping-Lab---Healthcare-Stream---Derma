@@ -182,7 +182,10 @@ async def get_analysis_by_report_id(
             detail="You don't have permission to view this analysis"
         )
     
-    analysis_data = json.loads(report.report_json)
+    analysis_data = report.report_json
+    if isinstance(analysis_data, str):
+        analysis_data = json.loads(analysis_data)
+    
     analysis_data["report_id"] = report.id
     analysis_data["image_id"] = report.image_id
     analysis_data["review_status"] = report.review_status
@@ -223,7 +226,10 @@ async def get_analysis_by_image_id(
             detail="No analysis found for this image"
         )
     
-    analysis_data = json.loads(report.report_json)
+    analysis_data = report.report_json
+    if isinstance(analysis_data, str):
+        analysis_data = json.loads(analysis_data)
+        
     analysis_data["report_id"] = report.id
     analysis_data["image_id"] = image.id
     analysis_data["review_status"] = report.review_status
@@ -306,7 +312,9 @@ async def chat_about_lesion_endpoint(
         history = db.query(ChatMessage).filter(ChatMessage.report_id == report.id).all()
         
         # Call AI
-        analysis_data = json.loads(report.report_json)
+        analysis_data = report.report_json
+        if isinstance(analysis_data, str):
+            analysis_data = json.loads(analysis_data)
         ai_reply = await gemini_service.chat_about_lesion(analysis_data, chat_request.message, history=history)
         
         # Save AI message
@@ -352,7 +360,16 @@ async def get_patient_reports(
     
     results = []
     for report in reports:
-        data = json.loads(report.report_json)
+        data = report.report_json
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {}
+        
+        if not isinstance(data, dict):
+            data = {}
+
         data["report_id"] = report.id
         data["image_id"] = report.image_id
         data["review_status"] = report.review_status
@@ -386,7 +403,16 @@ async def get_doctor_patient_reports(
     
     results = []
     for report in reports:
-        data = json.loads(report.report_json)
+        data = report.report_json
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {}
+        
+        if not isinstance(data, dict):
+            data = {}
+
         data["report_id"] = report.id
         data["image_id"] = report.image_id
         data["review_status"] = report.review_status
