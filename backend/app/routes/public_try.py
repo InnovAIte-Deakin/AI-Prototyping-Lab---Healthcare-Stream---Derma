@@ -50,8 +50,12 @@ def _normalize_analysis(raw_result: Dict[str, Any]) -> Dict[str, Any]:
 @router.post("/try/analyze")
 async def analyze_anonymously(file: UploadFile = File(...)) -> Dict[str, Any]:
     """Allow anonymous users to upload and receive a one-off AI analysis without auth."""
+    from app.config import MEDIA_ROOT
+    import uuid
+    import shutil
+
     file_bytes = await file.read()
-    await file.close()
+    # await file.close() # Don't close yet if we want to write it again, but we read bytes so it's fine.
 
     if not file_bytes:
         raise HTTPException(
@@ -59,28 +63,30 @@ async def analyze_anonymously(file: UploadFile = File(...)) -> Dict[str, Any]:
             detail="Uploaded file cannot be empty",
         )
 
+    # Setup anonymous storage
+    anon_dir = MEDIA_ROOT / "anonymous"
+    anon_dir.mkdir(parents=True, exist_ok=True)
+    
     suffix = Path(file.filename or "upload.png").suffix or ".png"
-    tmp_path: Path | None = None
+    filename = f"{uuid.uuid4().hex}{suffix}"
+    file_path = anon_dir / filename
+
+    # Save file persistently (until cleanup)
+    with open(file_path, "wb") as f:
+        f.write(file_bytes)
 
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
-            tmp_file.write(file_bytes)
-            tmp_path = Path(tmp_file.name)
-
-        try:
-            raw_result = await gemini_service.analyze_skin_lesion(str(tmp_path))
-        except Exception as exc:  # noqa: BLE001 - surface graceful error
-            raw_result = {"status": "error", "error": str(exc)}
-    finally:
-        if tmp_path and tmp_path.exists():
-            try:
-                tmp_path.unlink(missing_ok=True)
-            except OSError:
-                # Best-effort cleanup only
-                pass
+        raw_result = await gemini_service.analyze_skin_lesion(str(file_path))
+    except Exception as exc:  # noqa: BLE001 - surface graceful error
+        raw_result = {"status": "error", "error": str(exc)}
+        # If analysis fails, we might still want to keep the file? 
+        # Or maybe not. For now let's keep it simple.
 
     analysis = _normalize_analysis(raw_result)
-    session_id = public_session_store.create_session(analysis)
+    
+    # Store session with image path relative to media root or absolute?
+    # Storing absolute path for simplicity in backend usage.
+    session_id = public_session_store.create_session(analysis, image_path=str(file_path))
 
     return {"session_id": session_id, **analysis}
 

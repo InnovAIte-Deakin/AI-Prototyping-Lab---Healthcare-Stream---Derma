@@ -26,6 +26,7 @@ class UserSignup(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, description="Sprint 1: min 6 chars. Sprint 2: Add complexity rules")
     role: Literal["patient", "doctor"] = Field(..., description="User role: patient or doctor")
+    public_session_id: Optional[str] = Field(None, description="Link anonymous session on signup")
 
     @field_validator('role')
     @classmethod
