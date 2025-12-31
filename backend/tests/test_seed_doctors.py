@@ -62,7 +62,7 @@ def test_seed_doctors_updates_incomplete_profile(test_db):
     user = User(email=target["email"], password="dummy", role="doctor")
     test_db.add(user)
     test_db.commit()
-    profile = DoctorProfile(user_id=user.id, full_name="", clinic_name=None, bio=None)
+    profile = DoctorProfile(user_id=user.id, full_name="", clinic_name="", bio="", avatar_url="")
     test_db.add(profile)
     test_db.commit()
 
