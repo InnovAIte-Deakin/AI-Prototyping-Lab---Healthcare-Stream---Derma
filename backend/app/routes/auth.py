@@ -102,7 +102,18 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
                         db.commit()
                         db.refresh(new_report)
                         
-                        # 5. Migrate Chat Messages
+                        # 5. Seed Initial AI Message (if not present)
+                        an = session.get("analysis", {})
+                        msg_text = f"Hello! I've analyzed your image. Based on the scan, I detect signs of {an.get('condition', 'Unknown')}. My confidence is {int(float(an.get('confidence', 0))) or 0}%. {an.get('recommendation', '')}"
+                        
+                        seed_msg = ChatMessage(
+                            report_id=new_report.id,
+                            sender_role="ai",
+                            message=msg_text
+                        )
+                        db.add(seed_msg)
+
+                        # 6. Migrate Chat Messages
                         for msg in session.get("messages", []):
                             # msg is SimpleNamespace object
                             role = "patient" if msg.sender_role == "patient" else "ai"
