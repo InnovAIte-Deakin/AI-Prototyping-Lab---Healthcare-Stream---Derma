@@ -179,7 +179,9 @@ async def websocket_chat(
                         
                         # Get history for context
                         history = db.query(ChatMessage).filter(ChatMessage.report_id == report_id).all()
-                        analysis_data = json.loads(report.report_json)
+                        analysis_data = report.report_json
+                        if isinstance(analysis_data, str):
+                            analysis_data = json.loads(analysis_data)
                         
                         # Get AI response
                         ai_reply = await gemini_service.chat_about_lesion(analysis_data, message_text, history=history)

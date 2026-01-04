@@ -475,5 +475,5 @@ I need to Apply Styling and Layout
 - [x] F7 – Results UI & AI Chat Surface
 - [ ] F8 – Doctor Profile Display Robustness
 - [x] F9 – Patient-to-Doctor Flow & Escalation UI
-- [ ] F10 – Anonymous/Public Flow
+- [x] F10 – Anonymous/Public Flow
 - [ ] F11 – E2E Coverage (Playwright)
