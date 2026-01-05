@@ -48,12 +48,13 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
         db.refresh(new_user)
 
         if user_data.role == "doctor":
+            default_name = f"Dr. {new_user.email.split('@')[0].replace('.', ' ').title()}"
             doctor_profile = DoctorProfile(
                 user_id=new_user.id,
-                full_name="Dr. Pending", 
-                clinic_name="Pending Clinic Assignment",
-                bio="Bio not provided.",
-                avatar_url="/profiles/default_doctor.png"
+                full_name=default_name,
+                clinic_name="Clinic pending update",
+                bio="Doctor profile to be completed.",
+                avatar_url="https://placehold.co/128x128?text=Dr"
             )
             db.add(doctor_profile)
             db.commit()

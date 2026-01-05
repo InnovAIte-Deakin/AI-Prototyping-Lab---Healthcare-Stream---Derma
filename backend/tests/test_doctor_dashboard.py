@@ -15,6 +15,7 @@ def create_doctor(client, test_db, email: str, full_name: str) -> int:
     profile.full_name = full_name
     profile.clinic_name = "Test Clinic"
     profile.bio = "Test bio"
+    profile.avatar_url = "https://placehold.co/128x128?text=Dashboard"
     test_db.commit()
     return doctor_id
 
