@@ -132,10 +132,16 @@ def sample_doctor_data():
     columns = {c.name for c in DoctorProfile.__table__.columns}
     data = {}
 
+    if "full_name" in columns:
+        data["full_name"] = "Test Doctor"
     if "specialty" in columns:
         data["specialty"] = "Dermatology"
     if "clinic_name" in columns:
         data["clinic_name"] = "Test Clinic"
+    if "bio" in columns:
+        data["bio"] = "Test bio"
+    if "avatar_url" in columns:
+        data["avatar_url"] = "https://placehold.co/128x128?text=Test"
     if "location" in columns:
         data["location"] = "Test City"
 

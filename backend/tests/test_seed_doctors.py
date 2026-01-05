@@ -15,6 +15,7 @@ def test_seed_doctors_inserts_expected_records(test_db):
 
     assert len(doctors) == len(DOCTORS)
     assert len(profiles) == len(DOCTORS)
+    assert all(profile.avatar_url for profile in profiles)
     emails = {doctor.email for doctor in doctors}
     for doctor in DOCTORS:
         assert doctor["email"] in emails
@@ -62,7 +63,13 @@ def test_seed_doctors_updates_incomplete_profile(test_db):
     user = User(email=target["email"], password="dummy", role="doctor")
     test_db.add(user)
     test_db.commit()
-    profile = DoctorProfile(user_id=user.id, full_name="", clinic_name="", bio="", avatar_url="")
+    profile = DoctorProfile(
+        user_id=user.id,
+        full_name="",
+        clinic_name="",
+        bio="",
+        avatar_url="",
+    )
     test_db.add(profile)
     test_db.commit()
 
@@ -72,6 +79,7 @@ def test_seed_doctors_updates_incomplete_profile(test_db):
     assert updated.full_name == target["full_name"]
     assert updated.clinic_name == target["clinic_name"]
     assert updated.bio == target["bio"]
+    assert updated.avatar_url == target["avatar_url"]
 
 
 def test_seed_doctors_uses_internal_session(monkeypatch):

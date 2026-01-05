@@ -49,11 +49,13 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
 
         # If role is doctor, create an empty DoctorProfile
         if user_data.role == "doctor":
+            default_name = f"Dr. {new_user.email.split('@')[0].replace('.', ' ').title()}"
             doctor_profile = DoctorProfile(
                 user_id=new_user.id,
-                full_name="", 
-                clinic_name=None,
-                bio=None
+                full_name=default_name,
+                clinic_name="Clinic pending update",
+                bio="Doctor profile to be completed.",
+                avatar_url="https://placehold.co/128x128?text=Dr",
             )
             db.add(doctor_profile)
             db.commit()
