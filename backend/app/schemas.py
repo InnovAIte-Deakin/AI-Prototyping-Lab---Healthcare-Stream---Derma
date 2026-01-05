@@ -78,11 +78,14 @@ class LoginResponse(BaseModel):
 
 class DoctorResponse(BaseModel):
     """Doctor details with associated profile information."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: EmailStr
     full_name: str
-    clinic_name: Optional[str] = None
-    bio: Optional[str] = None
+    clinic_name: str
+    bio: str
+    avatar_url: str
 
 
 class PatientDoctorResponse(BaseModel):

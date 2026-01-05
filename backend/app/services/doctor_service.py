@@ -5,15 +5,24 @@ from sqlalchemy.orm import Session
 
 from app.models import DoctorProfile, PatientDoctorLink, User
 
+DEFAULT_AVATAR_URL = "https://placehold.co/128x128?text=Dr"
+DEFAULT_CLINIC_NAME = "Clinic not provided"
+DEFAULT_BIO = "Doctor profile coming soon"
+
+
+def _safe_value(value: str | None, fallback: str) -> str:
+    """Return a non-empty string for serialization."""
+    return value if value not in (None, "") else fallback
 
 def _doctor_response(user: User, profile: DoctorProfile) -> Dict[str, object]:
     """Shape a doctor record with profile details."""
     return {
         "id": user.id,
         "email": user.email,
-        "full_name": profile.full_name,
-        "clinic_name": profile.clinic_name,
-        "bio": profile.bio,
+        "full_name": _safe_value(profile.full_name, "Doctor"),
+        "clinic_name": _safe_value(profile.clinic_name, DEFAULT_CLINIC_NAME),
+        "bio": _safe_value(profile.bio, DEFAULT_BIO),
+        "avatar_url": _safe_value(profile.avatar_url, DEFAULT_AVATAR_URL),
     }
 
 

@@ -21,28 +21,32 @@ DOCTORS = [
         "password": "password123",
         "full_name": "Dr. Alice Henderson",
         "clinic_name": "DermaAI Clinic",
-        "bio": "Board-certified dermatologist specializing in acne and eczema.",
+        "bio": "Board-certified dermatologist specializing in acne and eczema with 10+ years in teledermatology.",
+        "avatar_url": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
     },
     {
         "email": "bob@derma.com",
         "password": "password123",
         "full_name": "Dr. Bob Martinez",
         "clinic_name": "Downtown Derm Care",
-        "bio": "Focused on teledermatology and rapid triage workflows.",
+        "bio": "Focused on virtual dermatology workflows and rapid triage for urgent cases.",
+        "avatar_url": "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&q=80",
     },
     {
         "email": "carol@derma.com",
         "password": "password123",
         "full_name": "Dr. Carol Singh",
         "clinic_name": "Sunrise Skin Center",
-        "bio": "Experienced with pigmentary disorders and pediatric dermatology.",
+        "bio": "Experienced with pigmentary disorders, pediatric dermatology, and patient education.",
+        "avatar_url": "https://images.unsplash.com/photo-1524156868115-1e3acb1686f0?auto=format&fit=crop&w=400&q=80",
     },
     {
         "email": "dan@derma.com",
         "password": "password123",
         "full_name": "Dr. Dan Okafor",
         "clinic_name": "Harbor Dermatology",
-        "bio": "Passionate about patient education and preventive care.",
+        "bio": "Passionate about preventive care, post-treatment follow-ups, and community outreach.",
+        "avatar_url": "https://images.unsplash.com/photo-1544723795-3fb0f9ae6c2b?auto=format&fit=crop&w=400&q=80",
     },
 ]
 
@@ -93,21 +97,18 @@ def seed_doctors(
                     full_name=doctor["full_name"],
                     clinic_name=doctor["clinic_name"],
                     bio=doctor["bio"],
+                    avatar_url=doctor["avatar_url"],
                 )
                 session.add(profile)
                 session.commit()
                 print(f"Created profile for: {doctor['full_name']}")
             else:
                 updated = False
-                if not profile.full_name:
-                    profile.full_name = doctor["full_name"]
-                    updated = True
-                if not profile.clinic_name:
-                    profile.clinic_name = doctor["clinic_name"]
-                    updated = True
-                if not profile.bio:
-                    profile.bio = doctor["bio"]
-                    updated = True
+                for field in ["full_name", "clinic_name", "bio", "avatar_url"]:
+                    desired = doctor[field]
+                    if getattr(profile, field) != desired:
+                        setattr(profile, field, desired)
+                        updated = True
                 if updated:
                     session.commit()
                     print(f"Updated profile for: {doctor['full_name']}")
