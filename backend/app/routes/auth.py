@@ -47,13 +47,13 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
 
-        # If role is doctor, create an empty DoctorProfile
         if user_data.role == "doctor":
             doctor_profile = DoctorProfile(
                 user_id=new_user.id,
-                full_name="", 
-                clinic_name=None,
-                bio=None
+                full_name="Dr. Pending", 
+                clinic_name="Pending Clinic Assignment",
+                bio="Bio not provided.",
+                avatar_url="/profiles/default_doctor.png"
             )
             db.add(doctor_profile)
             db.commit()
