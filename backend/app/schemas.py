@@ -26,6 +26,7 @@ class UserSignup(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, description="Sprint 1: min 6 chars. Sprint 2: Add complexity rules")
     role: Literal["patient", "doctor"] = Field(..., description="User role: patient or doctor")
+    public_session_id: Optional[str] = Field(None, description="Link anonymous session on signup")
 
     @field_validator('role')
     @classmethod
@@ -147,3 +148,17 @@ class ChatResponse(BaseModel):
     user_message: str
     ai_response: str
     context_used: bool = Field(default=True, description="Whether analysis context was used")
+
+
+
+class PublicChatRequest(BaseModel):
+    """Request body for anonymous chat preview."""
+    session_id: str = Field(..., description="Anonymous session identifier")
+    message: str = Field(..., min_length=1, max_length=1000)
+
+
+class PublicChatResponse(BaseModel):
+    """Response for anonymous chat preview."""
+    session_id: str
+    reply: str
+    analysis: Dict[str, Any]

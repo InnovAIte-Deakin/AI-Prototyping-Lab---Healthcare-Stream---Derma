@@ -11,7 +11,8 @@ from app.routes import (
     images,
     cases,
     doctor_dashboard,
-    websocket
+    websocket,
+    public_try,
 )  # Registered routers
 
 app = FastAPI(
@@ -37,6 +38,9 @@ app.add_middleware(
 
 # Include WebSocket router FIRST (before static files)
 app.include_router(websocket.router)
+
+# Public/anonymous routes
+app.include_router(public_try.router)
 
 # Include routers
 app.include_router(auth.router)

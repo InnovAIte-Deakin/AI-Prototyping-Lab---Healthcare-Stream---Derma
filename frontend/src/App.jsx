@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
@@ -10,6 +10,7 @@ import DoctorPatientDetail from './pages/DoctorPatientDetail';
 import DoctorCasePage from './pages/DoctorCasePage';
 import PatientHistory from './pages/PatientHistory';
 import PatientCasePage from './pages/PatientCasePage';
+import PublicTryPage from './pages/PublicTryPage';
 
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -28,6 +29,10 @@ export const routes = [
       {
         path: '/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/try-anonymous',
+        element: <PublicTryPage />,
       },
       {
         path: '/patient-dashboard',
