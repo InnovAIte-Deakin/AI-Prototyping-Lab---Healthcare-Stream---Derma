@@ -29,15 +29,15 @@ jobs:
         python -m app.seed_data
         python -m app.seed_e2e_fixtures
       env:
-        DATABASE_URL: sqlite:///./skinscope.db
+        DATABASE_URL: sqlite:///./derma.db
         MOCK_AI: "true"
 
     - name: Start Backend
       run: |
         cd backend
-        uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+        uvicorn app.main:app --host 127.0.0.1 --port 8000 > uvicorn.log 2>&1 &
       env:
-        DATABASE_URL: sqlite:///./skinscope.db
+        DATABASE_URL: sqlite:///./derma.db
         MOCK_AI: "true"
 
     # --- Frontend Setup ---
@@ -77,7 +77,25 @@ jobs:
         npx playwright test
       env:
         BASE_URL: http://localhost:5173
+        CI: true
 
+    # --- Debug Info (on failure) ---
+    - name: Debug Info
+      if: failure()
+      run: |
+        echo "=== Environment ==="
+        echo "DATABASE_URL: $DATABASE_URL"
+        echo "BASE_URL: $BASE_URL"
+        echo "=== Backend Logs ==="
+        cat backend/uvicorn.log 2>/dev/null || echo "No backend log found"
+        echo "=== Check Services ==="
+        curl -s http://localhost:8000/health || echo "Backend not responding"
+        curl -s http://localhost:5173 | head -20 || echo "Frontend not responding"
+      env:
+        DATABASE_URL: sqlite:///./derma.db
+        BASE_URL: http://localhost:5173
+
+    # --- Artifacts ---
     - name: Upload Report
       uses: actions/upload-artifact@v4
       if: always()
@@ -85,3 +103,11 @@ jobs:
         name: playwright-report
         path: frontend/playwright-report/
         retention-days: 30
+
+    - name: Upload Test Results (traces, videos, screenshots)
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-results
+        path: frontend/test-results/
+        retention-days: 7
