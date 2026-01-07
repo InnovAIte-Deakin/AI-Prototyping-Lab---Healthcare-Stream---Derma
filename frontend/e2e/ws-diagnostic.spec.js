@@ -15,6 +15,40 @@ test.describe('WebSocket Diagnostics', () => {
         console.log('=== WebSocket Diagnostics ===');
         console.log(`Timestamp: ${new Date().toISOString()}`);
         
+        // Set up WebSocket monitoring BEFORE navigating
+        const wsEvents = [];
+        page.on('websocket', ws => {
+            console.log(`[WS EVENT] WebSocket created: ${ws.url()}`);
+            wsEvents.push({ type: 'created', url: ws.url(), time: Date.now() });
+            
+            ws.on('framereceived', frame => {
+                console.log(`[WS EVENT] Frame received: ${frame.payload?.toString().substring(0, 100)}...`);
+                wsEvents.push({ type: 'frame', payload: frame.payload?.toString().substring(0, 100), time: Date.now() });
+            });
+            
+            ws.on('framesent', frame => {
+                console.log(`[WS EVENT] Frame sent: ${frame.payload?.toString().substring(0, 100)}...`);
+            });
+            
+            ws.on('close', () => {
+                console.log(`[WS EVENT] WebSocket closed`);
+                wsEvents.push({ type: 'closed', time: Date.now() });
+            });
+            
+            ws.on('socketerror', err => {
+                console.log(`[WS EVENT] WebSocket ERROR: ${err}`);
+                wsEvents.push({ type: 'error', error: String(err), time: Date.now() });
+            });
+        });
+        
+        // Also monitor all network requests
+        page.on('requestfailed', request => {
+            if (request.url().includes('ws://') || request.url().includes('wss://')) {
+                console.log(`[NETWORK] WebSocket request failed: ${request.url()}`);
+                console.log(`[NETWORK] Failure reason: ${request.failure()?.errorText}`);
+            }
+        });
+        
         // Test 1: Check if backend HTTP is reachable
         console.log('\n[Test 1] Checking backend HTTP health...');
         try {
@@ -35,14 +69,43 @@ test.describe('WebSocket Diagnostics', () => {
             console.log(`Root FAILED: ${e.message}`);
         }
         
-        // Test 3: Navigate to doctor dashboard and check network
-        console.log('\n[Test 3] Loading doctor dashboard...');
+        // Test 3: Try a direct WebSocket test via page.evaluate
+        console.log('\n[Test 3] Testing direct WebSocket from browser...');
+        const wsTestResult = await page.evaluate(async () => {
+            return new Promise((resolve) => {
+                const ws = new WebSocket('ws://localhost:8000/ws/chat/1');
+                const result = { events: [] };
+                
+                ws.onopen = () => {
+                    result.events.push('open');
+                    ws.close();
+                };
+                ws.onerror = (e) => {
+                    result.events.push('error: ' + e.type);
+                };
+                ws.onclose = (e) => {
+                    result.events.push('close: code=' + e.code + ' reason=' + e.reason);
+                    resolve(result);
+                };
+                
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    result.events.push('timeout');
+                    try { ws.close(); } catch {}
+                    resolve(result);
+                }, 10000);
+            });
+        });
+        console.log(`Direct WebSocket test result: ${JSON.stringify(wsTestResult)}`);
+        
+        // Test 4: Navigate to doctor dashboard
+        console.log('\n[Test 4] Loading doctor dashboard...');
         await page.goto('/doctor-dashboard');
         await expect(page.getByRole('heading', { name: 'Doctor Dashboard' })).toBeVisible();
         console.log('Dashboard loaded successfully');
         
-        // Test 4: Find and click a case to trigger WebSocket
-        console.log('\n[Test 4] Looking for any case card...');
+        // Test 5: Find and click a case to trigger WebSocket
+        console.log('\n[Test 5] Looking for any case card...');
         const caseCard = page.getByRole('article').first();
         
         if (await caseCard.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -62,7 +125,14 @@ test.describe('WebSocket Diagnostics', () => {
             }
             
             // Now check WebSocket connection status
-            console.log('\n[Test 5] Checking WebSocket connection status...');
+            console.log('\n[Test 6] Checking WebSocket connection status...');
+            
+            // Wait a bit for WebSocket attempt
+            await page.waitForTimeout(3000);
+            
+            // Print all WebSocket events we captured
+            console.log('\n[WebSocket Events Captured]:');
+            wsEvents.forEach((e, i) => console.log(`  ${i}: ${JSON.stringify(e)}`));
             
             // Check for CONNECTING badge
             const connectingBadge = page.getByText('CONNECTING...');
@@ -85,7 +155,7 @@ test.describe('WebSocket Diagnostics', () => {
             
             // If still connecting, wait and check again
             if (isConnecting) {
-                console.log('\n[Test 6] Waiting up to 30s for WebSocket to connect...');
+                console.log('\n[Test 7] Waiting up to 30s for WebSocket to connect...');
                 const startTime = Date.now();
                 
                 // Try waiting for input to be enabled
@@ -96,7 +166,10 @@ test.describe('WebSocket Diagnostics', () => {
                 } catch (e) {
                     const elapsed = Date.now() - startTime;
                     console.log(`❌ WebSocket FAILED to connect after ${elapsed}ms`);
-                    console.log(`Error: ${e.message}`);
+                    
+                    // Final WebSocket events dump
+                    console.log('\n[Final WebSocket Events]:');
+                    wsEvents.forEach((e, i) => console.log(`  ${i}: ${JSON.stringify(e)}`));
                     
                     // Take screenshot for debugging
                     await page.screenshot({ path: 'test-results/websocket-debug.png' });

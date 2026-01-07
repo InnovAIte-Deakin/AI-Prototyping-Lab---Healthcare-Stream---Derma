@@ -91,6 +91,12 @@ jobs:
         CI: true
       continue-on-error: true
 
+    - name: Print Backend Logs After Diagnostic
+      run: |
+        echo "=== Backend Logs (uvicorn.log) ==="
+        cat backend/uvicorn.log 2>/dev/null || echo "No log file found"
+        echo "=== End Backend Logs ==="
+
     # --- Run Main Tests ---
     - name: Run Playwright tests
       run: |
