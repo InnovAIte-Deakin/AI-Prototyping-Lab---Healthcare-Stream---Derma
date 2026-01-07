@@ -53,20 +53,27 @@ test.describe('Doctor Review', () => {
             console.log('Step 5: No Accept button found (case may already be accepted)');
         }
         
-        // Wait a moment for chat UI to fully render
-        console.log('Step 6: Waiting for chat input to be ready...');
-        await page.waitForTimeout(1000);
+        // Wait for WebSocket connection - input becomes enabled when connected
+        console.log('Step 6: Waiting for WebSocket connection (input enabled)...');
+        const chatInput = page.getByRole('textbox');
         
-        // Debug: Log what textboxes and buttons are on the page
+        // Wait for "CONNECTING..." to disappear (indicates WebSocket connected)
+        const connectingBadge = page.getByText('CONNECTING...');
+        if (await connectingBadge.isVisible({ timeout: 1000 }).catch(() => false)) {
+            console.log('Step 6: CONNECTING badge visible, waiting for it to disappear...');
+            await expect(connectingBadge).not.toBeVisible({ timeout: 30000 });
+        }
+        
+        // Wait for input to be enabled (WebSocket connected)
+        await expect(chatInput).toBeEnabled({ timeout: 30000 });
+        console.log('Step 6: Chat input is now enabled (WebSocket connected)');
+        
+        // Debug: Log element counts
         const textboxCount = await page.getByRole('textbox').count();
         const buttonCount = await page.getByRole('button').count();
         console.log(`Step 6: Found ${textboxCount} textbox(es) and ${buttonCount} button(s) on page`);
         
-        // Try to find the specific chat input
-        const chatInput = page.getByRole('textbox');
         const sendButton = page.getByRole('button', { name: /send/i });
-        
-        console.log(`Step 6: Chat input visible: ${await chatInput.isVisible().catch(() => false)}`);
         console.log(`Step 6: Send button visible: ${await sendButton.isVisible().catch(() => false)}`);
         
         // Send message to patient
