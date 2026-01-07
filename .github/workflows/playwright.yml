@@ -81,27 +81,11 @@ jobs:
       run: |
         until curl -sf http://localhost:5173; do sleep 1; done
 
-    # --- Run Diagnostic Test First ---
-    - name: Run WebSocket Diagnostic
-      run: |
-        cd frontend
-        npx playwright test ws-diagnostic --reporter=list
-      env:
-        BASE_URL: http://localhost:5173
-        CI: true
-      continue-on-error: true
-
-    - name: Print Backend Logs After Diagnostic
-      run: |
-        echo "=== Backend Logs (uvicorn.log) ==="
-        cat backend/uvicorn.log 2>/dev/null || echo "No log file found"
-        echo "=== End Backend Logs ==="
-
-    # --- Run Main Tests ---
+    # --- Run Tests ---
     - name: Run Playwright tests
       run: |
         cd frontend
-        npx playwright test --ignore-snapshots
+        npx playwright test
       env:
         BASE_URL: http://localhost:5173
         CI: true
