@@ -13,6 +13,7 @@ from app.routes import (
     doctor_dashboard,
     websocket,
     public_try,
+    health,
 )  # Registered routers
 
 app = FastAPI(
@@ -50,6 +51,7 @@ app.include_router(patient_doctor.router)
 app.include_router(analysis.router)
 app.include_router(cases.router)
 app.include_router(doctor_dashboard.router)
+app.include_router(health.router)
 
 # Static files (must be AFTER WebSocket routes)
 app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")

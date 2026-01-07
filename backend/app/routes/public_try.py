@@ -5,7 +5,7 @@ from typing import Any, Dict
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from app.schemas import PublicChatRequest, PublicChatResponse
-from app.services.gemini_service import gemini_service
+from app.services.gemini_service import get_gemini_service
 from app.services.public_session_store import public_session_store
 
 router = APIRouter(prefix="/public", tags=["Public/Anonymous"])
@@ -76,7 +76,7 @@ async def analyze_anonymously(file: UploadFile = File(...)) -> Dict[str, Any]:
         f.write(file_bytes)
 
     try:
-        raw_result = await gemini_service.analyze_skin_lesion(str(file_path))
+        raw_result = await get_gemini_service().analyze_skin_lesion(str(file_path))
     except Exception as exc:  # noqa: BLE001 - surface graceful error
         raw_result = {"status": "error", "error": str(exc)}
         # If analysis fails, we might still want to keep the file? 
@@ -102,7 +102,7 @@ async def chat_preview(payload: PublicChatRequest) -> PublicChatResponse:
     public_session_store.append_message(payload.session_id, "patient", payload.message)
 
     try:
-        reply_text = await gemini_service.chat_about_lesion(
+        reply_text = await get_gemini_service().chat_about_lesion(
             session["analysis"], payload.message, history=session["messages"]
         )
     except Exception as exc:  # noqa: BLE001 - user-facing fallback

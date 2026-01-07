@@ -54,7 +54,8 @@ function PatientCasePage() {
     }
   };
 
-  if (loading) {
+  // Only show full page spinner on INITIAL load to prevent Chat unmounting
+  if (loading && !report) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="h-10 w-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>

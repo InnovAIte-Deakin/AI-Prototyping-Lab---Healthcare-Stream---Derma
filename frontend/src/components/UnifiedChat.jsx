@@ -70,6 +70,7 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) 
         
         try {
           const data = JSON.parse(event.data);
+          console.log('[WS] Received message type:', data.type);
           
           if (data.type === 'connected') {
             console.log('[WS] Authenticated successfully');
@@ -151,7 +152,7 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) 
         wsRef.current = null;
       }
     };
-  }, [reportId, token, onStatusChange]);
+  }, [reportId, token]); // Removed onStatusChange to prevent reconnects on callback change
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -358,6 +359,7 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) 
           />
           <button
             type="submit"
+            aria-label="Send message"
             disabled={!isConnected || isLoading || !input.trim()}
             className="absolute right-2 top-2 h-10 w-10 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-20 transition-all flex items-center justify-center shadow-lg"
           >
