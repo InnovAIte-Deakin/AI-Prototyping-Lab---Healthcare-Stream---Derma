@@ -58,11 +58,47 @@ Set-Location ..
 Write-Host "`n [4/5] Starting Backend (MOCK_AI=true)..." -ForegroundColor Yellow
 $backendJob = Start-Job -ScriptBlock {
     Set-Location $using:OriginalDir\backend
+    # Rename .env to prevent interference
+    if (Test-Path .env) { Rename-Item .env .env.bak -Force }
     $env:DATABASE_URL = "sqlite:///./derma.db"
     $env:MOCK_AI = "true"
-    python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+    try {
+        python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+    }
+    finally {
+        # Restore .env
+        if (Test-Path .env.bak) { Rename-Item .env.bak .env -Force }
+    }
 }
-Start-Sleep -Seconds 5
+# Wait for backend to be ready
+Write-Host " [INFO] Waiting for backend to be ready..." -ForegroundColor Gray
+$maxRetries = 30
+$retryCount = 0
+$backendReady = $false
+
+while (-not $backendReady -and $retryCount -lt $maxRetries) {
+    try {
+        $response = Invoke-WebRequest -Uri "http://127.0.0.1:8000/health" -Method Get -ErrorAction Stop
+        if ($response.StatusCode -eq 200) {
+            $backendReady = $true
+            Write-Host " [INFO] Backend is ready!" -ForegroundColor Green
+        }
+    }
+    catch {
+        Start-Sleep -Seconds 1
+        $retryCount++
+        Write-Host " [INFO] Waiting for backend... ($retryCount/$maxRetries)" -ForegroundColor Gray
+    }
+}
+
+if (-not $backendReady) {
+    Write-Host " [ERROR] Backend failed to start within timeout. Stopping." -ForegroundColor Red
+    Stop-Job -Job $backendJob -ErrorAction SilentlyContinue
+    Remove-Job -Job $backendJob -Force -ErrorAction SilentlyContinue
+    Set-Location $OriginalDir
+    exit 1
+}
+
 Write-Host " [INFO] Backend started with MOCK_AI=true" -ForegroundColor Gray
 
 # 7. E2E Tests
