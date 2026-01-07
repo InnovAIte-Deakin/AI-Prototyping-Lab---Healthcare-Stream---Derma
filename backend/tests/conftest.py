@@ -22,6 +22,9 @@ def fast_bcrypt():
 # because app.db.py creates the engine at module load time.
 # -------------------------------------------------------------------
 
+from dotenv import load_dotenv
+load_dotenv()
+
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
 os.environ.setdefault("GOOGLE_API_KEY", "test-api-key")
 

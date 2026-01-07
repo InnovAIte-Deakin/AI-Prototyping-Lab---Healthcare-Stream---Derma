@@ -9,6 +9,10 @@ import { MemoryRouter } from 'react-router-dom';
   MOCKING WEBSOCKET
   Since jsdom doesn't support WebSocket, we mock it globally.
 */
+const originalWebSocket = global.WebSocket;
+let lastSocketInstance = null;
+const socketTimeouts = new Set();
+
 class MockWebSocket {
   constructor(url) {
     this.url = url;
@@ -18,10 +22,13 @@ class MockWebSocket {
     this.onerror = null;
     this.sentMessages = [];
     
-    setTimeout(() => {
+    // Track timeout to clear it on cleanup
+    const timerId = setTimeout(() => {
         this.readyState = 1; // OPEN
         if (this.onopen) this.onopen();
+        socketTimeouts.delete(timerId);
     }, 10);
+    socketTimeouts.add(timerId);
   }
 
   send(data) {
@@ -40,11 +47,6 @@ class MockWebSocket {
   }
 }
 
-global.WebSocket = MockWebSocket;
-
-// Capture the last created socket instance to manipulate it in tests
-let lastSocketInstance = null;
-const OriginalWebSocket = global.WebSocket;
 global.WebSocket = class extends MockWebSocket {
     constructor(url) {
         super(url);
@@ -71,6 +73,9 @@ describe('ChatFlows', () => {
     vi.restoreAllMocks();
     cleanup();
     lastSocketInstance = null;
+    // Clear any pending socket timers to prevent "unhandled error" / "state update" warnings
+    socketTimeouts.forEach(id => clearTimeout(id));
+    socketTimeouts.clear();
   });
 
   it('UnifiedChat connects and authenticates via WebSocket', async () => {

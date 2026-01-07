@@ -144,6 +144,7 @@ async def websocket_chat(
             
             if data.get("type") == "message":
                 message_text = data.get("message", "").strip()
+                print(f"[WS] Received message from user {user_id}: {message_text[:50]}...")
                 if message_text:
                     # Save to database
                     new_msg = ChatMessage(
@@ -166,16 +167,18 @@ async def websocket_chat(
                         "created_at": new_msg.created_at.isoformat()
                     }
                     
+                    print(f"[WS] Report {report_id}: Broadcasting message {new_msg.id} to {len(manager.connections.get(report_id, {}))} users")
                     for uid, ws in manager.connections.get(report_id, {}).items():
                         try:
                             await ws.send_json(broadcast_msg)
-                        except:
+                        except Exception as e:
+                            print(f"[WS] Error broadcasting to user {uid}: {e}")
                             pass
                     
                     # If patient sent message and doctor is not active, trigger AI response
                     if user_role == "patient" and not report.doctor_active:
                         # Import here to avoid circular imports
-                        from app.services.gemini_service import gemini_service
+                        from app.services.gemini_service import get_gemini_service
                         
                         # Get history for context
                         history = db.query(ChatMessage).filter(ChatMessage.report_id == report_id).all()
@@ -184,7 +187,7 @@ async def websocket_chat(
                             analysis_data = json.loads(analysis_data)
                         
                         # Get AI response
-                        ai_reply = await gemini_service.chat_about_lesion(analysis_data, message_text, history=history)
+                        ai_reply = await get_gemini_service().chat_about_lesion(analysis_data, message_text, history=history)
                         
                         # Save AI message
                         ai_msg = ChatMessage(

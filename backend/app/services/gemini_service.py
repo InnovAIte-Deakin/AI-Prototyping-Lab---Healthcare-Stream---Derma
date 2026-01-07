@@ -168,5 +168,20 @@ class GeminiService:
         return mime_types.get(extension, 'image/jpeg')
 
 
-# Create a singleton instance
-gemini_service = GeminiService()
+def get_gemini_service():
+    """
+    Factory function to get the appropriate Gemini service.
+    Returns MockGeminiService when MOCK_AI=true (for CI), otherwise real service.
+    """
+    if os.getenv("MOCK_AI", "").lower() == "true":
+        from app.services.mock_gemini_service import MockGeminiService
+        return MockGeminiService()
+    return gemini_service
+
+
+# Create singleton instance only if not in mock mode
+# This prevents crashes when GOOGLE_API_KEY is not set in CI
+if os.getenv("MOCK_AI", "").lower() != "true":
+    gemini_service = GeminiService()
+else:
+    gemini_service = None  # Will use MockGeminiService via factory

@@ -104,6 +104,7 @@ const PatientUpload = () => {
             id="upload-input"
             type="file"
             accept="image/*"
+            aria-label="Upload image"
             onChange={handleFileChange}
             className={uiTokens.input}
           />
@@ -122,7 +123,7 @@ const PatientUpload = () => {
         </button>
 
         {error && (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
             {error}
           </p>
         )}

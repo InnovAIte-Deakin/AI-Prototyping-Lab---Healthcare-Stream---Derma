@@ -476,4 +476,5 @@ I need to Apply Styling and Layout
 - [ ] F8 – Doctor Profile Display Robustness
 - [x] F9 – Patient-to-Doctor Flow & Escalation UI
 - [x] F10 – Anonymous/Public Flow
-- [ ] F11 – E2E Coverage (Playwright)
+- [x] F11 – E2E Coverage (Playwright)
+

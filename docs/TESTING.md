@@ -2,6 +2,23 @@
 
 This document outlines the testing strategy for the DERMA project, ensuring reliability and correctness across the Backend (FastAPI) and Frontend (React).
 
+## 🚀 Quick Start (Recommended)
+
+For the simplest and most robust way to run ALL tests (Backend, Frontend, and E2E) with automatic configuration and data seeding, use the provided PowerShell script in the root directory:
+
+```powershell
+./run_tests.ps1
+```
+
+This script will:
+1.  Configure the environment (`MOCK_AI=true`).
+2.  Run Backend Unit Tests (`pytest`).
+3.  Run Frontend Unit Tests (`vitest`).
+4.  Reset and Seed E2E Test Data.
+5.  Run End-to-End Tests (`playwright`).
+
+---
+
 ## 1. Backend Testing (FastAPI)
 
 We will use **pytest** as the primary test runner.
@@ -34,6 +51,7 @@ We will use **pytest** as the primary test runner.
 
 ## 2. Frontend Testing (React + Vite)
 
+
 We will use **Vitest** (compatible with Vite) and **React Testing Library**.
 
 ### 2.1 Unit Tests
@@ -57,15 +75,166 @@ We will use **Vitest** (compatible with Vite) and **React Testing Library**.
 2.  Configure `vite.config.ts` for testing.
 3.  Create `frontend/src/__tests__/` directory.
 
-## 3. End-to-End (E2E) Testing (Future Scope)
-**Goal:** Verify the entire user flow from browser to backend to database.
-**Tools:** Playwright or Cypress.
-**Scope:**
-- Patient Login -> Upload Image -> View Result.
-- Doctor Login -> View Dashboard -> Review Case.
+## 3. End-to-End (E2E) Testing (Playwright)
+
+We use **Playwright** for end-to-end testing of full user journeys.
+
+### 3.0 Quick Start
+
+**Local Development (with real AI):**
+```bash
+# Terminal 1: Backend
+cd backend
+python -m app.seed_data          # Seed doctors
+python -m app.seed_e2e_fixtures  # Seed E2E test accounts + cases
+python -m uvicorn app.main:app --reload
+
+# Terminal 2: Frontend
+cd frontend
+npm run dev
+
+# Terminal 3: Run Tests
+cd frontend
+npx playwright test --headed
+```
+
+**CI Mode (with mock AI, no API key needed):**
+```powershell
+# Set mock mode before starting backend
+$env:MOCK_AI = "true"
+python -m uvicorn app.main:app --reload
+```
+
+### 3.1 Setup
+1. **Install Browsers**:
+   ```bash
+   cd frontend
+   npx playwright install
+   ```
+2. **Seed Test Data**: 
+   - `python -m app.seed_data` — Seeds doctors only
+   - `python -m app.seed_e2e_fixtures` — Creates test patients with cases in specific states
+
+### 3.2 Running Tests
+**Standard Run (Headed)**:
+```bash
+cd frontend
+npx playwright test --headed
+```
+
+**Visual Debugging (Trace Viewer)**:
+If a test fails, open the trace file to see exactly what happened:
+```bash
+npx playwright show-trace test-results/*/trace.zip
+```
+
+**UI Mode** (element inspection):
+```bash
+npx playwright test --ui
+```
+
+### 3.3 E2E Test Accounts (Fixtures)
+
+| Account | Password | Purpose |
+|---------|----------|---------|
+| `alice@derma.com` | password123 | Doctor (seeded by `seed_data.py`) |
+| `e2e_patient_aichat@test.com` | password123 | AI chat test (case not escalated) |
+| `e2e_patient_pending@test.com` | password123 | Doctor-review test (case pending) |
+| `e2e_patient_accepted@test.com` | password123 | Patient-doctor chat test |
+
+### 3.4 CI Mock Mode
+
+In GitHub Actions, we set `MOCK_AI=true` to run tests without a Gemini API key. The `MockGeminiService` returns deterministic responses for predictable test behavior.
+
+### 3.5 Selector Strategy
+
+Use **user-first selectors** that don't break when implementation changes:
+
+| ❌ Brittle | ✅ Resilient |
+|------------|-------------|
+| `#upload-input` | `getByLabel('Upload image')` |
+| `.text-red-700` | `getByRole('alert')` |
+| `form button[type="submit"]` | `getByRole('button', { name: /send/i })` |
+
+### 3.6 Authenticated State Reuse
+
+Tests use pre-authenticated sessions saved by `auth.setup.js`:
+```javascript
+test.use({ storageState: '.auth/doctor.json' });
+
+test('Doctor can view dashboard', async ({ page }) => {
+  await page.goto('/doctor-dashboard'); // Already logged in!
+});
+```
+
+### 3.7 Test Scenarios & Flows
+
+Here is the expected behavior for each test file:
+
+#### 1. `auth.setup.js` (Infrastructure)
+*   **Goal:** Create reuseable session files (`.auth/*.json`) for other tests.
+*   **Flow:**
+    1.  Logs in as **Doctor** (`alice@derma.com`) -> Verification: Dashboard -> Saves `.auth/doctor.json`
+    2.  Logs in as **Patient A** (`e2e_patient_aichat`) -> Verification: Dashboard -> Saves `.auth/patient_aichat.json`
+    3.  Logs in as **Patient B** (`e2e_patient_pending`) -> Verification: Dashboard -> Saves `.auth/patient_pending.json`
+    4.  Logs in as **Patient C** (`e2e_patient_accepted`) -> Verification: Dashboard -> Saves `.auth/patient_accepted.json`
+*   **Note:** Runs automatically via Playwright dependencies.
+
+#### 2. `auth-flow.spec.js` (Lifecycle)
+*   **Goal:** Verify login, logout, and route protection.
+*   **Flow:**
+    1.  **Login:** Manually logs in with seeded credentials.
+    2.  **Verify:** Checks "Patient Dashboard" heading.
+    3.  **Logout:** Clicks "Logout" button.
+    4.  **Verify:** Redirected to landing page (`/`).
+    5.  **Protect:** Attempts to force-navigate to `/patient-dashboard`.
+    6.  **Verify:** Redirected back to landing page.
+
+#### 3. `anonymous-flow.spec.js` (Public)
+*   **Goal:** Test "Try without signing up" workflow.
+*   **Flow:**
+    1.  **Start:** Navigate to `/try-anonymous`.
+    2.  **Upload:** Uploads `test_skin_image.png`.
+    3.  **Analyze:** Clicks "Run quick analysis" -> Mock AI returns results.
+    4.  **Preview:** Sees "Chat Preview" (limited chat interface).
+    5.  **Convert:** Clicks "Sign up to save this case".
+    6.  **Signup:** Fills signup form with a *new* unique email.
+    7.  **Verify:** Redirects to Patient Dashboard -> Checks History -> Finds the saved case.
+
+#### 4. `patient-ai-chat.spec.js` (Golden Path: Step 1)
+*   **Goal:** Test patient interaction with AI before doctor involvement.
+*   **State:** Uses `patient_aichat` (Fixtures: 1 case, status="none").
+*   **Flow:**
+    1.  **Load:** Uses saved session -> Navigates to `/patient-history`.
+    2.  **Open:** Clicks "Open Conversation" on the case.
+    3.  **Chat:** Types specifically to AI ("Is this serious?") -> Sends.
+    4.  **Verify:** Message appears in chat -> AI responds.
+    5.  **Check:** "Request Physician Review" button is visible (not yet escalated).
+
+#### 5. `doctor-review.spec.js` (Golden Path: Step 2)
+*   **Goal:** Test doctor accepting and triaging a case.
+*   **State:** Uses `doctor` session + `patient_pending` (Fixtures: 1 case, status="pending").
+*   **Flow:**
+    1.  **Load:** Uses saved session -> Navigates to Doctor Dashboard.
+    2.  **Find:** Locates the pending case card.
+    3.  **Accept:** Clicks "Accept Case" -> Status changes to "Patient Consultation".
+    4.  **Chat:** Doctor types message ("Medical review started") -> Sends.
+    5.  **Verify:** Message appears in chat stream.
+
+#### 6. `patient-doctor-chat.spec.js` (Golden Path: Step 3)
+*   **Goal:** Test patient replying to a doctor.
+*   **State:** Uses `patient_accepted` (Fixtures: 1 case, status="accepted").
+*   **Flow:**
+    1.  **Load:** Uses saved session -> Navigates to `/patient-history`.
+    2.  **Open:** Clicks the accepted case.
+    3.  **View:** Sees previous doctor messages.
+    4.  **Reply:** Patient types ("Thank you doctor") -> Sends.
+    5.  **Verify:** Message appears in chat stream.
 
 ## 4. CI/CD Integration
-- Configure GitHub Actions to run `pytest` and `npm test` on every Pull Request to `main`.
+- GitHub Actions runs `pytest` for backend and `npx playwright test` for E2E on every PR to `main`.
+- **No API keys required** — Uses `MOCK_AI=true` for deterministic AI responses.
+
 
 ## 5. Detailed Backend Test Documentation
 
@@ -111,6 +280,19 @@ pytest -m b2  # Run only B2 tests
 ```bash
 pytest -v
 ```
+
+### Live AI Integration Test
+To verify the **real** Google Gemini API integration (requires API key):
+```bash
+# Windows
+$env:MOCK_AI = "false"
+pytest tests/test_live_gemini.py -v -s
+
+# Mac/Linux
+export MOCK_AI=false
+pytest tests/test_live_gemini.py -v -s
+```
+*Note: This consumes API quota.*
 
 ### Test Coverage
 

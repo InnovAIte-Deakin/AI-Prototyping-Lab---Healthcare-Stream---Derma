@@ -30,11 +30,11 @@ def test_chat_endpoint_success(client, db_session, sample_image, sample_user):
         db_session.add(report)
         db_session.commit()
 
-        # Mock Gemini service
-        # Note: We must patch the INSTANCE 'gemini_service' used in the route
-        with patch("app.routes.analysis.gemini_service.chat_about_lesion", new_callable=AsyncMock) as mock_chat:
-            mock_chat.return_value = "AI Response"
-            
+        # Mock the factory function to return a mock service
+        mock_service = AsyncMock()
+        mock_service.chat_about_lesion.return_value = "AI Response"
+        
+        with patch("app.routes.analysis.get_gemini_service", return_value=mock_service):
             response = client.post(
                 f"/api/analysis/{sample_image.id}/chat",
                 json={"message": "What should I do?"}

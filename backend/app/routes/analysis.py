@@ -8,7 +8,7 @@ from pathlib import Path
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
 from app.models import Image, User, AnalysisReport, ChatMessage
-from app.services.gemini_service import gemini_service
+from app.services.gemini_service import get_gemini_service
 from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.schemas import ChatRequest, ChatResponse
 
@@ -81,7 +81,7 @@ async def analyze_image(
     image_path = str(_resolve_image_path(image.image_url))
     
     # Perform AI analysis
-    analysis_result = await gemini_service.analyze_skin_lesion(image_path)
+    analysis_result = await get_gemini_service().analyze_skin_lesion(image_path)
     
     if analysis_result["status"] == "error":
         error_msg = analysis_result.get('error', 'Unknown error')
@@ -315,7 +315,7 @@ async def chat_about_lesion_endpoint(
         analysis_data = report.report_json
         if isinstance(analysis_data, str):
             analysis_data = json.loads(analysis_data)
-        ai_reply = await gemini_service.chat_about_lesion(analysis_data, chat_request.message, history=history)
+        ai_reply = await get_gemini_service().chat_about_lesion(analysis_data, chat_request.message, history=history)
         
         # Save AI message
         ai_msg = ChatMessage(

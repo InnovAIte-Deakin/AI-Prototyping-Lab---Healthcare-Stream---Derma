@@ -101,8 +101,9 @@ const PatientHistory = () => {
       {!loading && !error && normalizedReports.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2">
           {normalizedReports.map((report) => (
-            <div 
-              key={report.id} 
+            <article 
+              key={report.id}
+              aria-label={`Case ${report.id}`}
               className={`${uiTokens.card} p-4 cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all border-l-4 ${
                 report.reviewStatus === 'accepted' ? 'border-l-indigo-500' : 
                 report.reviewStatus === 'pending' ? 'border-l-yellow-500' : 
@@ -148,9 +149,15 @@ const PatientHistory = () => {
               </div>
 
               <div className="mt-3 flex justify-end">
-                <span className="text-xs font-bold text-indigo-600">Open Conversation →</span>
+                <Link 
+                  to={`/patient/case/${report.imageId}`}
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Open Conversation →
+                </Link>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}

@@ -24,25 +24,26 @@ const clearHeaders = () => {
 };
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const isAuthenticated = !!user;
-  const userRole = user ? user.role : null;
-
-  // Load user from localStorage on first mount
-  useEffect(() => {
+  // Lazy initialize user from localStorage to prevent flash of unauthenticated state
+  const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem('authUser');
       if (stored) {
         const parsed = JSON.parse(stored);
-        setUser(parsed);
+        // Also set headers immediately
         setHeadersFromUser(parsed);
+        return parsed;
       }
     } catch (err) {
       console.error('Failed to parse authUser from localStorage', err);
     }
-  }, []);
+    return null;
+  });
 
-  // Whenever user changes, sync to localStorage + apiClient headers
+  const isAuthenticated = !!user;
+  const userRole = user ? user.role : null;
+
+  // Sync to localStorage + apiClient headers when user changes (after mount)
   useEffect(() => {
     if (user) {
       localStorage.setItem('authUser', JSON.stringify(user));
@@ -52,6 +53,8 @@ export function AuthProvider({ children }) {
       clearHeaders();
     }
   }, [user]);
+
+
 
   /**
    * login({ email, password, roleOverride })

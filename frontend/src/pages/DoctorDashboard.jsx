@@ -89,6 +89,8 @@ const DoctorDashboard = () => {
                 {pendingCases.map((task, index) => (
                   <div
                     key={task.report_id ?? task.id ?? `pending-${index}`}
+                    role="article"
+                    aria-label={`Case for ${task.patient_email}`}
                     className={`${uiTokens.card} p-4 border-l-4 border-l-red-500 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer`}
                     onClick={() => navigate(`/doctor/case/${task.report_id}`)}
                   >
