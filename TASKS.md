@@ -454,109 +454,7 @@ I need to Apply Styling and Layout
 
 ## 🚀 Sprint 2 – Advanced Tasks (Plug & Play)
 
-### 🟩 S2-1 – Frontend Doctor Profiles
-**Prompt:**
-```xml
-<task id="frontend-doctor-profiles" owner="Hoang">
-  <mission>Enrich doctor profiles shown to patients with fuller data and resilient rendering.</mission>
-  <context>
-    <frontend>
-      <files>
-        <file>frontend/src/pages/PatientDashboard.jsx</file>
-        <file>frontend/src/components/Layout.jsx (uiTokens for spacing/colors)</file>
-        <file>frontend/src/App.css and frontend/src/index.css</file>
-      </files>
-      <flow>PatientDashboard renders doctor cards from availableDoctors and posts selection via apiClient to POST /patient/select-doctor.</flow>
-    </frontend>
-    <backend>
-      <files>
-        <file>backend/app/routes/doctors.py (GET /doctors)</file>
-        <file>backend/app/services/doctor_service.py (doctor assembly)</file>
-        <file>backend/app/models.py (Doctor fields: id, email, full_name, clinic_name, bio, avatar_url)</file>
-      </files>
-    </backend>
-  </context>
-  <instructions>
-    <step>Expand the doctor card to show avatar, clinic name, bio/experience, years practicing (fallback to "Experience pending"), and specialties (comma-joined if present). Keep styling consistent with uiTokens and existing responsive layout.</step>
-    <step>Add graceful fallbacks for optional fields so undefined data never breaks rendering.</step>
-    <step>Show a small badge for doctors accepting new patients (default true unless backend supplies otherwise) and expose email contact.</step>
-    <step>Preserve existing selection flow and loading/disabled states that rely on selectingDoctorId.</step>
-    <step>Create or update a React Testing Library test (e.g., frontend/src/__tests__/PatientDashboard.test.jsx) that verifies avatar, clinic name, and bio render for mocked doctors.</step>
-    <step>Do not change routing; keep /patient-dashboard entry intact. Respect strictness in the existing JS/TS configuration.</step>
-  </instructions>
-  <constraints>
-    <item>Follow AGENTS.md rulebook; no logic in routes.</item>
-    <item>Keep any new props typed if you touch TS files; maintain lint friendliness.</item>
-  </constraints>
-</task>
-```
-
-### � S2-2 – Security Hardening
-**Prompt:**
-```xml
-<task id="security-hardening" owner="Ahmed">
-  <mission>Strengthen protection of clinical data in the FastAPI backend.</mission>
-  <context>
-    <backend>
-      <files>
-        <file>backend/app/config.py (MEDIA_ROOT, settings)</file>
-        <file>backend/app/main.py (app.mount("/media", ...))</file>
-        <file>backend/app/routes/cases.py; backend/app/routes/analysis.py (case/report access)</file>
-        <file>backend/app/models.py (AnalysisReport, ChatMessage)</file>
-        <file>backend/app/services/auth.py and backend/app/auth_helpers.py (JWT + dependencies)</file>
-        <file>backend/tests/ (pytest suite)</file>
-      </files>
-    </backend>
-  </context>
-  <instructions>
-    <step>Restrict media serving: add signed URL or token-check middleware so /media/** files require authenticated patients or their linked doctors. Document the approach in docs/SECURITY.md.</step>
-    <step>Add lifecycle cleanup or encryption-at-rest for uploaded images. If cleaning, create a scheduled job hook (placeholder async task) that removes media and DB rows older than N days; make retention configurable via env var.</step>
-    <step>Enforce role-based access on analysis/chat endpoints to prevent cross-patient access.</step>
-    <step>Add regression tests in backend/tests/ for unauthorized media fetch and report access.</step>
-    <step>Update threat-model notes in docs/TESTING.md if new risks/mitigations are added.</step>
-  </instructions>
-  <constraints>
-    <item>Async first; do not wrap imports in try/except.</item>
-    <item>Use service-layer pattern for business logic.</item>
-    <item>Mock external services in tests.</item>
-  </constraints>
-</task>
-```
-
-### 🟩 S2-3 – Playwright E2E Coverage
-**Prompt:**
-```xml
-<task id="playwright-e2e" owner="Ash">
-  <mission>Add browser-level coverage for critical patient and doctor flows.</mission>
-  <context>
-    <frontend>
-      <files>
-        <file>frontend/src/App.jsx (routes)</file>
-        <file>frontend/src/context/AuthContext.jsx (JWT auth)</file>
-        <file>frontend/src/pages/PatientUpload.jsx, PatientDashboard.jsx, PatientCasePage.jsx</file>
-        <file>frontend/src/pages/DoctorDashboard.jsx, DoctorCasePage.jsx</file>
-      </files>
-      <existingTests>Vitest/RTL live under frontend/src/__tests__.</existingTests>
-    </frontend>
-    <data>
-      <seed>Doctors seeded via backend/app/seed_doctors.py.</seed>
-      <creds>Test creds: alice@derma.com / password123 (adjust if you change seeds).</creds>
-    </data>
-  </context>
-  <instructions>
-    <step>Initialize Playwright in frontend/ (npm create playwright@latest with TypeScript). Configure baseURL to http://localhost:5173.</step>
-    <step>Write specs for: (a) patient login → upload dummy image → trigger analyze → see structured result card; (b) doctor login → view pending cases at /doctor-dashboard → open a case → post a note → mark case complete; (c) anonymous try flow via /try-anonymous → upload image → receive AI response → sign up → ensure session links to history (public_session_id linkage).</step>
-    <step>Add CI-friendly scripts to frontend/package.json (test:e2e) with headless mode; document run instructions in docs/TESTING.md.</step>
-    <step>Use data-testid hooks only where necessary; prefer stable text selectors.</step>
-  </instructions>
-  <constraints>
-    <item>Keep existing routing/auth intact.</item>
-    <item>Do not skip cleanup—ensure fixtures reset storage/state between tests.</item>
-  </constraints>
-</task>
-```
-
-### 🟩 S2-4 – UI Improvements
+### 🟩 S2-1 – UI Improvements
 **Prompt:**
 ```xml
 <task id="ui-improvements" owner="Hani">
@@ -584,7 +482,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 📝 S2-5 – Usage Guides for Patients and Doctors
+### 📝 S2-2 – Usage Guides for Patients and Doctors
 **Prompt:**
 ```xml
 <task id="user-guides" owner="Docs">
@@ -609,7 +507,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-6 – Clinic Branding & Content
+### 🟦 S2-3 – Clinic Branding & Content
 **Prompt:**
 ```xml
 <task id="clinic-branding" owner="Content">
@@ -637,7 +535,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-7 – Safe Doctor Switch
+### 🟦 S2-4 – Safe Doctor Switch
 **Prompt:**
 ```xml
 <task id="safe-doctor-switch" owner="Backend+Frontend">
@@ -669,7 +567,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-8 – Post-Consultation Doctor Rating
+### 🟦 S2-5 – Post-Consultation Doctor Rating
 **Prompt:**
 ```xml
 <task id="doctor-rating" owner="Backend+Frontend">
@@ -700,7 +598,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-9 – Medical Admin Role & Seeded Account
+### 🟦 S2-6 – Medical Admin Role & Seeded Account
 **Prompt:**
 ```xml
 <task id="medical-admin" owner="Fullstack">
@@ -733,7 +631,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-10 – Observability & Operational Readiness
+### 🟦 S2-7 – Observability & Operational Readiness
 **Prompt:**
 ```xml
 <task id="observability" owner="Ops+Fullstack">
@@ -770,7 +668,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-11 – Data Lifecycle & Patient Deletion
+### 🟦 S2-8 – Data Lifecycle & Patient Deletion
 **Prompt:**
 ```xml
 <task id="data-lifecycle" owner="Security+Backend">
@@ -803,7 +701,7 @@ I need to Apply Styling and Layout
 </task>
 ```
 
-### 🟦 S2-12 – Resilience for AI + Upload Pipeline
+### 🟦 S2-9 – Resilience for AI + Upload Pipeline
 **Prompt:**
 ```xml
 <task id="resilience" owner="Reliability">
@@ -851,7 +749,7 @@ I need to Apply Styling and Layout
 - [x] B8 – Doctor Profile Integrity & Seeding
 - [x] B9 – Analysis Result Formatting & Chat Context
 - [x] B10 – Doctor-Patient Workflow Glue
-- [-] B11 – Security Hardening & Data Safety
+- [] B11 – Security Hardening & Data Safety
 
 ### Frontend
 - [x] F1 – Frontend Skeleton
@@ -861,22 +759,19 @@ I need to Apply Styling and Layout
 - [x] F5 – Styling & Layout
 - [x] F6 – Landing, Auth Navigation, and Logout
 - [x] F7 – Results UI & AI Chat Surface
-- [-] F8 – Doctor Profile Display Robustness
+- [] F8 – Doctor Profile Display Robustness
 - [x] F9 – Patient-to-Doctor Flow & Escalation UI
 - [x] F10 – Anonymous/Public Flow
-- [-] F11 – E2E Coverage (Playwright)
+- [x] F11 – E2E Coverage (Playwright)
 
 ### Sprint 2 Advanced (Plug & Play)
-- [ ] S2-1 – Doctor Profiles
-- [ ] S2-2 – Security Hardening
-- [x] S2-3 – Playwright E2E Coverage
-- [ ] S2-4 – UI Improvements
-- [ ] S2-5 – Usage Guides
-- [ ] S2-6 – Clinic Branding
-- [ ] S2-7 – Safe Doctor Switch
-- [ ] S2-8 – Post-Consultation Doctor Rating
-- [ ] S2-9 – Medical Admin Role
-- [ ] S2-10 – Observability
-- [ ] S2-11 – Data Lifecycle
-- [ ] S2-12 – Resilience
+- [ ] S2-1 – UI Improvements
+- [ ] S2-2 – Usage Guides
+- [ ] S2-3 – Clinic Branding
+- [ ] S2-4 – Safe Doctor Switch
+- [ ] S2-5 – Post-Consultation Doctor Rating
+- [ ] S2-6 – Medical Admin Role
+- [ ] S2-7 – Observability
+- [ ] S2-8 – Data Lifecycle
+- [ ] S2-9 – Resilience
 
