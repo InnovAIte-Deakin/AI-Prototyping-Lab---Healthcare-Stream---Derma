@@ -7,7 +7,7 @@ from pathlib import Path
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.db import get_db
-from app.models import Image, User, AnalysisReport, ChatMessage
+from app.models import Image, User, AnalysisReport, ChatMessage, DoctorProfile
 from app.services.gemini_service import get_gemini_service
 from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.schemas import ChatRequest, ChatResponse
@@ -192,6 +192,16 @@ async def get_analysis_by_report_id(
     analysis_data["doctor_active"] = report.doctor_active
     analysis_data["created_at"] = report.created_at.isoformat()
     
+    # Include doctor details if assigned
+    if report.doctor_id:
+        doctor_profile = db.query(DoctorProfile).filter(DoctorProfile.user_id == report.doctor_id).first()
+        if doctor_profile:
+            analysis_data["doctor"] = {
+                "full_name": doctor_profile.full_name,
+                "avatar_url": doctor_profile.avatar_url,
+                "clinic_name": doctor_profile.clinic_name
+            }
+
     return analysis_data
 
 
@@ -235,6 +245,16 @@ async def get_analysis_by_image_id(
     analysis_data["review_status"] = report.review_status
     analysis_data["doctor_active"] = report.doctor_active
     analysis_data["created_at"] = report.created_at.isoformat()
+
+    # Include doctor details if assigned
+    if report.doctor_id:
+        doctor_profile = db.query(DoctorProfile).filter(DoctorProfile.user_id == report.doctor_id).first()
+        if doctor_profile:
+            analysis_data["doctor"] = {
+                "full_name": doctor_profile.full_name,
+                "avatar_url": doctor_profile.avatar_url,
+                "clinic_name": doctor_profile.clinic_name
+            }
     
     return analysis_data
 

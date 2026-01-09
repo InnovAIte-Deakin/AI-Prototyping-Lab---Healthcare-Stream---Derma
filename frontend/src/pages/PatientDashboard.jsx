@@ -105,22 +105,59 @@ function PatientDashboard() {
 
       {!loading && !error && currentDoctor && (
         <div className={`${uiTokens.card} p-5`}>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Your doctor</p>
-              <h2 className="text-xl font-semibold text-slate-900">
-                {currentDoctor.full_name ?? 'Unknown'}
-              </h2>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-              Active care team
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            {/* Avatar and Doctor Info */}
+            <div className="flex gap-4 flex-1">
+              {currentDoctor.avatar_url && (
+                <img
+                  src={currentDoctor.avatar_url}
+                  alt={currentDoctor.full_name ?? 'Doctor'}
+                  className="h-20 w-20 rounded-lg object-cover border border-slate-200"
+                />
+              )}
+              <div className="flex-1">
+                <div className="flex items-start gap-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Your doctor</p>
+                    <h2 className="text-xl font-semibold text-slate-900">
+                      {currentDoctor.full_name ?? 'Unknown'}
+                    </h2>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 whitespace-nowrap">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+                    Active
+                  </div>
+                </div>
+
+                {currentDoctor.clinic_name && (
+                  <p className="mt-2 text-sm text-slate-600">
+                    <span className="font-medium">Clinic:</span> {currentDoctor.clinic_name}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="mt-3 space-y-1 text-sm text-slate-600">
-            {currentDoctor.specialty && <p>Specialty: {currentDoctor.specialty}</p>}
-            {currentDoctor.email && <p>Email: {currentDoctor.email}</p>}
+          {/* Bio and Contact */}
+          <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+            {currentDoctor.bio && (
+              <div>
+                <p className="text-sm text-slate-900">{currentDoctor.bio}</p>
+              </div>
+            )}
+            <div className="flex flex-col gap-2 text-sm text-slate-600">
+              {currentDoctor.email && (
+                <p>
+                  <span className="font-medium text-slate-900">Email:</span>{' '}
+                  <a
+                    href={`mailto:${currentDoctor.email}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {currentDoctor.email}
+                  </a>
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -157,21 +194,64 @@ function PatientDashboard() {
                 return (
                   <div
                     key={id}
-                    className="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition"
                   >
-                    <p className="text-base font-semibold text-slate-900">
-                      {doctor.full_name ?? 'Doctor'}
-                    </p>
-                    {doctor.specialty && (
-                      <p className="text-sm text-slate-600">Specialty: {doctor.specialty}</p>
-                    )}
-                    <div className="mt-3">
+                    <div className="flex gap-4">
+                      {/* Doctor Avatar */}
+                      {doctor.avatar_url && (
+                        <img
+                          src={doctor.avatar_url}
+                          alt={doctor.full_name ?? 'Doctor'}
+                          className="h-16 w-16 rounded-lg object-cover border border-slate-200 flex-shrink-0"
+                        />
+                      )}
+
+                      {/* Doctor Details */}
+                      <div className="flex-1">
+                        <div className="flex items-start gap-2 mb-1">
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900">
+                              {doctor.full_name ?? 'Doctor'}
+                            </h3>
+                          </div>
+                          <div className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 whitespace-nowrap flex-shrink-0">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
+                            Available
+                          </div>
+                        </div>
+
+                        {doctor.clinic_name && (
+                          <p className="text-sm text-slate-600 mb-1">
+                            {doctor.clinic_name}
+                          </p>
+                        )}
+
+                        {doctor.bio && (
+                          <p className="text-sm text-slate-600 mb-2 line-clamp-2">
+                            {doctor.bio}
+                          </p>
+                        )}
+
+                        {doctor.email && (
+                          <p className="text-xs text-slate-500">
+                            <a
+                              href={`mailto:${doctor.email}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {doctor.email}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-slate-200">
                       <button
                         onClick={() => handleSelectDoctor(doctor)}
                         disabled={selectingDoctorId === id}
                         className={uiTokens.primaryButton}
                       >
-                        {selectingDoctorId === id ? 'Selecting...' : 'Select'}
+                        {selectingDoctorId === id ? 'Selecting...' : 'Select Doctor'}
                       </button>
                     </div>
                   </div>

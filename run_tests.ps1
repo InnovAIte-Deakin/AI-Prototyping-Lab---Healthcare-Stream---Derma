@@ -45,6 +45,15 @@ Set-Location ..
 # 5. Seeding E2E
 Write-Host "`n [3/5] Seeding Data for E2E Tests..." -ForegroundColor Yellow
 Set-Location backend
+# Ensure DB schema and base users (Doctors) exist
+python -m app.seed_doctors
+if ($LASTEXITCODE -ne 0) {
+    Write-Host " [ERROR] Doctor seeding failed. Stopping." -ForegroundColor Red
+    Set-Location $OriginalDir
+    exit 1
+}
+
+# Seed E2E specific fixtures
 python -m app.seed_e2e_fixtures
 if ($LASTEXITCODE -ne 0) {
     Write-Host " [ERROR] Seeding failed. Stopping." -ForegroundColor Red
@@ -118,20 +127,26 @@ if ($existingBackend) {
 }
 Start-Sleep -Seconds 2
 
-# 9. Restart backend for development (real AI)
-Write-Host " [INFO] Restarting backend for development (real AI)..." -ForegroundColor Gray
-Remove-Item Env:MOCK_AI -ErrorAction SilentlyContinue
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$OriginalDir\backend'; `$env:DATABASE_URL='sqlite:///./derma.db'; python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
-Write-Host " [INFO] Dev backend started in new window (real AI mode)!" -ForegroundColor Green
-
-# 10. Final result
+# 9. Final Reporting
 Set-Location $OriginalDir
 if ($e2eResult -ne 0) {
     Write-Host "`n [ERROR] E2E tests failed." -ForegroundColor Red
-    exit 1
+} else {
+    Write-Host "`n ================================================= " -ForegroundColor Cyan
+    Write-Host "      ALL TESTS PASSED SUCCESSFULLY! 🚀            " -ForegroundColor Green
+    Write-Host " ================================================= " -ForegroundColor Cyan
 }
 
-Write-Host "`n ================================================= " -ForegroundColor Cyan
-Write-Host "      ALL TESTS PASSED SUCCESSFULLY! 🚀            " -ForegroundColor Green
-Write-Host " ================================================= " -ForegroundColor Cyan
-Write-Host " [NOTE] Backend is now running with REAL AI mode." -ForegroundColor Yellow
+# 10. Restart backend for development (real AI)
+Write-Host " [INFO] Restarting backend for development (real AI)..." -ForegroundColor Gray
+Write-Host " [INFO] Server running in THIS terminal. Press Ctrl+C to stop." -ForegroundColor Yellow
+
+Remove-Item Env:MOCK_AI -ErrorAction SilentlyContinue
+Set-Location "$OriginalDir\backend"
+$env:DATABASE_URL = "sqlite:///./derma.db"
+
+# Run directly in this console (Blocking)
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+
+# Exit with test result code after server stops
+if ($e2eResult -ne 0) { exit 1 }

@@ -38,7 +38,7 @@ DOCTORS = [
         "full_name": "Dr. Carol Singh",
         "clinic_name": "Sunrise Skin Center",
         "bio": "Experienced with pigmentary disorders, pediatric dermatology, and patient education.",
-        "avatar_url": "https://images.unsplash.com/photo-1524156868115-1e3acb1686f0?auto=format&fit=crop&w=400&q=80",
+        "avatar_url": "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=400&q=80",
     },
     {
         "email": "dan@derma.com",
@@ -46,7 +46,7 @@ DOCTORS = [
         "full_name": "Dr. Dan Okafor",
         "clinic_name": "Harbor Dermatology",
         "bio": "Passionate about preventive care, post-treatment follow-ups, and community outreach.",
-        "avatar_url": "https://images.unsplash.com/photo-1544723795-3fb0f9ae6c2b?auto=format&fit=crop&w=400&q=80",
+        "avatar_url": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80",
     },
 ]
 

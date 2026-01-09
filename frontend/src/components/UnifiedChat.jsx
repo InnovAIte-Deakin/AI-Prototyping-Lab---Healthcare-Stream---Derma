@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 // eslint-disable-next-line no-unused-vars
-const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) => {
+const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange, doctor }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isConnected, setIsConnected] = useState(false);
@@ -241,12 +241,16 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange }) 
         return (
           <div key={m.id} className="flex justify-start">
             <div className="flex gap-3 max-w-[85%]">
-              <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg">👨‍⚕️</span>
+              <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+                {doctor?.avatar_url ? (
+                  <img src={doctor.avatar_url} alt="Doctor" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-lg">👨‍⚕️</span>
+                )}
               </div>
               <div className="bg-indigo-600 text-white rounded-2xl rounded-tl-none px-4 py-3 shadow-md">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-black text-indigo-200 uppercase tracking-widest">Physician</span>
+                  <span className="text-[10px] font-black text-indigo-200 uppercase tracking-widest">{doctor?.full_name || 'Physician'}</span>
                   <span className="bg-white/20 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">HUMAN</span>
                 </div>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{m.message}</p>

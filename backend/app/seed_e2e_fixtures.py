@@ -30,7 +30,7 @@ def seed_e2e_fixtures():
         doctor_profile = db.query(DoctorProfile).first()
         if not doctor_profile:
             print("ERROR: No doctors found. Run 'python -m app.seed_data' first.")
-            return
+            sys.exit(1)
         doctor_id = doctor_profile.user_id
 
         for fixture in FIXTURES:
