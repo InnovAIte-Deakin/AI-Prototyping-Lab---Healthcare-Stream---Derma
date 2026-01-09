@@ -149,6 +149,7 @@ function PatientCasePage() {
             isPaused={isPaused}
             userRole="patient"
             onStatusChange={handleStatusChange}
+            doctor={report?.doctor}
           />
         </div>
       )}
