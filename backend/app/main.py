@@ -1,8 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-
-from app.config import MEDIA_ROOT
 from app.routes import (
     auth,
     doctors,
@@ -14,6 +11,7 @@ from app.routes import (
     websocket,
     public_try,
     health,
+    media,
 )  # Registered routers
 
 app = FastAPI(
@@ -52,9 +50,7 @@ app.include_router(analysis.router)
 app.include_router(cases.router)
 app.include_router(doctor_dashboard.router)
 app.include_router(health.router)
-
-# Static files (must be AFTER WebSocket routes)
-app.mount("/media", StaticFiles(directory=str(MEDIA_ROOT)), name="media")
+app.include_router(media.router)
 
 @app.get("/")
 def read_root():

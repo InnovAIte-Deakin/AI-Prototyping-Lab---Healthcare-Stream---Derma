@@ -1,17 +1,21 @@
 from uuid import uuid4
+from pathlib import Path
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.config import MEDIA_ROOT, MEDIA_URL
+from app.config import MEDIA_ROOT
 from app.models import Image, PatientDoctorLink
 
 
-def _write_media_file(file_bytes: bytes) -> str:
+def _write_media_file(file_bytes: bytes, subdir: str = "uploads") -> str:
     """
-    Persist uploaded bytes to the media directory and return the file name.
+    Persist uploaded bytes to the media directory and return a relative path.
     """
     file_name = f"{uuid4().hex}.png"
-    file_path = MEDIA_ROOT / file_name
+    relative_path = Path(subdir) / file_name
+    file_path = (MEDIA_ROOT / relative_path).resolve()
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         with open(file_path, "wb") as destination:
@@ -22,7 +26,7 @@ def _write_media_file(file_bytes: bytes) -> str:
             detail="Failed to store uploaded image",
         ) from exc
 
-    return file_name
+    return relative_path.as_posix()
 
 
 def save_patient_image(db: Session, patient_id: int, file_bytes: bytes) -> Image:
@@ -50,7 +54,7 @@ def save_patient_image(db: Session, patient_id: int, file_bytes: bytes) -> Image
     image = Image(
         patient_id=patient_id,
         doctor_id=link.doctor_id,
-        image_url=f"{MEDIA_URL}/{file_name}",
+        image_url=file_name,
     )
 
     db.add(image)

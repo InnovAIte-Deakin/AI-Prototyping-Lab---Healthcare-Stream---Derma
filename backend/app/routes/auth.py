@@ -10,7 +10,7 @@ from app.schemas import UserSignup, UserLogin, LoginResponse, UserResponse
 from app.services.auth import get_password_hash, verify_password, create_access_token
 from app.auth_helpers import get_current_user
 from app.services.public_session_store import public_session_store
-from app.config import MEDIA_ROOT, MEDIA_URL
+from app.config import MEDIA_ROOT
 from app.models import Image, AnalysisReport, ChatMessage
 import os
 import shutil
@@ -71,18 +71,19 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
                 if session and session.get("image_path"):
                     # 2. Migrate Image File
                     src_path = Path(session["image_path"])
+                    if not src_path.is_absolute():
+                        src_path = MEDIA_ROOT / src_path
                     if src_path.exists():
                         target_dir = MEDIA_ROOT / "uploads"
                         target_dir.mkdir(parents=True, exist_ok=True)
                         target_path = target_dir / src_path.name
                         shutil.move(str(src_path), str(target_path))
-                        
-                        final_image_url = f"{MEDIA_URL}/uploads/{src_path.name}"
-                        
+                        final_image_path = (Path("uploads") / src_path.name).as_posix()
+
                         # 3. Create Image Record
                         new_image = Image(
                             patient_id=new_user.id,
-                            image_url=final_image_url
+                            image_url=final_image_path
                         )
                         db.add(new_image)
                         db.commit()

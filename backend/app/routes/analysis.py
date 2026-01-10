@@ -3,45 +3,22 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import Dict, Any, List
 import json
-from pathlib import Path
-
-from app.config import MEDIA_ROOT, MEDIA_URL
+from app.services.media_service import resolve_media_path
 from app.db import get_db
 from app.models import Image, User, AnalysisReport, ChatMessage, DoctorProfile
 from app.services.gemini_service import get_gemini_service
 from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.schemas import ChatRequest, ChatResponse
+from app.services.report_service import (
+    ensure_image_access,
+    ensure_report_access,
+    get_image_or_404,
+    get_report_or_404,
+)
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
 
-def _resolve_image_path(image_url: str) -> Path:
-    """
-    Translate the stored image URL into an absolute filesystem path.
-    """
-    candidate = Path(image_url)
-    if candidate.exists():
-        return candidate
-
-    if image_url.startswith(MEDIA_URL):
-        relative_path = image_url[len(MEDIA_URL):].lstrip("/")
-        candidate = MEDIA_ROOT / relative_path
-        if candidate.exists():
-            return candidate
-
-    trimmed = image_url.lstrip("/")
-    candidate = MEDIA_ROOT / trimmed
-    if candidate.exists():
-        return candidate
-
-    candidate = MEDIA_ROOT / Path(image_url).name
-    if candidate.exists():
-        return candidate
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Image file not found on server",
-    )
 
 
 @router.post("/{image_id}")
@@ -78,7 +55,7 @@ async def analyze_image(
         )
     
     # Resolve image path on disk
-    image_path = str(_resolve_image_path(image.image_url))
+    image_path = str(resolve_media_path(image.image_url))
     
     # Perform AI analysis
     analysis_result = await get_gemini_service().analyze_skin_lesion(image_path)
@@ -160,27 +137,14 @@ async def analyze_image(
 async def get_analysis_by_report_id(
     report_id: int,
     db: Session = Depends(get_db),
-    user_id: int = None
+    current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     Retrieve existing analysis by report ID
     """
-    report = db.query(AnalysisReport).filter(AnalysisReport.id == report_id).first()
-    
-    if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis report not found"
-        )
-    
-    # Get associated image for permission check
-    image = db.query(Image).filter(Image.id == report.image_id).first()
-    
-    if user_id and image and image.patient_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to view this analysis"
-        )
+    report = get_report_or_404(db, report_id)
+    image = get_image_or_404(db, report.image_id)
+    ensure_report_access(db, report, current_user)
     
     analysis_data = report.report_json
     if isinstance(analysis_data, str):
@@ -209,24 +173,13 @@ async def get_analysis_by_report_id(
 async def get_analysis_by_image_id(
     image_id: int,
     db: Session = Depends(get_db),
-    user_id: int = None
+    current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     Retrieve existing analysis for an image by image ID
     """
-    image = db.query(Image).filter(Image.id == image_id).first()
-    
-    if not image:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Image not found"
-        )
-    
-    if user_id and image.patient_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to view this analysis"
-        )
+    image = get_image_or_404(db, image_id)
+    ensure_image_access(db, image, current_user)
     
     report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
     

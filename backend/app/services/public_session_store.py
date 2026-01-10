@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException, status
 
+from app.services.media_service import safe_remove_media_file
 
 class PublicSessionStore:
     """
@@ -27,7 +28,9 @@ class PublicSessionStore:
                 expired_ids.append(session_id)
 
         for session_id in expired_ids:
-            self.sessions.pop(session_id, None)
+            session = self.sessions.pop(session_id, None)
+            if session:
+                safe_remove_media_file(session.get("image_path"))
 
     def create_session(self, analysis: Dict[str, Any], image_path: str = None) -> str:
         """Create a new anonymous session and return its ID."""
@@ -47,7 +50,9 @@ class PublicSessionStore:
         session = self.sessions.get(session_id)
 
         if not session or self._is_expired(session["created_at"]):
-            self.sessions.pop(session_id, None)
+            session = self.sessions.pop(session_id, None)
+            if session:
+                safe_remove_media_file(session.get("image_path"))
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Session expired or not found",
@@ -62,6 +67,8 @@ class PublicSessionStore:
 
     def clear(self) -> None:
         """Utility for tests to reset state."""
+        for session in self.sessions.values():
+            safe_remove_media_file(session.get("image_path"))
         self.sessions.clear()
 
 
