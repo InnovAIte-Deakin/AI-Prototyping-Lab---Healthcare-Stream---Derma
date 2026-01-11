@@ -10,3 +10,5 @@ task-b9-plan.md
 backend/media/
 *.log
 test_image.jpg
+frontend/playwright-report/
+frontend/test-results/

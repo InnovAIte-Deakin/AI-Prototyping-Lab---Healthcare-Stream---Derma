@@ -749,7 +749,7 @@ I need to Apply Styling and Layout
 - [x] B8 – Doctor Profile Integrity & Seeding
 - [x] B9 – Analysis Result Formatting & Chat Context
 - [x] B10 – Doctor-Patient Workflow Glue
-- [] B11 – Security Hardening & Data Safety
+- [x] B11 – Security Hardening & Data Safety
 
 ### Frontend
 - [x] F1 – Frontend Skeleton
