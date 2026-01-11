@@ -66,10 +66,11 @@ async def analyze_anonymously(file: UploadFile = File(...)) -> Dict[str, Any]:
     # Setup anonymous storage
     anon_dir = MEDIA_ROOT / "anonymous"
     anon_dir.mkdir(parents=True, exist_ok=True)
-    
+
     suffix = Path(file.filename or "upload.png").suffix or ".png"
     filename = f"{uuid.uuid4().hex}{suffix}"
-    file_path = anon_dir / filename
+    relative_path = Path("anonymous") / filename
+    file_path = MEDIA_ROOT / relative_path
 
     # Save file persistently (until cleanup)
     with open(file_path, "wb") as f:
@@ -86,7 +87,10 @@ async def analyze_anonymously(file: UploadFile = File(...)) -> Dict[str, Any]:
     
     # Store session with image path relative to media root or absolute?
     # Storing absolute path for simplicity in backend usage.
-    session_id = public_session_store.create_session(analysis, image_path=str(file_path))
+    session_id = public_session_store.create_session(
+        analysis,
+        image_path=relative_path.as_posix(),
+    )
 
     return {"session_id": session_id, **analysis}
 

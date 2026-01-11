@@ -19,6 +19,16 @@ This script will:
 
 ---
 
+## Security & Data Safety (B11)
+
+The backend now treats uploaded media as sensitive content:
+
+- Authenticated uploads are stored under the private `MEDIA_ROOT` and are no longer served via public static files. Clients receive short-lived signed URLs (`/media/... ?token=...`) and the TTL is configurable via `MEDIA_URL_TTL_SECONDS` (default: 300 seconds).
+- Anonymous "try now" uploads are stored under `media/anonymous` and deleted when the public session expires (default: 20 minutes). Expired sessions trigger file cleanup automatically.
+- Report endpoints (`/api/analysis/report/*` and `/api/analysis/image/*`) now require authentication and enforce patient/doctor access checks.
+
+---
+
 ## 1. Backend Testing (FastAPI)
 
 We will use **pytest** as the primary test runner.

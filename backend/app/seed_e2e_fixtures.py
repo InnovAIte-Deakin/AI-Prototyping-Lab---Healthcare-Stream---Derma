@@ -60,7 +60,7 @@ def seed_e2e_fixtures():
             
             _create_case_in_state(db, patient.id, doctor_id, fixture["case_state"])
             _link_patient_to_doctor(db, patient.id, doctor_id)
-            print(f"  ✓ {fixture['patient_email']} → case state: '{fixture['case_state']}'")
+            print(f"  - {fixture['patient_email']} case state: '{fixture['case_state']}'")
         
         db.commit()
         print("--- E2E Fixtures Complete ---")

@@ -1,6 +1,10 @@
+from datetime import datetime, timedelta, timezone
+from fastapi import HTTPException
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from app.config import MEDIA_ROOT
+from app.services.public_session_store import PublicSessionStore
 from app.services.public_session_store import public_session_store
 
 
@@ -86,3 +90,22 @@ def test_public_chat_rejects_missing_session(client):
     )
 
     assert response.status_code == 404
+
+
+def test_public_session_cleanup_removes_file():
+    store = PublicSessionStore(ttl_minutes=20)
+    anon_dir = MEDIA_ROOT / "anonymous"
+    anon_dir.mkdir(parents=True, exist_ok=True)
+    file_path = anon_dir / "cleanup_test.png"
+    file_path.write_bytes(b"fake-bytes")
+
+    session_id = store.create_session(
+        {"status": "success"},
+        image_path=f"anonymous/{file_path.name}",
+    )
+    store.sessions[session_id]["created_at"] = datetime.now(timezone.utc) - timedelta(minutes=30)
+
+    with pytest.raises(HTTPException):
+        store.get_session(session_id)
+
+    assert not file_path.exists()
