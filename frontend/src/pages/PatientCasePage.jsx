@@ -11,6 +11,11 @@ function PatientCasePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRequestingReview, setIsRequestingReview] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [ratingError, setRatingError] = useState(null);
+  const [ratingSuccess, setRatingSuccess] = useState(null);
 
   const fetchReport = useCallback(async () => {
     try {
@@ -32,6 +37,13 @@ function PatientCasePage() {
     }
   }, [imageId, fetchReport]);
 
+  useEffect(() => {
+    if (report?.patient_rating) {
+      setRating(report.patient_rating);
+      setFeedback(report.patient_feedback || '');
+    }
+  }, [report?.patient_rating, report?.patient_feedback]);
+
   const handleStatusChange = useCallback(() => {
     // Refresh report when status changes (e.g., doctor accepts or closes case)
     console.log('[PatientCasePage] Status change detected, refreshing...');
@@ -51,6 +63,34 @@ function PatientCasePage() {
       alert(err.response?.data?.detail || 'Failed to request review');
     } finally {
       setIsRequestingReview(false);
+    }
+  };
+
+  const handleSubmitRating = async () => {
+    if (!report?.report_id) return;
+    if (!rating || rating < 1 || rating > 5) {
+      setRatingError('Please select a rating from 1 to 5 stars.');
+      return;
+    }
+    setIsSubmittingRating(true);
+    setRatingError(null);
+    setRatingSuccess(null);
+    try {
+      const payload = {
+        rating,
+        feedback: feedback.trim() ? feedback.trim() : null,
+      };
+      const res = await apiClient.post(`/cases/${report.report_id}/rating`, payload);
+      setReport(prev => ({
+        ...prev,
+        patient_rating: res.data.patient_rating,
+        patient_feedback: res.data.patient_feedback,
+      }));
+      setRatingSuccess('Thanks for your feedback! Your rating has been saved.');
+    } catch (err) {
+      setRatingError(err.response?.data?.detail || 'Could not submit rating. Please try again.');
+    } finally {
+      setIsSubmittingRating(false);
     }
   };
 
@@ -138,6 +178,76 @@ function PatientCasePage() {
         <p className="text-[10px] font-bold text-blue-400 uppercase mb-1">AI Recommendation</p>
         <p className="text-sm font-medium text-blue-900 leading-relaxed italic">"{report?.recommendation || 'No recommendation available.'}"</p>
       </div>
+
+      {/* Rating */}
+      {reviewStatus === 'reviewed' && (
+        <div className={`${uiTokens.card} p-5 space-y-4`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">Rate Your Physician</h2>
+              <p className="text-sm text-slate-500">
+                Your feedback helps improve care quality.
+              </p>
+            </div>
+            {report?.patient_rating && (
+              <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-100 px-3 py-1 rounded-full">
+                Submitted
+              </span>
+            )}
+          </div>
+
+          {report?.patient_rating ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1 text-amber-500">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span key={star}>{star <= report.patient_rating ? '★' : '☆'}</span>
+                ))}
+              </div>
+              {report?.patient_feedback && (
+                <p className="text-sm text-slate-600">
+                  “{report.patient_feedback}”
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className={`text-2xl ${rating >= star ? 'text-amber-500' : 'text-slate-300'} hover:text-amber-500 transition`}
+                    aria-label={`${star} star`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <textarea
+                rows={3}
+                value={feedback}
+                onChange={(event) => setFeedback(event.target.value)}
+                placeholder="Optional feedback about your physician's review..."
+                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              {ratingError && (
+                <p className="text-sm text-red-600">{ratingError}</p>
+              )}
+              {ratingSuccess && (
+                <p className="text-sm text-green-600">{ratingSuccess}</p>
+              )}
+              <button
+                onClick={handleSubmitRating}
+                disabled={isSubmittingRating}
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-all"
+              >
+                {isSubmittingRating ? 'Submitting...' : 'Submit Rating'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Chat Interface */}
       {report?.report_id && (

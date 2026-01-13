@@ -133,6 +133,20 @@ function DoctorCasePage() {
         <p className="text-sm font-medium text-blue-900 leading-relaxed italic">"{report?.recommendation || 'No recommendation available.'}"</p>
       </div>
 
+      {report?.patient_rating && (
+        <div className="bg-amber-50/60 p-4 rounded-xl border border-amber-100">
+          <p className="text-[10px] font-bold text-amber-500 uppercase mb-1">Patient Rating</p>
+          <div className="flex items-center gap-1 text-amber-500 mb-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star}>{star <= report.patient_rating ? '★' : '☆'}</span>
+            ))}
+          </div>
+          {report?.patient_feedback && (
+            <p className="text-sm text-amber-900 italic">“{report.patient_feedback}”</p>
+          )}
+        </div>
+      )}
+
       {/* Chat Interface - Show for accepted cases */}
       {report?.review_status === 'accepted' && (
         <div>
