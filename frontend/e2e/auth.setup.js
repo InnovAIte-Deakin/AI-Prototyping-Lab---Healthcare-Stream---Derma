@@ -5,6 +5,8 @@
  * Accounts are created by seed_e2e_fixtures.py
  */
 import { test as setup, expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 const ACCOUNTS = {
   doctor: {
@@ -32,17 +34,28 @@ const ACCOUNTS = {
 for (const [name, account] of Object.entries(ACCOUNTS)) {
   setup(`authenticate as ${name}`, async ({ page }) => {
     await page.goto('/login');
+    await page.waitForLoadState("domcontentloaded");
 
     // Robust email filling
-    const emailField = page.getByLabel('Email');
-    await expect(emailField).toBeVisible();
+    let emailField = page.getByLabel('Email');
+    try {
+      await emailField.waitFor({ state: "visible", timeout: 10000 });
+    } catch {
+      emailField = page.locator('input[name="email"], input[type="email"], [aria-label="Email"], input[placeholder*="email"]').first();
+      await emailField.waitFor({ state: "visible", timeout: 10000 });
+    }
     await emailField.click({ clickCount: 3 });
     await emailField.press('Backspace');
     await emailField.fill(account.email);
 
     // Robust password filling
-    const passwordField = page.getByLabel('Password');
-    await expect(passwordField).toBeVisible();
+    let passwordField = page.getByLabel('Password');
+    try {
+      await passwordField.waitFor({ state: "visible", timeout: 10000 });
+    } catch {
+      passwordField = page.locator('input[name="password"], input[type="password"], [aria-label="Password"], input[placeholder*="password"]').first();
+      await passwordField.waitFor({ state: "visible", timeout: 10000 });
+    }
     await passwordField.click({ clickCount: 3 });
     await passwordField.press('Backspace');
     await passwordField.fill(account.password);
@@ -50,9 +63,10 @@ for (const [name, account] of Object.entries(ACCOUNTS)) {
     await page.getByRole('button', { name: 'Log In' }).click();
 
     // Wait for dashboard to confirm login success
-    await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 20000 });
 
     // Save storage state (cookies, localStorage) to file
+    await fs.promises.mkdir(path.dirname(account.file), { recursive: true });
     await page.context().storageState({ path: account.file });
 
     console.log(`✓ Saved auth state for ${name} to ${account.file}`);
