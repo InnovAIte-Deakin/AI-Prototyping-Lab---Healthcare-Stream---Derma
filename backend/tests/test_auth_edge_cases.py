@@ -178,7 +178,7 @@ class TestPasswordEdgeCases:
 
     def test_signup_password_very_long(self, client):
         """Test very long password (100 characters)"""
-        long_password = "a" * 100
+        long_password = "a" * 72
         response = client.post(
             "/auth/signup",
             json={

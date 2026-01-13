@@ -17,7 +17,7 @@ export default defineConfig({
   /* Retry to generate traces for debugging */
   retries: process.env.CI ? 2 : 1,
   /* Increase timeout to 120s for slow E2E flows with slowMo enabled */
-  timeout: 120000,
+  timeout: 180000,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -72,6 +72,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: true,
-    timeout: 120_000,
+    timeout: 180000,
   },
 });
