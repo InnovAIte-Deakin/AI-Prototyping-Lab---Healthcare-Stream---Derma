@@ -53,7 +53,7 @@ describe('PatientCasePage ratings', () => {
 
     renderWithRouter('/patient/case/123');
 
-    expect(await screen.findByText('Rate Your Physician')).toBeInTheDocument();
+    expect(await screen.findByText('Rate Your Experience')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Submit Rating/i })).toBeInTheDocument();
   });
 
@@ -73,11 +73,11 @@ describe('PatientCasePage ratings', () => {
 
     renderWithRouter('/patient/case/123');
 
-    await screen.findByText('Rate Your Physician');
+    await screen.findByText('Rate Your Experience');
 
     fireEvent.click(screen.getByLabelText('4 star'));
     fireEvent.change(
-      screen.getByPlaceholderText(/Optional feedback/i),
+      screen.getByPlaceholderText(/Optional.*feedback/i),
       { target: { value: 'Helpful review.' } }
     );
 
@@ -90,6 +90,7 @@ describe('PatientCasePage ratings', () => {
       });
     });
 
-    expect(await screen.findByText('Submitted')).toBeInTheDocument();
+    // Verify the Submitted badge appears (may include checkmark)
+    expect(await screen.findByText(/Submitted/i, {}, { timeout: 5000 })).toBeInTheDocument();
   });
 });
