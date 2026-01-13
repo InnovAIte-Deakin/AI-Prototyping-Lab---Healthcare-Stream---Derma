@@ -267,7 +267,8 @@ def test_all_models_have_metadata():
     assert "images" in table_names
     assert "analysis_reports" in table_names
     assert "chat_messages" in table_names
-    assert len(table_names) == 6
+    assert "doctor_change_logs" in table_names
+    assert len(table_names) == 7
 
 
 def test_foreign_key_relationships():

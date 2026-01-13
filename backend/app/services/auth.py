@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 import bcrypt
 from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.services.media_service import verify_media_token
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against a hashed password."""
@@ -51,3 +52,9 @@ def verify_token(token: str) -> Optional[Dict[str, Any]]:
     except JWTError:
         return None
 
+def verify_media_access_token(token: str, path: str) -> bool:
+    """
+    Verify that a media access token is valid for the given path.
+    Wrapper for media_service.verify_media_token to keep auth logic centralized.
+    """
+    return verify_media_token(token, path)
