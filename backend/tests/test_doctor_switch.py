@@ -38,7 +38,8 @@ def doctor1(db_session):
         user_id=user.id,
         full_name="Dr. Alice Smith",
         clinic_name="City Clinic",
-        bio="Experienced dermatologist"
+        bio="Experienced dermatologist",
+        avatar_url="https://placehold.co/128x128"
     )
     db_session.add(profile)
     db_session.commit()
@@ -61,7 +62,8 @@ def doctor2(db_session):
         user_id=user.id,
         full_name="Dr. Bob Jones",
         clinic_name="Health Center",
-        bio="Board certified specialist"
+        bio="Board certified specialist",
+        avatar_url="https://placehold.co/128x128"
     )
     db_session.add(profile)
     db_session.commit()

@@ -10,7 +10,7 @@ DEFAULT_CLINIC_NAME = "Clinic not provided"
 DEFAULT_BIO = "Doctor profile coming soon"
 
 
-def _safe_value(value: str | None, fallback: str) -> str:
+def _safe_value(value: Optional[str], fallback: str) -> str:
     """Return a non-empty string for serialization."""
     return value if value not in (None, "") else fallback
 
