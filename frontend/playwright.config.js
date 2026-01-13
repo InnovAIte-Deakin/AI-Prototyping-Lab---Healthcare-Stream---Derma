@@ -31,7 +31,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    
+
     // Force headed mode for local tests (Methodology Requirement)
     headless: process.env.CI ? true : false,
 
@@ -44,11 +44,11 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup project runs first to create auth states
-    { 
-      name: 'setup', 
+    {
+      name: 'setup',
       testMatch: /.*\.setup\.js/,
     },
-    
+
     // Main tests depend on setup (auth states)
     {
       name: 'chromium',
@@ -72,5 +72,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: true,
+    timeout: 120_000,
   },
 });
