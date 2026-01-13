@@ -11,6 +11,11 @@ function PatientCasePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRequestingReview, setIsRequestingReview] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [ratingError, setRatingError] = useState(null);
+  const [ratingSuccess, setRatingSuccess] = useState(null);
 
   const fetchReport = useCallback(async () => {
     try {
@@ -32,6 +37,13 @@ function PatientCasePage() {
     }
   }, [imageId, fetchReport]);
 
+  useEffect(() => {
+    if (report?.patient_rating) {
+      setRating(report.patient_rating);
+      setFeedback(report.patient_feedback || '');
+    }
+  }, [report?.patient_rating, report?.patient_feedback]);
+
   const handleStatusChange = useCallback(() => {
     // Refresh report when status changes (e.g., doctor accepts or closes case)
     console.log('[PatientCasePage] Status change detected, refreshing...');
@@ -51,6 +63,37 @@ function PatientCasePage() {
       alert(err.response?.data?.detail || 'Failed to request review');
     } finally {
       setIsRequestingReview(false);
+    }
+  };
+
+  const handleSubmitRating = async (ratingValue, feedbackValue) => {
+    if (!report?.report_id) return;
+    const ratingToSubmit = ratingValue || rating;
+    const feedbackToSubmit = feedbackValue !== undefined ? feedbackValue : feedback;
+    
+    if (!ratingToSubmit || ratingToSubmit < 1 || ratingToSubmit > 5) {
+      setRatingError('Please select a rating from 1 to 5 stars.');
+      return;
+    }
+    setIsSubmittingRating(true);
+    setRatingError(null);
+    setRatingSuccess(null);
+    try {
+      const payload = {
+        rating: ratingToSubmit,
+        feedback: feedbackToSubmit?.trim() ? feedbackToSubmit.trim() : null,
+      };
+      const res = await apiClient.post(`/cases/${report.report_id}/rating`, payload);
+      setReport(prev => ({
+        ...prev,
+        patient_rating: res.data.patient_rating,
+        patient_feedback: res.data.patient_feedback,
+      }));
+      setRatingSuccess('Thanks for your feedback! Your rating has been saved.');
+    } catch (err) {
+      setRatingError(err.response?.data?.detail || 'Could not submit rating. Please try again.');
+    } finally {
+      setIsSubmittingRating(false);
     }
   };
 
@@ -150,6 +193,14 @@ function PatientCasePage() {
             userRole="patient"
             onStatusChange={handleStatusChange}
             doctor={report?.doctor}
+            // Rating props for inline rating card
+            reviewStatus={reviewStatus}
+            patientRating={report?.patient_rating}
+            patientFeedback={report?.patient_feedback}
+            onRatingSubmit={handleSubmitRating}
+            ratingSuccess={ratingSuccess}
+            ratingError={ratingError}
+            isSubmittingRating={isSubmittingRating}
           />
         </div>
       )}

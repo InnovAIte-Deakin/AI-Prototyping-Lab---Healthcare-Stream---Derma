@@ -154,6 +154,8 @@ async def get_analysis_by_report_id(
     analysis_data["image_id"] = report.image_id
     analysis_data["review_status"] = report.review_status
     analysis_data["doctor_active"] = report.doctor_active
+    analysis_data["patient_rating"] = report.patient_rating
+    analysis_data["patient_feedback"] = report.patient_feedback
     analysis_data["created_at"] = report.created_at.isoformat()
     
     # Include doctor details if assigned
@@ -197,6 +199,8 @@ async def get_analysis_by_image_id(
     analysis_data["image_id"] = image.id
     analysis_data["review_status"] = report.review_status
     analysis_data["doctor_active"] = report.doctor_active
+    analysis_data["patient_rating"] = report.patient_rating
+    analysis_data["patient_feedback"] = report.patient_feedback
     analysis_data["created_at"] = report.created_at.isoformat()
 
     # Include doctor details if assigned
@@ -347,6 +351,8 @@ async def get_patient_reports(
         data["image_id"] = report.image_id
         data["review_status"] = report.review_status
         data["doctor_active"] = report.doctor_active
+        data["patient_rating"] = report.patient_rating
+        data["patient_feedback"] = report.patient_feedback
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
         
@@ -390,6 +396,8 @@ async def get_doctor_patient_reports(
         data["image_id"] = report.image_id
         data["review_status"] = report.review_status
         data["doctor_active"] = report.doctor_active
+        data["patient_rating"] = report.patient_rating
+        data["patient_feedback"] = report.patient_feedback
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
         

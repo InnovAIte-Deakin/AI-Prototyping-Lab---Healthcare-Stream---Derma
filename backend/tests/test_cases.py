@@ -111,3 +111,122 @@ class TestCasesRoutes:
         data = response.json()
         assert data["review_status"] == "reviewed"
         assert data["doctor_active"] is False
+
+    def test_submit_rating_success(self, client, db_session, sample_user, sample_image):
+        """Test patient rating submission after review"""
+        report = AnalysisReport(
+            image_id=sample_image.id,
+            patient_id=sample_user.id,
+            review_status="reviewed"
+        )
+        db_session.add(report)
+        db_session.commit()
+        db_session.refresh(report)
+
+        token = create_access_token({"sub": str(sample_user.id)})
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.post(
+            f"/cases/{report.id}/rating",
+            headers=headers,
+            json={"rating": 4, "feedback": "Clear and helpful review."},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["patient_rating"] == 4
+        assert data["patient_feedback"] == "Clear and helpful review."
+
+        db_report = db_session.query(AnalysisReport).filter(AnalysisReport.id == report.id).first()
+        assert db_report.patient_rating == 4
+        assert db_report.patient_feedback == "Clear and helpful review."
+
+    def test_submit_rating_before_review(self, client, db_session, sample_user, sample_image):
+        """Test rating blocked if case not reviewed"""
+        report = AnalysisReport(
+            image_id=sample_image.id,
+            patient_id=sample_user.id,
+            review_status="accepted"
+        )
+        db_session.add(report)
+        db_session.commit()
+
+        token = create_access_token({"sub": str(sample_user.id)})
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.post(
+            f"/cases/{report.id}/rating",
+            headers=headers,
+            json={"rating": 5, "feedback": "Great"},
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_submit_rating_twice(self, client, db_session, sample_user, sample_image):
+        """Test duplicate rating submission"""
+        report = AnalysisReport(
+            image_id=sample_image.id,
+            patient_id=sample_user.id,
+            review_status="reviewed",
+            patient_rating=3,
+        )
+        db_session.add(report)
+        db_session.commit()
+
+        token = create_access_token({"sub": str(sample_user.id)})
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.post(
+            f"/cases/{report.id}/rating",
+            headers=headers,
+            json={"rating": 4},
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_submit_rating_wrong_patient(self, client, db_session, sample_user, sample_image):
+        """Test rating forbidden for non-owner"""
+        report = AnalysisReport(
+            image_id=sample_image.id,
+            patient_id=sample_user.id,
+            review_status="reviewed"
+        )
+        db_session.add(report)
+        db_session.commit()
+
+        other_user = User(email="other_rating@test.com", password="pass", role="patient")
+        db_session.add(other_user)
+        db_session.commit()
+        db_session.refresh(other_user)
+
+        token = create_access_token({"sub": str(other_user.id)})
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.post(
+            f"/cases/{report.id}/rating",
+            headers=headers,
+            json={"rating": 4},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_submit_rating_validation(self, client, db_session, sample_user, sample_image):
+        """Test rating validation for out-of-range values"""
+        report = AnalysisReport(
+            image_id=sample_image.id,
+            patient_id=sample_user.id,
+            review_status="reviewed"
+        )
+        db_session.add(report)
+        db_session.commit()
+
+        token = create_access_token({"sub": str(sample_user.id)})
+        headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.post(
+            f"/cases/{report.id}/rating",
+            headers=headers,
+            json={"rating": 6},
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
