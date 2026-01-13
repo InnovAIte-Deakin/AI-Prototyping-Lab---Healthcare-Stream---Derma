@@ -44,9 +44,7 @@ for (const [name, account] of Object.entries(ACCOUNTS)) {
       emailField = page.locator('input[name="email"], input[type="email"], [aria-label="Email"], input[placeholder*="email"]').first();
       await emailField.waitFor({ state: "visible", timeout: 10000 });
     }
-    await emailField.click({ clickCount: 3 });
-    await emailField.press('Backspace');
-    await emailField.fill(account.email);
+    await emailField.fill(account.email, { timeout: 10000 });
 
     // Robust password filling
     let passwordField = page.getByLabel('Password');
@@ -56,11 +54,12 @@ for (const [name, account] of Object.entries(ACCOUNTS)) {
       passwordField = page.locator('input[name="password"], input[type="password"], [aria-label="Password"], input[placeholder*="password"]').first();
       await passwordField.waitFor({ state: "visible", timeout: 10000 });
     }
-    await passwordField.click({ clickCount: 3 });
-    await passwordField.press('Backspace');
-    await passwordField.fill(account.password);
+    await passwordField.fill(account.password, { timeout: 10000 });
 
-    await page.getByRole('button', { name: 'Log In' }).click();
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "networkidle", timeout: 20000 }),
+      page.getByRole('button', { name: /log in/i }).click()
+    ]);
 
     // Wait for dashboard to confirm login success
     await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 20000 });
