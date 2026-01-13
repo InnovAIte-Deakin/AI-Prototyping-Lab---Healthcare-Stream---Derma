@@ -113,26 +113,61 @@ function PatientDashboard() {
       )}
 
       {!loading && !error && currentDoctor && (
-        <div
-          style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            border: '1px solid #ccc',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <h2>Your Doctor</h2>
-          <p><strong>Name:</strong> {currentDoctor.doctor?.full_name || currentDoctor.full_name || currentDoctor.name || 'Unknown'}</p>
-          <p>
-            <strong>Clinic:</strong>{' '}
-            {currentDoctor.doctor?.clinic_name || currentDoctor.clinic_name || 'Clinic unavailable'}
-          </p>
-          {(currentDoctor.doctor?.bio || currentDoctor.bio) && (
-            <p><strong>Bio:</strong> {currentDoctor.doctor?.bio || currentDoctor.bio}</p>
-          )}
-          {(currentDoctor.doctor?.email || currentDoctor.email) && (
-            <p><strong>Email:</strong> {currentDoctor.doctor?.email || currentDoctor.email}</p>
-          )}
+        <div className={`${uiTokens.card} p-5`}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            {/* Avatar and Doctor Info */}
+            <div className="flex gap-4 flex-1">
+              {currentDoctor.avatar_url && (
+                <img
+                  src={currentDoctor.avatar_url}
+                  alt={currentDoctor.full_name ?? 'Doctor'}
+                  className="h-20 w-20 rounded-lg object-cover border border-slate-200"
+                />
+              )}
+              <div className="flex-1">
+                <div className="flex items-start gap-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Your doctor</p>
+                    <h2 className="text-xl font-semibold text-slate-900">
+                      {currentDoctor.full_name ?? 'Unknown'}
+                    </h2>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 whitespace-nowrap">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+                    Active
+                  </div>
+                </div>
+
+                {currentDoctor.clinic_name && (
+                  <p className="mt-2 text-sm text-slate-600">
+                    <span className="font-medium">Clinic:</span> {currentDoctor.clinic_name}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bio and Contact */}
+          <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+            {currentDoctor.bio && (
+              <div>
+                <p className="text-sm text-slate-900">{currentDoctor.bio}</p>
+              </div>
+            )}
+            <div className="flex flex-col gap-2 text-sm text-slate-600">
+              {currentDoctor.email && (
+                <p>
+                  <span className="font-medium text-slate-900">Email:</span>{' '}
+                  <a
+                    href={`mailto:${currentDoctor.email}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {currentDoctor.email}
+                  </a>
+                </p>
+              )}
+            </div>
+          </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <button className={uiTokens.primaryButton} onClick={handleNewScan}>
@@ -174,26 +209,66 @@ function PatientDashboard() {
                 return (
                   <div
                     key={id}
-                    style={{
-                      border: '1px solid #ddd',
-                      borderRadius: '0.5rem',
-                      padding: '0.75rem',
-                    }}
+                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition"
                   >
-                    <p><strong>{doctor.full_name || doctor.name || 'Doctor'}</strong></p>
-                    <p style={{ fontSize: '0.875rem', color: '#666' }}>
-                      {doctor.clinic_name || 'Clinic unavailable'}
-                    </p>
-                    {doctor.bio && (
-                      <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>{doctor.bio}</p>
-                    )}
-                    <button
-                      onClick={() => handleSelectDoctor(doctor)}
-                      disabled={selectingDoctorId === id}
-                      style={{ marginTop: '0.5rem' }}
-                    >
-                      {selectingDoctorId === id ? 'Selecting…' : 'Select'}
-                    </button>
+                    <div className="flex gap-4">
+                      {/* Doctor Avatar */}
+                      {doctor.avatar_url && (
+                        <img
+                          src={doctor.avatar_url}
+                          alt={doctor.full_name ?? 'Doctor'}
+                          className="h-16 w-16 rounded-lg object-cover border border-slate-200 flex-shrink-0"
+                        />
+                      )}
+
+                      {/* Doctor Details */}
+                      <div className="flex-1">
+                        <div className="flex items-start gap-2 mb-1">
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900">
+                              {doctor.full_name ?? 'Doctor'}
+                            </h3>
+                          </div>
+                          <div className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 whitespace-nowrap flex-shrink-0">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
+                            Available
+                          </div>
+                        </div>
+
+                        {doctor.clinic_name && (
+                          <p className="text-sm text-slate-600 mb-1">
+                            {doctor.clinic_name}
+                          </p>
+                        )}
+
+                        {doctor.bio && (
+                          <p className="text-sm text-slate-600 mb-2 line-clamp-2">
+                            {doctor.bio}
+                          </p>
+                        )}
+
+                        {doctor.email && (
+                          <p className="text-xs text-slate-500">
+                            <a
+                              href={`mailto:${doctor.email}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {doctor.email}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <button
+                        onClick={() => handleSelectDoctor(doctor)}
+                        disabled={selectingDoctorId === id}
+                        className={uiTokens.primaryButton}
+                      >
+                        {selectingDoctorId === id ? 'Selecting...' : 'Select Doctor'}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -210,7 +285,7 @@ function PatientDashboard() {
           </p>
         )}
 
-      {/* Change Doctor Modal */}
+      {/* Change Doctor Modal - Task 7 */}
       {showChangeDoctorModal && (
         <ChangeDoctorModal
           currentDoctor={currentDoctor}

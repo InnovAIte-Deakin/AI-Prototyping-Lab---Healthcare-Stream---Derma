@@ -1,47 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from typing import Dict, Any, List
 import json
-import os
-from pathlib import Path
-
-from app.config import MEDIA_ROOT, MEDIA_URL
+from app.services.media_service import resolve_media_path
 from app.db import get_db
-from app.models import Image, User, AnalysisReport
-from app.services.gemini_service import gemini_service
+from app.models import Image, User, AnalysisReport, ChatMessage, DoctorProfile
+from app.services.gemini_service import get_gemini_service
 from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.schemas import ChatRequest, ChatResponse
+from app.services.report_service import (
+    ensure_image_access,
+    ensure_report_access,
+    get_image_or_404,
+    get_report_or_404,
+)
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
 
-def _resolve_image_path(image_url: str) -> Path:
-    """
-    Translate the stored image URL into an absolute filesystem path.
-    """
-    candidate = Path(image_url)
-    if candidate.exists():
-        return candidate
-
-    if image_url.startswith(MEDIA_URL):
-        relative_path = image_url[len(MEDIA_URL):].lstrip("/")
-        candidate = MEDIA_ROOT / relative_path
-        if candidate.exists():
-            return candidate
-
-    trimmed = image_url.lstrip("/")
-    candidate = MEDIA_ROOT / trimmed
-    if candidate.exists():
-        return candidate
-
-    candidate = MEDIA_ROOT / Path(image_url).name
-    if candidate.exists():
-        return candidate
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Image file not found on server",
-    )
 
 
 @router.post("/{image_id}")
@@ -78,49 +55,54 @@ async def analyze_image(
             detail="You don't have permission to analyze this image"
         )
     
-    # Check if there's an existing report with doctor_active flag
-    existing_report = db.query(AnalysisReport).filter(
-        AnalysisReport.image_id == image_id
-    ).first()
-    
-    if existing_report and existing_report.doctor_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="AI analysis is paused. A doctor is actively reviewing this case."
-        )
-    
-    # If report already exists, return it instead of re-analyzing
-    if existing_report:
-        analysis_data = json.loads(existing_report.report_json)
-        analysis_data["report_id"] = existing_report.id
-        analysis_data["review_status"] = existing_report.review_status
-        analysis_data["doctor_active"] = existing_report.doctor_active
-        return analysis_data
-    
-    # Check if image file exists
-    image_path = image.image_url
-    # Handle both absolute and relative paths
-    if image_path.startswith("/media/"):
-        # Convert URL path to filesystem path
-        image_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-            image_path.lstrip("/")
-        )
-    
-    if not os.path.exists(image_path):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Image file not found on server"
-        )
+    # Resolve image path on disk
+    image_path = str(resolve_media_path(image.image_url))
     
     # Perform AI analysis
-    analysis_result = await gemini_service.analyze_skin_lesion(image_path)
+    analysis_result = await get_gemini_service().analyze_skin_lesion(image_path)
     
     if analysis_result["status"] == "error":
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"{analysis_result.get('message', 'Analysis failed')} Details: {analysis_result.get('error')}"
+        error_msg = analysis_result.get('error', 'Unknown error')
+        print(f"[Analysis] Error encountered: {error_msg}")
+        
+        # Create fallback result so user flow isn't blocked
+        analysis_result = {
+            "status": "error",
+            "condition": "Service Unavailable",
+            "severity": "Unknown",
+            "confidence": 0,
+            "recommendation": "The AI service is currently unavailable due to high demand (Quota Exceeded). Please escalate to a human physician.",
+            "explanation": f"Service Error: {error_msg}. Please try again later or consult a doctor directly.",
+            "precautions": ["Consult a doctor"]
+        }
+        
+        # We continue to save this as a valid (but error-state) report
+        # This allows the user to still use the chat and escalate features
+        report = AnalysisReport(
+            image_id=image.id,
+            report_json=json.dumps(analysis_result),
+            patient_id=current_user.id
         )
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        
+        # Add a system message to the chat explaining the situation
+        system_msg = ChatMessage(
+            report_id=report.id,
+            sender_role="system",
+            message=f"⚠️ I was unable to perform the visual analysis due to a service limit ({error_msg}).\n\nHowever, a case has been created. You can use the button below to escalate this directly to a human dermatologist for review."
+        )
+        db.add(system_msg)
+        db.commit()
+        
+        # Add return fields
+        analysis_result["report_id"] = report.id
+        analysis_result["image_id"] = image.id
+        analysis_result["review_status"] = report.review_status
+        analysis_result["doctor_active"] = report.doctor_active
+        
+        return analysis_result
     
     # Save analysis results to database - include doctor_id from image
     report = AnalysisReport(
@@ -135,38 +117,75 @@ async def analyze_image(
     db.commit()
     db.refresh(report)
     
-    # Add report metadata to response
+    # Add report ID and tracking to response
     analysis_result["report_id"] = report.id
+    analysis_result["image_id"] = image.id
     analysis_result["review_status"] = report.review_status
     analysis_result["doctor_active"] = report.doctor_active
+    
+    # --- PHASE 4: Seed initial AI message ---
+    msg_text = f"Hello! I've analyzed your image. Based on the scan, I detect signs of {analysis_result.get('condition', 'Unknown')}. My confidence is {int(analysis_result.get('confidence', 0)) or 0}%. {analysis_result.get('recommendation', '')}"
+    
+    first_msg = ChatMessage(
+        report_id=report.id,
+        sender_role="ai",
+        message=msg_text
+    )
+    db.add(first_msg)
+    db.commit()
     
     return analysis_result
 
 
-@router.get("/{image_id}")
-async def get_analysis(
+@router.get("/report/{report_id}")
+async def get_analysis_by_report_id(
+    report_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    Retrieve existing analysis by report ID
+    """
+    report = get_report_or_404(db, report_id)
+    image = get_image_or_404(db, report.image_id)
+    ensure_report_access(db, report, current_user)
+    
+    analysis_data = report.report_json
+    if isinstance(analysis_data, str):
+        analysis_data = json.loads(analysis_data)
+    
+    analysis_data["report_id"] = report.id
+    analysis_data["image_id"] = report.image_id
+    analysis_data["review_status"] = report.review_status
+    analysis_data["doctor_active"] = report.doctor_active
+    analysis_data["created_at"] = report.created_at.isoformat()
+    
+    # Include doctor details if assigned
+    if report.doctor_id:
+        doctor_profile = db.query(DoctorProfile).filter(DoctorProfile.user_id == report.doctor_id).first()
+        if doctor_profile:
+            analysis_data["doctor"] = {
+                "full_name": doctor_profile.full_name,
+                "avatar_url": doctor_profile.avatar_url,
+                "clinic_name": doctor_profile.clinic_name
+            }
+
+    return analysis_data
+
+
+@router.get("/image/{image_id}")
+async def get_analysis_by_image_id(
     image_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     Retrieve existing analysis for an image
     """
-    image = db.query(Image).filter(Image.id == image_id).first()
+    image = get_image_or_404(db, image_id)
+    ensure_image_access(db, image, current_user)
     
-    if not image:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Image not found"
-        )
-    
-    if image.patient_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to view this analysis"
-        )
-    
-    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
     
     if not report:
         raise HTTPException(
@@ -174,53 +193,133 @@ async def get_analysis(
             detail="No analysis found for this image"
         )
     
-    analysis_data = json.loads(report.report_json)
+    analysis_data = report.report_json
+    if isinstance(analysis_data, str):
+        analysis_data = json.loads(analysis_data)
+        
     analysis_data["report_id"] = report.id
     analysis_data["image_id"] = image.id
-    analysis_data["report_id"] = report.id
     analysis_data["review_status"] = report.review_status
     analysis_data["doctor_active"] = report.doctor_active
+    analysis_data["created_at"] = report.created_at.isoformat()
+
+    # Include doctor details if assigned
+    if report.doctor_id:
+        doctor_profile = db.query(DoctorProfile).filter(DoctorProfile.user_id == report.doctor_id).first()
+        if doctor_profile:
+            analysis_data["doctor"] = {
+                "full_name": doctor_profile.full_name,
+                "avatar_url": doctor_profile.avatar_url,
+                "clinic_name": doctor_profile.clinic_name
+            }
     
     return analysis_data
 
+
+@router.get("/{image_id}/chat")
+async def get_chat_history(
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get chat history for a specific analysis (Patient or Doctor).
+    """
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
+    
+    if not report:
+        raise HTTPException(status_code=404, detail="Analysis report not found")
+        
+    # Permission check: Patient owner OR associated Doctor
+    is_patient = current_user.role == "patient" and report.patient_id == current_user.id
+    is_doctor = current_user.role == "doctor" and (report.doctor_id == current_user.id or report.review_status == "pending")
+    
+    if not (is_patient or is_doctor):
+        raise HTTPException(status_code=403, detail="Forbidden")
+        
+    messages = db.query(ChatMessage).filter(ChatMessage.report_id == report.id).order_by(ChatMessage.created_at.asc()).all()
+    
+    return [
+        {
+            "id": m.id,
+            "sender_role": m.sender_role,
+            "sender_id": m.sender_id,
+            "message": m.message,
+            "created_at": m.created_at.isoformat()
+        } for m in messages
+    ]
 
 @router.post("/{image_id}/chat", response_model=ChatResponse)
 async def chat_about_lesion_endpoint(
     image_id: int,
     chat_request: ChatRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_patient)
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Chat with the AI about a specific lesion analysis.
+    Unified chat endpoint. Handles Patient -> AI, Patient -> Doctor, and Doctor -> Patient.
+    AI responds only if doctor_active is False.
     """
     # Fetch Analysis Report by image_id
-    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).first()
+    report = db.query(AnalysisReport).filter(AnalysisReport.image_id == image_id).order_by(desc(AnalysisReport.created_at)).first()
     
     if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Analysis not found for this image"
-        )
+        raise HTTPException(status_code=404, detail="Analysis not found")
 
-    # Verify ownership
-    if report.patient_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to chat about this analysis"
-        )
+    # Permission check
+    is_patient = current_user.role == "patient" and report.patient_id == current_user.id
+    is_doctor = current_user.role == "doctor" and report.doctor_id == current_user.id
+    
+    if not (is_patient or is_doctor):
+        raise HTTPException(status_code=403, detail="Unauthorized")
 
-    # Extract context
-    analysis_data = json.loads(report.report_json)
+    # Save incoming message
+    new_msg = ChatMessage(
+        report_id=report.id,
+        sender_id=current_user.id,
+        sender_role=current_user.role,
+        message=chat_request.message
+    )
+    db.add(new_msg)
     
-    # Call Service
-    reply = await gemini_service.chat_about_lesion(analysis_data, chat_request.message)
-    
+    ai_reply = None
+    # AI responds ONLY to patient and ONLY if doctor is not active
+    if is_patient and not report.doctor_active:
+        # Get history for context
+        history = db.query(ChatMessage).filter(ChatMessage.report_id == report.id).all()
+        
+        # Call AI
+        analysis_data = report.report_json
+        if isinstance(analysis_data, str):
+            analysis_data = json.loads(analysis_data)
+        ai_reply = await get_gemini_service().chat_about_lesion(analysis_data, chat_request.message, history=history)
+        
+        # Save AI message
+        ai_msg = ChatMessage(
+            report_id=report.id,
+            sender_role="ai",
+            message=ai_reply
+        )
+        db.add(ai_msg)
+
+    db.commit()
+
+    # Determine response message:
+    # - If AI replied, use that response
+    # - If patient sent to active doctor, confirm message was sent to doctor
+    # - Otherwise (doctor sending), confirm message was sent to patient
+    if ai_reply:
+        response_message = ai_reply
+    elif is_patient and report.doctor_active:
+        response_message = "Message sent to doctor."
+    else:
+        response_message = "Message sent to patient."
+
     return ChatResponse(
         image_id=image_id,
         user_message=chat_request.message,
-        ai_response=reply,
-        context_used=True
+        ai_response=response_message,
+        context_used=True if ai_reply else False
     )
 
 
@@ -231,24 +330,32 @@ async def get_patient_reports(
 ) -> List[Dict[str, Any]]:
     """
     List all analysis reports for the current patient.
-    Includes doctor_id and doctor_name from the report for historical display.
+    Includes doctor_id and doctor_name from the report for historical display (Task 7).
     """
-    from app.models import DoctorProfile
-    
     reports = db.query(AnalysisReport).filter(
         AnalysisReport.patient_id == current_patient.id
     ).order_by(AnalysisReport.created_at.desc()).all()
     
     results = []
     for report in reports:
-        data = json.loads(report.report_json)
+        data = report.report_json
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {}
+        
+        if not isinstance(data, dict):
+            data = {}
+
         data["report_id"] = report.id
         data["image_id"] = report.image_id
+        data["review_status"] = report.review_status
+        data["doctor_active"] = report.doctor_active
         data["created_at"] = report.created_at.isoformat()
         data["doctor_id"] = report.doctor_id
-        data["review_status"] = report.review_status
         
-        # Fetch doctor name if doctor_id exists (for historical display)
+        # Fetch doctor name if doctor_id exists (for historical display - Task 7)
         if report.doctor_id:
             profile = db.query(DoctorProfile).filter(
                 DoctorProfile.user_id == report.doctor_id
@@ -285,9 +392,20 @@ async def get_doctor_patient_reports(
     
     results = []
     for report in reports:
-        data = json.loads(report.report_json)
+        data = report.report_json
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {}
+        
+        if not isinstance(data, dict):
+            data = {}
+
         data["report_id"] = report.id
         data["image_id"] = report.image_id
+        data["review_status"] = report.review_status
+        data["doctor_active"] = report.doctor_active
         data["created_at"] = report.created_at.isoformat()
         results.append(data)
         

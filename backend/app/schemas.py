@@ -9,8 +9,8 @@ Sprint 2 Upgrade Path:
 - Add email validation and password strength requirements
 """
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Literal, Optional, List
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
+from typing import Literal, Optional, List, Dict, Any
 from datetime import datetime
 
 
@@ -26,6 +26,7 @@ class UserSignup(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, description="Sprint 1: min 6 chars. Sprint 2: Add complexity rules")
     role: Literal["patient", "doctor"] = Field(..., description="User role: patient or doctor")
+    public_session_id: Optional[str] = Field(None, description="Link anonymous session on signup")
 
     @field_validator('role')
     @classmethod
@@ -57,12 +58,11 @@ class UserResponse(BaseModel):
     - Add expires_at timestamp
     - Remove sensitive data exposure
     """
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: str
     role: str
-
-    class Config:
-        from_attributes = True  # Allows conversion from ORM models
 
 
 class LoginResponse(BaseModel):
@@ -78,11 +78,14 @@ class LoginResponse(BaseModel):
 
 class DoctorResponse(BaseModel):
     """Doctor details with associated profile information."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: EmailStr
     full_name: str
-    clinic_name: Optional[str] = None
-    bio: Optional[str] = None
+    clinic_name: str
+    bio: str
+    avatar_url: str
 
 
 class PatientDoctorResponse(BaseModel):
@@ -97,13 +100,13 @@ class SelectDoctorRequest(BaseModel):
 
 
 class ChangeDoctorRequest(BaseModel):
-    """Request body for changing doctor."""
+    """Request body for changing doctor (Task 7)."""
     doctor_id: int
     reason: Optional[str] = Field(None, max_length=500)
 
 
 class ChangeDoctorResponse(BaseModel):
-    """Response after changing doctor."""
+    """Response after changing doctor (Task 7)."""
     doctor: DoctorResponse
     status: str
     previous_doctor_id: Optional[int] = None
@@ -202,15 +205,54 @@ class ChatResponse(BaseModel):
     context_used: bool = True
 
 
-# Sprint 2: Add these additional schemas
-# class Token(BaseModel):
-#     access_token: str
-#     refresh_token: str
-#     token_type: str = "bearer"
-#
-# class TokenData(BaseModel):
-#     user_id: int
-#     email: str
-#     role: str
-#     exp: datetime
+# ============================================================================
+# ANALYSIS SCHEMAS
+# ============================================================================
 
+class AnalysisResult(BaseModel):
+    """
+    Structured analysis result from Gemini.
+    """
+    condition: str = Field(..., description="Predicted skin condition")
+    confidence: float = Field(..., description="Confidence score 0-100")
+    severity: Literal["Low", "Moderate", "High"] = Field(..., description="Severity level")
+    characteristics: List[str] = Field(..., description="List of visible features")
+    recommendation: str = Field(..., description="Actionable recommendation")
+    disclaimer: str
+
+
+class AnalysisReportResponse(BaseModel):
+    """Response schema for analysis reports"""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    image_id: int
+    condition: str
+    confidence: float
+    recommendation: str
+    report_json: Dict[str, Any]
+    raw_output: Optional[str] = None
+    created_at: datetime
+
+
+class ChatMessage(BaseModel):
+    """Schema for chat messages"""
+    role: str = Field(..., description="Role: 'user' or 'Doctor'")
+    content: str = Field(..., description="Message content")
+
+
+# ============================================================================
+# PUBLIC/ANONYMOUS SCHEMAS
+# ============================================================================
+
+class PublicChatRequest(BaseModel):
+    """Request body for anonymous chat preview."""
+    session_id: str = Field(..., description="Anonymous session identifier")
+    message: str = Field(..., min_length=1, max_length=1000)
+
+
+class PublicChatResponse(BaseModel):
+    """Response for anonymous chat preview."""
+    session_id: str
+    reply: str
+    analysis: Dict[str, Any]

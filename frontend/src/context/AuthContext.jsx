@@ -8,26 +8,42 @@ export const apiClient = axios.create({
   baseURL: 'http://localhost:8000',
 });
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const isAuthenticated = !!user;
-  const userRole = user ? user.role : null;
+// Helper functions for managing API client headers (defined outside component to avoid re-creation)
+const setHeadersFromUser = (u) => {
+  apiClient.defaults.headers['X-User-Id'] = u.id;
+  apiClient.defaults.headers['X-User-Role'] = u.role;
+  if (u.access_token) {
+    apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
+  }
+};
 
-  // Load user from localStorage on first mount
-  useEffect(() => {
+const clearHeaders = () => {
+  delete apiClient.defaults.headers['X-User-Id'];
+  delete apiClient.defaults.headers['X-User-Role'];
+  delete apiClient.defaults.headers['Authorization'];
+};
+
+export function AuthProvider({ children }) {
+  // Lazy initialize user from localStorage to prevent flash of unauthenticated state
+  const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem('authUser');
       if (stored) {
         const parsed = JSON.parse(stored);
-        setUser(parsed);
+        // Also set headers immediately
         setHeadersFromUser(parsed);
+        return parsed;
       }
     } catch (err) {
       console.error('Failed to parse authUser from localStorage', err);
     }
-  }, []);
+    return null;
+  });
 
-  // Whenever user changes, sync to localStorage + apiClient headers
+  const isAuthenticated = !!user;
+  const userRole = user ? user.role : null;
+
+  // Sync to localStorage + apiClient headers when user changes (after mount)
   useEffect(() => {
     if (user) {
       localStorage.setItem('authUser', JSON.stringify(user));
@@ -38,19 +54,7 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  const setHeadersFromUser = (u) => {
-    apiClient.defaults.headers['X-User-Id'] = u.id;
-    apiClient.defaults.headers['X-User-Role'] = u.role;
-    if (u.access_token) {
-      apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
-    }
-  };
 
-  const clearHeaders = () => {
-    delete apiClient.defaults.headers['X-User-Id'];
-    delete apiClient.defaults.headers['X-User-Role'];
-    delete apiClient.defaults.headers['Authorization'];
-  };
 
   /**
    * login({ email, password, roleOverride })
@@ -73,8 +77,8 @@ export function AuthProvider({ children }) {
     return normalizedUser;
   };
 
-  const signup = async ({ email, password, role }) => {
-    const res = await apiClient.post('/auth/signup', { email, password, role });
+  const signup = async ({ email, password, role, public_session_id }) => {
+    const res = await apiClient.post('/auth/signup', { email, password, role, public_session_id });
     const userData = res.data;
 
     // Backend returns LoginResponse: { access_token, user_id, email, role }
@@ -93,7 +97,10 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const value = { user, isAuthenticated, userRole, login, signup, logout };
+  // Expose the raw token for WebSocket connections
+  const token = user?.access_token || null;
+
+  const value = { user, isAuthenticated, userRole, token, login, signup, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

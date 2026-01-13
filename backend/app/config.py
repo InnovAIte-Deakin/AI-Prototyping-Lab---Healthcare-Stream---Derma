@@ -18,3 +18,4 @@ DEFAULT_MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT", DEFAULT_MEDIA_ROOT))
 MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 MEDIA_URL = "/media"
+MEDIA_URL_TTL_SECONDS = int(os.getenv("MEDIA_URL_TTL_SECONDS", "300"))

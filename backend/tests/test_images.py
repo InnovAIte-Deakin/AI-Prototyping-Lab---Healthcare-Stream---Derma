@@ -2,6 +2,7 @@
 Tests for the image upload endpoint.
 """
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from app.config import MEDIA_ROOT, MEDIA_URL
 from app.models import Image, User
@@ -30,9 +31,11 @@ def link_patient_to_doctor(client, patient_id: int, doctor_id: int) -> None:
     assert response.status_code == 200
 
 
-def _media_path_from_url(image_url: str) -> Path:
-    relative_part = image_url.replace(MEDIA_URL, "", 1).lstrip("/")
-    return MEDIA_ROOT / relative_part
+def _parse_media_url(image_url: str) -> tuple[str, str, str]:
+    parsed = urlparse(image_url)
+    relative_part = parsed.path.replace(MEDIA_URL, "", 1).lstrip("/")
+    token = parse_qs(parsed.query).get("token", [None])[0]
+    return parsed.path, relative_part, token
 
 
 class TestImageUpload:
@@ -71,15 +74,20 @@ class TestImageUpload:
         payload = response.json()
         assert payload["image_url"].startswith(MEDIA_URL)
 
+        public_path, relative_part, token = _parse_media_url(payload["image_url"])
+        assert token is not None
+
         image = test_db.query(Image).filter(Image.id == payload["image_id"]).first()
         assert image is not None
         assert image.patient_id == patient_id
         assert image.doctor_id == doctor_id
-        assert image.image_url == payload["image_url"]
+        assert image.image_url == relative_part
 
-        file_path = _media_path_from_url(payload["image_url"])
+        file_path = MEDIA_ROOT / relative_part
         try:
             assert file_path.exists()
+            assert client.get(public_path).status_code == 403
+            assert client.get(payload["image_url"]).status_code == 200
         finally:
             if file_path.exists():
                 file_path.unlink()

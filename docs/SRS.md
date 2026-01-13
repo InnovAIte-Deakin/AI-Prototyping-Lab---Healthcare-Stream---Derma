@@ -2,9 +2,9 @@
 
 Project Name: DERMA (AI-Powered Dermatologist)
 
-Version: 1.1 (Updated Framework)
+Version: 1.2 (Sprint 2 Enhancements)
 
-Date: November 25, 2025
+Date: January 7, 2026
 
 Prepared For: Deakin University Capstone Project
 
@@ -48,11 +48,13 @@ The system functions as a standalone web application deployed via Docker13. It r
 
 **2.2 User Classes and Characteristics**
 
-- **Patient (User):** Registered individuals who check skin conditions and save history<sup>15</sup>.  
+- **Patient (User):** Registered individuals who check skin conditions, save history, and interact with clinicians<sup>15</sup>.  
     <br/>
 - **Guest (Anonymous):** Unregistered users who can perform a single "Try Now" analysis but must register to save results<sup>15b</sup>.  
     <br/>
-- **Doctor (Admin):** Medical professionals requiring a dashboard to view patient queues, review high-resolution images, and manage appointments<sup>16</sup>.  
+- **Doctor (Admin):** Medical professionals who review cases, manage patient links, and provide consultation via chat<sup>16</sup>.  
+    <br/>
+- **Medical Admin (Superuser):** Clinic-level administrators with oversight over all doctors, patients, and operational metrics<sup>16b</sup>.  
     <br/>
 
 **2.3 Operating Environment**
@@ -106,40 +108,53 @@ The system functions as a standalone web application deployed via Docker13. It r
     <br/>
 - Update personal contact details<sup>34</sup>.  
     <br/>
-- **FR-05: Find Help Resources**
-- **Description:** Users can access resources to find professional help<sup>35</sup>.  
+- **FR-05: Find Help & Doctor Selection**
+- **Description:** Users can locate professional help and manage their clinical relationships<sup>35</sup>.  
     <br/>
 - **Features:**
 - "Find a Doctor": Uses browser geolocation to suggest nearby clinics<sup>36</sup>.  
     <br/>
-- "Nurse on Call": Displays emergency/hotline contact details<sup>37</sup>.  
+- **Doctor Choice:** Patients can browse and select a specific doctor for review. Doctor cards display full credentials, specialties, years of experience, and clinic branding<sup>35b</sup>.  
+    <br/>
+- **Safe Doctor Switch:** Patients can change their linked doctor. Historical cases remain tied to the original reviewer for medical record integrity<sup>35c</sup>.  
+    <br/>
+- **FR-06: Feedback & Ratings**
+- **Description:** After a clinical review is completed, patients can rate their experience (1-5 stars) and provide text feedback<sup>35d</sup>.  
+    <br/>
+- **FR-07: Right to Erasure**
+- **Description:** Patients can request full account deletion, which scrubs PII and deletes associated media while preserving anonymized aggregate data for clinical audits<sup>35e</sup>.  
     <br/>
 
 **3.2 Doctor Portal Module (Admin)**
 
-- **FR-06: Doctor Authentication (RBAC)**
+- **FR-08: Doctor Authentication (RBAC)**
 - **Description:** A secure login specifically for medical professionals<sup>38</sup>.  
     <br/>
-- **Constraint:** Must be distinct from patient login permissions<sup>39</sup>.  
+- **Constraint:** Must use JWT-based sessions with role-specific permissions<sup>39</sup>.  
     <br/>
-- **FR-07: Triage Dashboard**
+- **FR-09: Triage Dashboard**
 - **Description:** Doctors view a queue of patient-submitted cases<sup>40</sup>.  
     <br/>
-- **Data Displayed:** Patient Name, Submission Date, Thumbnail of Image, Status (New/Reviewed)<sup>41</sup>.  
+- **Data Displayed:** Patient Name, Submission Date, Thumbnail of Image, Status (New/Reviewed/Rating)<sup>41</sup>.  
     <br/>
-- **FR-08: Clinical Review & Scheduling**
+- **FR-10: Clinical Review & Unified Chat**
 - **Description:** Doctors can open a specific case to view the high-res image and AI notes<sup>42</sup>.  
     <br/>
-- **Action:** Doctors can trigger an "Appointment Request" or **Join the Chat** context directly ("One Pane of Glass" workflow) to discuss results with the patient<sup>43</sup>.  
+- **Action:** Doctors can "Accept" a case to join the chat history. AI-auto replies are paused once direct clinician participation begins to ensure professional continuity<sup>43</sup>.  
+    <br/>
+- **FR-11: Profile Management**
+- **Description:** Doctors maintain a public profile (full name, clinic, bio, avatar) used for patient selection<sup>43b</sup>.  
     <br/>
 
 **4\. Non-Functional Requirements**
 
 **4.1 Performance**
 
-- **Latency:** AI responses should ideally load within 5-10 seconds (dependent on Google API latency)<sup>44</sup>.  
+- **Latency:** AI responses should ideally load within 5-10 seconds. The system must support asynchronous polling or streaming to prevent UI blocking<sup>44</sup>.  
     <br/>
-- **Mobile Responsiveness:** The UI must adapt automatically to mobile screen sizes for camera usability<sup>45</sup>.  
+- **Mobile Responsiveness:** The UI must adhere to WCAG accessibility standards and adapt to various viewport sizes<sup>45</sup>.  
+    <br/>
+- **Resilience:** The system must implement fallback logic to provide a safe "Degraded" experience if the Google AI API is unreachable<sup>45b</sup>.  
     <br/>
 
 **4.2 Reliability**
@@ -149,9 +164,11 @@ The system functions as a standalone web application deployed via Docker13. It r
 
 **4.3 Security & Privacy**
 
-- **Data Storage:** Patient images and chat logs must be stored securely in the database<sup>47</sup>.  
+- **Data Storage:** Patient images and chat logs must be encrypted at rest and served via access-controlled buffers<sup>47</sup>.  
     <br/>
-- **Access Control:** Only authorized Doctor accounts can view patient uploaded data<sup>48</sup>.  
+- **Access Control:** Image media (/media/**) must require signed URLs or authenticated tokens, preventing direct URL scraping<sup>48</sup>.  
+    <br/>
+- **Lifecycle Management:** Clinical data must be subject to automated retention policies, with configurable cleanup of aged records<sup>48b</sup>.  
     <br/>
 
 **5\. System Architecture & Technology Stack**
@@ -171,9 +188,11 @@ The system functions as a standalone web application deployed via Docker13. It r
 
 **5.2 Interface Requirements**
 
-- **API:** The Backend will expose RESTful endpoints (e.g., /api/upload, /api/chat, /api/login)<sup>54</sup>.  
+- **API:** The Backend will expose RESTful endpoints secured by JWT. Request correlation IDs must be used for tracing logs<sup>54</sup>.  
     <br/>
-- **System Prompt:** A robust system prompt will be maintained in the backend to instruct Gemini on its persona (Dermatologist Assistant) and safety constraints<sup>55</sup>.  
+- **System Prompt:** A robust system prompt will be maintained to instruct Gemini on its persona and safety constraints, tailored to fictional clinic branding ("Aurora Skin Clinic")<sup>55</sup>.  
+    <br/>
+- **Observability:** A `/health` endpoint must report connectivity status for database and AI services<sup>55b</sup>.  
     <br/>
 
 **6\. Data Model (Database Schema)**

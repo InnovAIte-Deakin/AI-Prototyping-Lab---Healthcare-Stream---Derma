@@ -1,6 +1,13 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Float, JSON, Boolean
+from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
 from sqlalchemy.sql import func
 from app.db import Base
+
+
+def _utc_now():
+    """Return an aware UTC datetime."""
+    return datetime.now(timezone.utc)
 
 
 class User(Base):
@@ -19,8 +26,9 @@ class DoctorProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     full_name = Column(String, nullable=False)
-    clinic_name = Column(String)
-    bio = Column(Text)
+    clinic_name = Column(String, nullable=False)
+    bio = Column(Text, nullable=False)
+    avatar_url = Column(String, nullable=False)
 
 
 class PatientDoctorLink(Base):
@@ -40,6 +48,9 @@ class Image(Base):
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     image_url = Column(String, nullable=False)
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    analysis_reports = relationship("AnalysisReport", back_populates="image")
 
 
 class AnalysisReport(Base):
@@ -47,34 +58,47 @@ class AnalysisReport(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     image_id = Column(Integer, ForeignKey("images.id"), nullable=False)
-    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_utc_now)
+    
+    # Relationships and tracking (Phase 1 updates)
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    report_json = Column(Text, nullable=False)
-    # Structured analysis fields (used by tests and endpoints)
-    condition = Column(String, nullable=True)
-    confidence = Column(String, nullable=True)
-    recommendation = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    # Workflow status: none | pending | accepted | reviewed
-    review_status = Column(String, default="none", nullable=False)
-    # When True, AI replies are paused (doctor is actively responding)
+    review_status = Column(String, default="none", nullable=False)  # none, pending, accepted, reviewed
     doctor_active = Column(Boolean, default=False, nullable=False)
+    
+    # Structured fields 
+    condition = Column(String, nullable=True)  # Primary detected condition
+    confidence = Column(Float, nullable=True)   # Confidence score (0-1)
+    recommendation = Column(Text, nullable=True)  # Clinical recommendation
+    
+    # JSON field for complete analysis
+    report_json = Column(JSON, nullable=True)  # Full structured output
+    
+    # Keep raw output if needed
+    raw_output = Column(Text, nullable=True)   # Original model response
+    
+    # Relationships
+    image = relationship("Image", back_populates="analysis_reports")
+    chat_messages = relationship("ChatMessage", back_populates="report", cascade="all, delete-orphan")
 
 
 class ChatMessage(Base):
     """Messages in the doctor-patient chat for a case/report."""
     __tablename__ = "chat_messages"
-
+    
     id = Column(Integer, primary_key=True, index=True)
     report_id = Column(Integer, ForeignKey("analysis_reports.id"), nullable=False)
-    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    sender_role = Column(String, nullable=False)  # patient | doctor | ai
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Null for AI
+    sender_role = Column(String, nullable=False)  # "patient", "doctor", or "ai"
     message = Column(Text, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), default=_utc_now)
+
+    # Relationships
+    report = relationship("AnalysisReport", back_populates="chat_messages")
 
 
 class DoctorChangeLog(Base):
-    """Log of doctor changes for a patient."""
+    """Log of doctor changes for a patient (Task 7 - Safe Doctor Switch)."""
     __tablename__ = "doctor_change_logs"
 
     id = Column(Integer, primary_key=True, index=True)

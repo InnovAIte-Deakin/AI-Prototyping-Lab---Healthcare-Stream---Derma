@@ -1,11 +1,29 @@
 import os
 import pytest
+import bcrypt
+from unittest.mock import patch
+
+@pytest.fixture(scope="session", autouse=True)
+def fast_bcrypt():
+    """
+    Force bcrypt to use minimum rounds (4) for speed during tests.
+    """
+    original_gensalt = bcrypt.gensalt
+    
+    def fast_gensalt(rounds=None, prefix=b"2b"):
+        return original_gensalt(rounds=4, prefix=prefix)
+        
+    with patch("bcrypt.gensalt", side_effect=fast_gensalt):
+        yield
 
 # -------------------------------------------------------------------
 # Test database setup – use in-memory SQLite and fake env vars
 # IMPORTANT: Set environment variables BEFORE importing app modules
 # because app.db.py creates the engine at module load time.
 # -------------------------------------------------------------------
+
+from dotenv import load_dotenv
+load_dotenv()
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
 os.environ.setdefault("GOOGLE_API_KEY", "test-api-key")
@@ -18,6 +36,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.db import Base, get_db
 from app.models import User, Image, DoctorProfile
+from app.config import MEDIA_ROOT
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -117,10 +136,16 @@ def sample_doctor_data():
     columns = {c.name for c in DoctorProfile.__table__.columns}
     data = {}
 
+    if "full_name" in columns:
+        data["full_name"] = "Test Doctor"
     if "specialty" in columns:
         data["specialty"] = "Dermatology"
     if "clinic_name" in columns:
         data["clinic_name"] = "Test Clinic"
+    if "bio" in columns:
+        data["bio"] = "Test bio"
+    if "avatar_url" in columns:
+        data["avatar_url"] = "https://placehold.co/128x128?text=Test"
     if "location" in columns:
         data["location"] = "Test City"
 
@@ -148,20 +173,27 @@ def sample_user(db_session, sample_user_data):
 
 
 @pytest.fixture
-def sample_image(db_session, sample_user, tmp_path):
+def sample_image(db_session, sample_user):
     """
-    Create a fake image record + actual temp file on disk so
-    the analysis route tests can find it.
+    Create a fake image record + actual file on disk under MEDIA_ROOT.
     """
-    # create a temporary file to simulate an uploaded image
-    image_file = tmp_path / "test_image.jpg"
+    from uuid import uuid4
+
+    media_dir = MEDIA_ROOT / "tests"
+    media_dir.mkdir(parents=True, exist_ok=True)
+    image_file = media_dir / f"test_image_{uuid4().hex}.jpg"
     image_file.write_bytes(b"fake image data")
 
     image = Image(
         patient_id=sample_user.id,
-        image_url=str(image_file),
+        image_url=f"tests/{image_file.name}",
     )
     db_session.add(image)
     db_session.commit()
     db_session.refresh(image)
-    return image
+
+    try:
+        yield image
+    finally:
+        if image_file.exists():
+            image_file.unlink()

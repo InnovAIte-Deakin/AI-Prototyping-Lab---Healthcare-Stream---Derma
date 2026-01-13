@@ -66,7 +66,7 @@ describe('App Component', () => {
   it('renders Doctor Patient Detail on /doctor/patients/:patientId', async () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
     renderWithRouter('/doctor/patients/123');
-    expect(await screen.findByText('Doctor Patient Detail')).toBeInTheDocument();
+    expect(await screen.findByText('Patient Reports')).toBeInTheDocument();
     expect(await screen.findByText('SkinScope')).toBeInTheDocument();
     expect(
       await screen.findByText(

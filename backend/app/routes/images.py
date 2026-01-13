@@ -107,6 +107,7 @@ from app.auth_helpers import get_current_patient
 from app.db import get_db
 from app.models import User
 from app.services.image_service import save_patient_image
+from app.services.media_service import create_signed_media_url
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
@@ -129,4 +130,4 @@ async def upload_image(
         file_bytes=file_bytes,
     )
 
-    return {"image_id": image.id, "image_url": image.image_url}
+    return {"image_id": image.id, "image_url": create_signed_media_url(image.image_url)}

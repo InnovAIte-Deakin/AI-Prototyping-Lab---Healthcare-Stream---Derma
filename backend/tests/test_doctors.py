@@ -20,6 +20,7 @@ def create_doctor(client, test_db, email: str, full_name: str) -> int:
     profile.full_name = full_name
     profile.clinic_name = "Test Clinic"
     profile.bio = "Test bio"
+    profile.avatar_url = "https://placehold.co/128x128?text=TestDoctor"
     test_db.commit()
     return doctor_id
 
@@ -49,6 +50,7 @@ class TestDoctorListing:
         assert doctor["full_name"] == "Dr. Test One"
         assert doctor["clinic_name"] == "Test Clinic"
         assert doctor["bio"] == "Test bio"
+        assert doctor["avatar_url"] == "https://placehold.co/128x128?text=TestDoctor"
 
 
 class TestPatientDoctorLinking:

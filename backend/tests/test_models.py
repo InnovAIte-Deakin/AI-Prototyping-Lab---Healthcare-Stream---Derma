@@ -79,6 +79,12 @@ def test_doctor_profile_model_columns():
     assert "full_name" in column_names
     assert "clinic_name" in column_names
     assert "bio" in column_names
+    assert "avatar_url" in column_names
+
+    assert mapper.columns["full_name"].nullable is False
+    assert mapper.columns["clinic_name"].nullable is False
+    assert mapper.columns["bio"].nullable is False
+    assert mapper.columns["avatar_url"].nullable is False
 
 
 def test_doctor_profile_has_foreign_key():
@@ -112,6 +118,7 @@ def test_doctor_profile_can_be_created(test_db, sample_user_data, sample_doctor_
     assert doctor_profile.id is not None
     assert doctor_profile.user_id == user.id
     assert doctor_profile.full_name == sample_doctor_data["full_name"]
+    assert doctor_profile.avatar_url == sample_doctor_data["avatar_url"]
 
 
 def test_patient_doctor_link_model_exists():
@@ -209,7 +216,9 @@ def test_analysis_report_columns():
     assert "id" in column_names
     assert "image_id" in column_names
     assert "patient_id" in column_names
-    # assert "doctor_id" in column_names
+    assert "doctor_id" in column_names
+    assert "review_status" in column_names
+    assert "doctor_active" in column_names
     assert "report_json" in column_names
     assert "created_at" in column_names
 
@@ -241,6 +250,8 @@ def test_analysis_report_can_be_created(test_db, sample_user_data):
     assert report.image_id == image.id
     assert report.patient_id == patient.id
     assert report.report_json == '{"diagnosis": "test"}'
+    assert report.review_status == "none"
+    assert report.doctor_active is False
     assert report.created_at is not None
 
 

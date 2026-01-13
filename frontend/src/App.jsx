@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
@@ -7,7 +7,10 @@ import PatientDashboard from './pages/PatientDashboard';
 import PatientUpload from './pages/PatientUpload';
 import DoctorDashboard from './pages/DoctorDashboard';
 import DoctorPatientDetail from './pages/DoctorPatientDetail';
+import DoctorCasePage from './pages/DoctorCasePage';
 import PatientHistory from './pages/PatientHistory';
+import PatientCasePage from './pages/PatientCasePage';
+import PublicTryPage from './pages/PublicTryPage';
 
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -28,6 +31,10 @@ export const routes = [
         element: <LoginPage />,
       },
       {
+        path: '/try-anonymous',
+        element: <PublicTryPage />,
+      },
+      {
         path: '/patient-dashboard',
         element: (
           <PrivateRoute allowedRoles={['patient']} element={<PatientDashboard />} />
@@ -46,6 +53,12 @@ export const routes = [
         ),
       },
       {
+        path: '/patient/case/:imageId',
+        element: (
+          <PrivateRoute allowedRoles={['patient']} element={<PatientCasePage />} />
+        ),
+      },
+      {
         path: '/doctor-dashboard',
         element: (
           <PrivateRoute allowedRoles={['doctor']} element={<DoctorDashboard />} />
@@ -55,6 +68,12 @@ export const routes = [
         path: '/doctor/patients/:patientId',
         element: (
           <PrivateRoute allowedRoles={['doctor']} element={<DoctorPatientDetail />} />
+        ),
+      },
+      {
+        path: '/doctor/case/:reportId',
+        element: (
+          <PrivateRoute allowedRoles={['doctor']} element={<DoctorCasePage />} />
         ),
       },
     ],
