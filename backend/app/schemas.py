@@ -164,3 +164,9 @@ class PublicChatResponse(BaseModel):
     session_id: str
     reply: str
     analysis: Dict[str, Any]
+
+
+class CaseRatingRequest(BaseModel):
+    """Request body for patient rating submission."""
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+    feedback: Optional[str] = Field(None, max_length=1000, description="Optional patient feedback")
