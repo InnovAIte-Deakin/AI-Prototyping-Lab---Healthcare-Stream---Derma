@@ -96,6 +96,19 @@ class SelectDoctorRequest(BaseModel):
     doctor_id: int
 
 
+class ChangeDoctorRequest(BaseModel):
+    """Request body for changing doctor."""
+    doctor_id: int
+    reason: Optional[str] = Field(None, max_length=500)
+
+
+class ChangeDoctorResponse(BaseModel):
+    """Response after changing doctor."""
+    doctor: DoctorResponse
+    status: str
+    previous_doctor_id: Optional[int] = None
+
+
 # ============================================================================
 # IMAGE UPLOAD SCHEMAS
 # ============================================================================

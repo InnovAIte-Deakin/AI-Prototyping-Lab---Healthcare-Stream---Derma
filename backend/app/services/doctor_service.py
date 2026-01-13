@@ -1,9 +1,9 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models import DoctorProfile, PatientDoctorLink, User
+from app.models import AnalysisReport, DoctorChangeLog, DoctorProfile, PatientDoctorLink, User
 
 
 def _doctor_response(user: User, profile: DoctorProfile) -> Dict[str, object]:
@@ -107,3 +107,95 @@ def get_doctor_patients(db: Session, doctor_id: int) -> List[Dict[str, object]]:
             "linked_at": "2023-01-01" # Placeholder or add created_at to Link model if needed
         })
     return results
+
+
+def has_active_case(db: Session, patient_id: int) -> bool:
+    """
+    Check if patient has any pending or accepted cases.
+    
+    These statuses indicate the doctor is actively involved with a case,
+    so switching doctors should be blocked.
+    """
+    active_statuses = ["pending", "accepted"]
+    return db.query(AnalysisReport).filter(
+        AnalysisReport.patient_id == patient_id,
+        AnalysisReport.review_status.in_(active_statuses)
+    ).first() is not None
+
+
+def change_patient_doctor(
+    db: Session, 
+    patient_id: int, 
+    new_doctor_id: int,
+    reason: Optional[str] = None
+) -> Dict[str, object]:
+    """
+    Change patient's doctor with validation.
+    
+    - Blocks if patient has active (pending/accepted) cases
+    - Uses SELECT FOR UPDATE to prevent race conditions
+    - Logs the change in DoctorChangeLog
+    
+    Args:
+        db: Database session
+        patient_id: ID of the patient
+        new_doctor_id: ID of the new doctor to link
+        reason: Optional reason for the change
+        
+    Returns:
+        Dict with doctor info, status, and previous_doctor_id
+        
+    Raises:
+        HTTPException: 404 if no current link, 400 if active case blocks change
+    """
+    # Acquire lock on PatientDoctorLink row to prevent race conditions
+    link = db.query(PatientDoctorLink).filter(
+        PatientDoctorLink.patient_id == patient_id
+    ).with_for_update().first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No doctor currently linked. Use select-doctor instead."
+        )
+    
+    # Check for active cases
+    if has_active_case(db, patient_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot change doctor while you have an active case (pending or accepted). Please wait for the doctor to complete their review."
+        )
+    
+    # Cannot change to the same doctor
+    if link.doctor_id == new_doctor_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You are already linked to this doctor."
+        )
+    
+    old_doctor_id = link.doctor_id
+    
+    # Validate new doctor exists
+    new_doctor, profile = _get_doctor_with_profile(db, new_doctor_id)
+    
+    # Log the change
+    log = DoctorChangeLog(
+        patient_id=patient_id,
+        old_doctor_id=old_doctor_id,
+        new_doctor_id=new_doctor_id,
+        reason=reason
+    )
+    db.add(log)
+    
+    # Update the link
+    link.doctor_id = new_doctor_id
+    link.status = "active"
+    
+    db.commit()
+    db.refresh(link)
+    
+    return {
+        "doctor": _doctor_response(new_doctor, profile),
+        "status": link.status,
+        "previous_doctor_id": old_doctor_id
+    }

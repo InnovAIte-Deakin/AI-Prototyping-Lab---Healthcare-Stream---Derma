@@ -231,7 +231,10 @@ async def get_patient_reports(
 ) -> List[Dict[str, Any]]:
     """
     List all analysis reports for the current patient.
+    Includes doctor_id and doctor_name from the report for historical display.
     """
+    from app.models import DoctorProfile
+    
     reports = db.query(AnalysisReport).filter(
         AnalysisReport.patient_id == current_patient.id
     ).order_by(AnalysisReport.created_at.desc()).all()
@@ -242,6 +245,18 @@ async def get_patient_reports(
         data["report_id"] = report.id
         data["image_id"] = report.image_id
         data["created_at"] = report.created_at.isoformat()
+        data["doctor_id"] = report.doctor_id
+        data["review_status"] = report.review_status
+        
+        # Fetch doctor name if doctor_id exists (for historical display)
+        if report.doctor_id:
+            profile = db.query(DoctorProfile).filter(
+                DoctorProfile.user_id == report.doctor_id
+            ).first()
+            data["doctor_name"] = profile.full_name if profile else None
+        else:
+            data["doctor_name"] = None
+            
         results.append(data)
         
     return results

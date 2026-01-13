@@ -71,3 +71,15 @@ class ChatMessage(Base):
     sender_role = Column(String, nullable=False)  # patient | doctor | ai
     message = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class DoctorChangeLog(Base):
+    """Log of doctor changes for a patient."""
+    __tablename__ = "doctor_change_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    old_doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    new_doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    changed_at = Column(DateTime(timezone=True), server_default=func.now())
+    reason = Column(String, nullable=True)  # Optional reason for change
