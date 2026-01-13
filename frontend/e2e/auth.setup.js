@@ -33,7 +33,7 @@ const ACCOUNTS = {
 
 // Helper: tries multiple selectors until one is visible, then fills it.
 // Uses case-insensitive attribute matching for placeholders and aria-labels. 
-async function findAndFill(page, selectors, value, timeout = 20000) {
+async function findAndFill(page, selectors, value, timeout = 5000) {
   for (const sel of selectors) {
     const loc = page.locator(sel).first();
     try {
@@ -44,6 +44,15 @@ async function findAndFill(page, selectors, value, timeout = 20000) {
       // Continue to next selector if this one fails 
     }
   }
+
+  // All selectors failed - dump page content for debugging
+  try {
+    const html = await page.content();
+    console.error(`[findAndFill] Failed to find input. Page content (first 500 chars):\n${html.substring(0, 500)}`);
+  } catch (e) {
+    console.error('[findAndFill] Could not retrieve page content', e);
+  }
+
   throw new Error(`Unable to find & fill input for selectors: ${selectors.join(', ')}`);
 }
 
@@ -51,6 +60,12 @@ for (const [name, account] of Object.entries(ACCOUNTS)) {
   setup(`authenticate as ${name}`, async ({ page }) => {
     try {
       await page.goto('/login', { waitUntil: 'domcontentloaded' });
+
+      // Diagnostic logging
+      const currentUrl = page.url();
+      const pageTitle = await page.title();
+      console.log(`[${name}] Navigated to: ${currentUrl}`);
+      console.log(`[${name}] Page title: "${pageTitle}"`);
 
       // Use robust helper for email 
       await findAndFill(page, [
