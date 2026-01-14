@@ -56,6 +56,8 @@ function DoctorPatientDetail() {
         createdAt,
         reviewStatus: report.review_status || 'none',
         imageId: report.image_id,
+        patientRating: report.patient_rating,
+        patientFeedback: report.patient_feedback,
       };
     });
   }, [reports]);
@@ -158,6 +160,16 @@ function DoctorPatientDetail() {
                   <span className="text-slate-600">
                     {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'Unknown'}
                   </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Patient Rating</span>
+                  {report.patientRating ? (
+                    <span className="font-bold text-amber-600">
+                      {'★'.repeat(report.patientRating)}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">Pending</span>
+                  )}
                 </div>
               </div>
 

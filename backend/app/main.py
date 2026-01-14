@@ -91,3 +91,4 @@ app.include_router(media.router)
 @app.get("/")
 def read_root():
     return {"message": "DermaAI API is running"}
+# Trigger Reload

@@ -769,7 +769,7 @@ I need to Apply Styling and Layout
 - [ ] S2-2 – Usage Guides
 - [ ] S2-3 – Clinic Branding
 - [ ] S2-4 – Safe Doctor Switch
-- [ ] S2-5 – Post-Consultation Doctor Rating
+- [x] S2-5 – Post-Consultation Doctor Rating
 - [ ] S2-6 – Medical Admin Role
 - [ ] S2-7 – Observability
 - [ ] S2-8 – Data Lifecycle

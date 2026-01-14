@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -68,3 +70,36 @@ def ensure_image_access(db: Session, image: Image, user: User) -> None:
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Forbidden",
     )
+
+
+def submit_patient_rating(
+    db: Session,
+    report_id: int,
+    current_patient: User,
+    rating: int,
+    feedback: Optional[str],
+) -> AnalysisReport:
+    report = db.query(AnalysisReport).filter(AnalysisReport.id == report_id).first()
+    if not report or report.patient_id != current_patient.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis report not found or you don't have permission",
+        )
+
+    if report.review_status != "reviewed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You can only rate cases after review is complete",
+        )
+
+    if report.patient_rating is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already rated this case",
+        )
+
+    report.patient_rating = rating
+    report.patient_feedback = feedback
+    db.commit()
+    db.refresh(report)
+    return report

@@ -8,9 +8,11 @@ import os
 # Ensure app module can be found
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.db import SessionLocal
+from app.db import SessionLocal, engine
 from app.models import User, Image, AnalysisReport, PatientDoctorLink, DoctorProfile
 from app.services.auth import get_password_hash
+
+print("SEED FIXTURES ENGINE:", engine.url)
 
 E2E_PASSWORD = "password123"
 
@@ -19,6 +21,7 @@ FIXTURES = [
     {"patient_email": "e2e_patient_aichat@test.com", "case_state": "none"},      # AI chat test (not escalated)
     {"patient_email": "e2e_patient_pending@test.com", "case_state": "pending"},  # Doctor-review test
     {"patient_email": "e2e_patient_accepted@test.com", "case_state": "accepted"}, # Patient-doctor chat test
+    {"patient_email": "e2e_patient_reviewed@test.com", "case_state": "reviewed"}, # Patient rating test
 ]
 
 def seed_e2e_fixtures():
@@ -40,12 +43,24 @@ def seed_e2e_fixtures():
             existing_user = db.query(User).filter(User.email == email).first()
             if existing_user:
                 print(f"  - Cleaning up old data for {email}...")
-                # Cascade delete should handle related records if configured, 
-                # but we'll manually be safe or rely on the ORM if configured well.
-                # For safety/simplicity in this script, we just delete the user 
-                # and let the DB constraints/ORM handle cascade or we re-create.
-                # Actually, deleting the user IS the best way if generic cascade works. 
-                # If not, we might error. Let's try deleting the User.
+                
+                # Manual cleanup of dependencies to avoid FK errors (sqlite/postgres differences)
+                # 1. Links
+                db.query(PatientDoctorLink).filter(PatientDoctorLink.patient_id == existing_user.id).delete()
+                
+                # 2. Chat messages (linked to reports) - need to find reports first
+                # This is getting complex to do via pure SQL if we don't assume cascade.
+                # Let's iterate.
+                reports = db.query(AnalysisReport).filter(AnalysisReport.patient_id == existing_user.id).all()
+                for r in reports:
+                    from app.models import ChatMessage # delayed import to prompt checking
+                    db.query(ChatMessage).filter(ChatMessage.report_id == r.id).delete()
+                    db.delete(r)
+                
+                # 3. Images
+                db.query(Image).filter(Image.patient_id == existing_user.id).delete()
+                
+                # 4. The user
                 db.delete(existing_user)
                 db.flush() # Enforce deletion
             
@@ -92,6 +107,8 @@ def _create_case_in_state(db, patient_id, doctor_id, state):
         condition="E2E Test Condition",
         confidence=85.0,
         recommendation="Monitor for changes (E2E fixture)",
+        patient_rating=None, # Explicitly ensure no rating
+        patient_feedback=None,
         report_json={
             "status": "success",
             "condition": "E2E Test Condition",

@@ -65,6 +65,8 @@ class AnalysisReport(Base):
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     review_status = Column(String, default="none", nullable=False)  # none, pending, accepted, reviewed
     doctor_active = Column(Boolean, default=False, nullable=False)
+    patient_rating = Column(Integer, nullable=True)
+    patient_feedback = Column(Text, nullable=True)
     
     # Structured fields 
     condition = Column(String, nullable=True)  # Primary detected condition
