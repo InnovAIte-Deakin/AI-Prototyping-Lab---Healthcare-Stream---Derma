@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
-import { uiTokens } from '../components/Layout';
 import UnifiedChat from '../components/UnifiedChat';
 
 const PatientUpload = () => {
@@ -84,21 +83,21 @@ const PatientUpload = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-enter">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link
             to="/patient-dashboard"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors mb-2"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-warm-600 hover:text-warm-700 transition-colors mb-2"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
             Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Upload Skin Image</h1>
-          <p className="mt-1 text-[15px] text-slate-500">
+          <h1 className="text-3xl font-semibold text-charcoal-900">Upload Skin Image</h1>
+          <p className="mt-1 text-charcoal-500">
             Upload a clear photo of the affected area for AI-powered analysis
           </p>
         </div>
@@ -107,20 +106,20 @@ const PatientUpload = () => {
       <DisclaimerBanner />
 
       {/* Upload Card */}
-      <div className={`${uiTokens.card} p-6 sm:p-8`}>
+      <div className="card-warm p-6 sm:p-8">
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Upload Section */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold text-charcoal-700 mb-3">
                 Select Image
               </label>
 
               {/* Drop Zone */}
               <div className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
                 previewUrl
-                  ? 'border-teal-300 bg-teal-50/50'
-                  : 'border-slate-200 hover:border-teal-300 hover:bg-slate-50'
+                  ? 'border-warm-300 bg-warm-50/50'
+                  : 'border-cream-300 hover:border-warm-300 hover:bg-cream-100'
               }`}>
                 {previewUrl ? (
                   <div className="p-4">
@@ -134,7 +133,7 @@ const PatientUpload = () => {
                         setSelectedFile(null);
                         setPreviewUrl(null);
                       }}
-                      className="mt-3 text-sm text-slate-500 hover:text-red-500 transition-colors"
+                      className="mt-3 text-sm text-charcoal-500 hover:text-red-500 transition-colors"
                     >
                       Remove image
                     </button>
@@ -142,15 +141,15 @@ const PatientUpload = () => {
                 ) : (
                   <label className="flex flex-col items-center justify-center h-64 cursor-pointer">
                     <div className="flex flex-col items-center justify-center">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-100 mb-4">
-                        <svg className="h-7 w-7 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-warm-100 border border-warm-200 mb-4">
+                        <svg className="h-7 w-7 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                         </svg>
                       </div>
-                      <p className="text-sm font-medium text-slate-700">
+                      <p className="text-sm font-medium text-charcoal-700">
                         Click to upload or drag and drop
                       </p>
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-1 text-xs text-charcoal-400">
                         PNG, JPG up to 10MB
                       </p>
                     </div>
@@ -168,23 +167,23 @@ const PatientUpload = () => {
             </div>
 
             {/* Tips */}
-            <div className="rounded-xl bg-slate-50 border border-slate-200/60 p-4">
-              <h4 className="text-sm font-semibold text-slate-700 mb-2">Tips for best results</h4>
-              <ul className="space-y-1.5 text-sm text-slate-600">
+            <div className="rounded-xl bg-cream-100 border border-cream-300 p-4">
+              <h4 className="text-sm font-semibold text-charcoal-700 mb-2">Tips for best results</h4>
+              <ul className="space-y-1.5 text-sm text-charcoal-600">
                 <li className="flex items-start gap-2">
-                  <svg className="h-4 w-4 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-4 w-4 text-sage-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                   Use good lighting (natural light works best)
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="h-4 w-4 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-4 w-4 text-sage-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                   Focus directly on the affected area
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="h-4 w-4 text-teal-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-4 w-4 text-sage-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                   Avoid blurry or distant shots
@@ -195,7 +194,7 @@ const PatientUpload = () => {
             {/* Analyze Button */}
             <button
               type="button"
-              className={`${uiTokens.primaryButton} w-full py-3.5 text-base`}
+              className="btn-warm w-full py-3.5 text-base"
               disabled={!selectedFile || isAnalyzing}
               onClick={handleAnalyze}
             >
@@ -210,7 +209,7 @@ const PatientUpload = () => {
               ) : (
                 <>
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                   </svg>
                   Analyze Image
                 </>
@@ -231,15 +230,15 @@ const PatientUpload = () => {
           {/* Results Section */}
           <div className="space-y-6">
             {!result && !isAnalyzing && (
-              <div className="flex h-full min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50">
+              <div className="flex h-full min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-cream-300 bg-cream-50">
                 <div className="text-center p-8">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mb-4">
-                    <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream-200 mb-4">
+                    <svg className="h-8 w-8 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-700">No analysis yet</h3>
-                  <p className="mt-2 text-sm text-slate-500">
+                  <h3 className="text-lg font-semibold text-charcoal-700">No analysis yet</h3>
+                  <p className="mt-2 text-sm text-charcoal-500">
                     Upload an image and click Analyze to see AI insights
                   </p>
                 </div>
@@ -247,15 +246,15 @@ const PatientUpload = () => {
             )}
 
             {isAnalyzing && (
-              <div className="flex h-full min-h-[400px] items-center justify-center rounded-2xl border border-slate-200 bg-white">
+              <div className="flex h-full min-h-[400px] items-center justify-center rounded-2xl border border-cream-300 bg-white">
                 <div className="text-center p-8">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-100 mb-4">
-                    <svg className="h-8 w-8 text-teal-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-warm-100 mb-4">
+                    <svg className="h-8 w-8 text-warm-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-700">Analyzing your image...</h3>
-                  <p className="mt-2 text-sm text-slate-500">
+                  <h3 className="text-lg font-semibold text-charcoal-700">Analyzing your image...</h3>
+                  <p className="mt-2 text-sm text-charcoal-500">
                     Our AI is examining the skin characteristics
                   </p>
                 </div>
@@ -287,24 +286,24 @@ const PatientUpload = () => {
 
           {/* Request Review CTA */}
           {reviewStatus === 'none' && result.report_id && (
-            <div className={`${uiTokens.card} p-6 bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200/60`}>
+            <div className="card-warm p-6 bg-deep-50 border-deep-200">
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 flex-shrink-0">
-                    <svg className="h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-deep-100 flex-shrink-0">
+                    <svg className="h-6 w-6 text-deep-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-violet-900">Want a professional opinion?</h3>
-                    <p className="text-sm text-violet-700 mt-0.5">
+                    <h3 className="font-semibold text-deep-900">Want a professional opinion?</h3>
+                    <p className="text-sm text-deep-700 mt-0.5">
                       Request a review from a board-certified dermatologist
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  className={`${uiTokens.accentButton} whitespace-nowrap`}
+                  className="btn-deep whitespace-nowrap"
                   disabled={isRequestingReview}
                   onClick={handleRequestReview}
                 >
@@ -326,9 +325,9 @@ const PatientUpload = () => {
 
           {/* Pending Status */}
           {reviewStatus === 'pending' && (
-            <div className={`${uiTokens.card} p-6 bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/60 text-center`}>
+            <div className="card-warm p-6 bg-amber-50 border-amber-200 text-center">
               <div className="flex items-center justify-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-500 pulse-dot" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500 status-dot" />
                 <p className="font-semibold text-amber-800">
                   Review Pending - A physician will be with you shortly
                 </p>

@@ -1,36 +1,33 @@
 import React from 'react';
 
-const DisclaimerBanner = ({ className = '' }) => {
-  return (
-    <div
-      className={`flex items-start gap-4 rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50 to-orange-50 p-5 ${className}`}
-      role="note"
-      aria-label="AI disclaimer"
-    >
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 flex-shrink-0">
-        <svg
-          className="h-5 w-5 text-amber-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-          />
-        </svg>
-      </div>
-      <div className="flex-1">
-        <p className="font-semibold text-amber-800">Important Notice</p>
-        <p className="mt-1 text-sm text-amber-700 leading-relaxed">
-          This AI-generated report is for informational purposes only and is not a medical diagnosis.
-          Always consult a qualified healthcare professional for medical advice.
-        </p>
-      </div>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DisclaimerBanner — Important but not alarming
+
+   Medical disclaimers are necessary, but they shouldn't feel scary.
+   This design is warm yet clear about the limitations.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const DisclaimerBanner = ({ className = '' }) => (
+  <div
+    className={`flex items-start gap-4 rounded-xl bg-cream-100 border border-cream-300 p-4 ${className}`}
+    role="note"
+    aria-label="AI disclaimer"
+  >
+    <div className="flex-shrink-0 mt-0.5">
+      <svg className="h-5 w-5 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+      </svg>
     </div>
-  );
-};
+    <div>
+      <p className="text-sm font-medium text-charcoal-700">
+        For informational purposes only
+      </p>
+      <p className="mt-1 text-sm text-charcoal-600 leading-relaxed">
+        AI analysis provides insights, not diagnoses. Always consult a healthcare professional
+        for medical advice. If you have an emergency, please contact your local emergency services.
+      </p>
+    </div>
+  </div>
+);
 
 export default DisclaimerBanner;

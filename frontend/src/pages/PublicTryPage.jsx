@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DisclaimerBanner from "../components/DisclaimerBanner";
-import { uiTokens } from "../components/Layout";
 import { publicApiClient } from "../utils/publicClient";
 
 function PublicTryPage() {
@@ -99,36 +98,36 @@ function PublicTryPage() {
   const showResult = Boolean(analysis);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-enter">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <span className={uiTokens.badgeInfo}>
+          <span className="badge-warm">
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             Anonymous Preview
           </span>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">Try SkinScope</h1>
-          <p className="mt-2 text-[15px] text-slate-500 max-w-2xl">
+          <h1 className="mt-3 text-3xl font-semibold text-charcoal-900">Try SkinScope</h1>
+          <p className="mt-2 text-charcoal-500 max-w-2xl">
             Upload a photo to see how our AI analyzes skin conditions. Nothing is saved until you create an account.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              <svg className="h-3 w-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-100 border border-cream-300 px-3 py-1 text-xs font-medium text-charcoal-600">
+              <svg className="h-3 w-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               No login required
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              <svg className="h-3 w-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-100 border border-cream-300 px-3 py-1 text-xs font-medium text-charcoal-600">
+              <svg className="h-3 w-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               Preview only
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              <svg className="h-3 w-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-100 border border-cream-300 px-3 py-1 text-xs font-medium text-charcoal-600">
+              <svg className="h-3 w-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               Not saved
@@ -138,7 +137,7 @@ function PublicTryPage() {
         <button
           type="button"
           onClick={() => navigate("/login?mode=signup")}
-          className={uiTokens.primaryButton}
+          className="btn-warm"
         >
           Sign up for full access
         </button>
@@ -147,20 +146,20 @@ function PublicTryPage() {
       <DisclaimerBanner />
 
       {/* Main Content */}
-      <div className={`${uiTokens.card} p-6 sm:p-8`}>
+      <div className="card-warm p-6 sm:p-8">
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Upload Section */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold text-charcoal-700 mb-3">
                 Upload an image
               </label>
 
               {/* Drop Zone */}
               <div className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
                 previewUrl
-                  ? 'border-teal-300 bg-teal-50/50'
-                  : 'border-slate-200 hover:border-teal-300 hover:bg-slate-50'
+                  ? 'border-warm-300 bg-warm-50/50'
+                  : 'border-cream-300 hover:border-warm-300 hover:bg-cream-100'
               }`}>
                 {previewUrl ? (
                   <div className="p-4">
@@ -174,7 +173,7 @@ function PublicTryPage() {
                         setFile(null);
                         setPreviewUrl(null);
                       }}
-                      className="mt-3 text-sm text-slate-500 hover:text-red-500 transition-colors"
+                      className="mt-3 text-sm text-charcoal-500 hover:text-red-500 transition-colors"
                     >
                       Remove image
                     </button>
@@ -182,13 +181,13 @@ function PublicTryPage() {
                 ) : (
                   <label className="flex flex-col items-center justify-center h-48 cursor-pointer">
                     <div className="flex flex-col items-center justify-center">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 mb-3">
-                        <svg className="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warm-100 border border-warm-200 mb-3">
+                        <svg className="h-6 w-6 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                         </svg>
                       </div>
-                      <p className="text-sm font-medium text-slate-700">Click to upload</p>
-                      <p className="mt-1 text-xs text-slate-400">JPG, PNG up to 10MB</p>
+                      <p className="text-sm font-medium text-charcoal-700">Click to upload</p>
+                      <p className="mt-1 text-xs text-charcoal-400">JPG, PNG up to 10MB</p>
                     </div>
                     <input
                       id="anon-upload"
@@ -202,7 +201,7 @@ function PublicTryPage() {
                 )}
               </div>
 
-              <p className="mt-2 text-xs text-slate-400">
+              <p className="mt-2 text-xs text-charcoal-400">
                 Your image is discarded after this preview session.
               </p>
             </div>
@@ -212,7 +211,7 @@ function PublicTryPage() {
                 type="button"
                 onClick={handleAnalyze}
                 disabled={isAnalyzing || !file}
-                className={`${uiTokens.primaryButton} flex-1`}
+                className="btn-warm flex-1"
               >
                 {isAnalyzing ? (
                   <span className="flex items-center gap-2">
@@ -226,7 +225,7 @@ function PublicTryPage() {
                   'Run Quick Analysis'
                 )}
               </button>
-              <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              <Link to="/login" className="text-sm font-medium text-charcoal-600 hover:text-charcoal-900 transition-colors">
                 Have an account? Log in
               </Link>
             </div>
@@ -242,19 +241,19 @@ function PublicTryPage() {
           </div>
 
           {/* How it Works */}
-          <div className="rounded-xl bg-slate-50 border border-slate-200/60 p-5">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">How this preview works</h3>
-            <ul className="space-y-2 text-sm text-slate-600">
+          <div className="rounded-xl bg-cream-100 border border-cream-300 p-5">
+            <h3 className="text-sm font-semibold text-charcoal-700 mb-3">How this preview works</h3>
+            <ul className="space-y-2 text-sm text-charcoal-600">
               <li className="flex items-start gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 text-teal-600 text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-warm-100 border border-warm-200 text-warm-700 text-xs font-bold flex-shrink-0 mt-0.5">1</span>
                 We analyze once and keep the result in memory only.
               </li>
               <li className="flex items-start gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 text-teal-600 text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-warm-100 border border-warm-200 text-warm-700 text-xs font-bold flex-shrink-0 mt-0.5">2</span>
                 Chat is short-lived; sessions expire after a few minutes.
               </li>
               <li className="flex items-start gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 text-teal-600 text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-warm-100 border border-warm-200 text-warm-700 text-xs font-bold flex-shrink-0 mt-0.5">3</span>
                 Nothing is stored to your account without signing up.
               </li>
             </ul>
@@ -266,35 +265,35 @@ function PublicTryPage() {
       {showResult && (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Analysis Result */}
-          <div className={`${uiTokens.card} p-6`}>
+          <div className="card-warm p-6">
             <div className="flex items-center justify-between mb-4">
-              <span className={uiTokens.badgeInfo}>AI Preview Result</span>
-              <span className={analysis.status === "error" ? uiTokens.badgeWarning : uiTokens.badgeNeutral}>
+              <span className="badge-warm">AI Preview Result</span>
+              <span className={analysis.status === "error" ? "badge-amber" : "bg-charcoal-100 border border-charcoal-200 text-charcoal-600 text-xs font-semibold px-3 py-1 rounded-full"}>
                 {analysis.status === "error" ? "Service issue" : "Preview"}
               </span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">{analysis.condition}</h3>
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+            <h3 className="text-2xl font-semibold text-charcoal-900 mb-2">{analysis.condition}</h3>
+            <p className="text-sm text-charcoal-600 leading-relaxed mb-4">
               {analysis.recommendation}
             </p>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="rounded-lg bg-slate-50 p-3">
-                <p className="text-xs font-medium text-slate-400 uppercase mb-1">Confidence</p>
-                <p className="text-lg font-bold text-slate-900">{Math.round(analysis.confidence || 0)}%</p>
+              <div className="rounded-lg bg-cream-100 border border-cream-200 p-3">
+                <p className="text-xs font-medium text-charcoal-400 uppercase mb-1">Confidence</p>
+                <p className="text-lg font-bold text-charcoal-900">{Math.round(analysis.confidence || 0)}%</p>
               </div>
-              <div className="rounded-lg bg-slate-50 p-3">
-                <p className="text-xs font-medium text-slate-400 uppercase mb-1">Severity</p>
-                <p className="text-lg font-bold text-slate-900">{analysis.severity}</p>
+              <div className="rounded-lg bg-cream-100 border border-cream-200 p-3">
+                <p className="text-xs font-medium text-charcoal-400 uppercase mb-1">Severity</p>
+                <p className="text-lg font-bold text-charcoal-900">{analysis.severity}</p>
               </div>
             </div>
 
             {analysis.characteristics?.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-medium text-slate-400 uppercase mb-2">Characteristics</p>
+                <p className="text-xs font-medium text-charcoal-400 uppercase mb-2">Characteristics</p>
                 <div className="flex flex-wrap gap-2">
                   {analysis.characteristics.map((item) => (
-                    <span key={item} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                    <span key={item} className="rounded-full bg-cream-200 px-3 py-1 text-xs font-medium text-charcoal-700">
                       {item}
                     </span>
                   ))}
@@ -302,31 +301,31 @@ function PublicTryPage() {
               </div>
             )}
 
-            <p className="text-xs text-slate-400 pt-3 border-t border-slate-100">{analysis.disclaimer}</p>
+            <p className="text-xs text-charcoal-400 pt-3 border-t border-cream-200">{analysis.disclaimer}</p>
           </div>
 
           {/* Chat Preview */}
-          <div className={`${uiTokens.card} p-6`}>
+          <div className="card-warm p-6">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-slate-700">Chat Preview</p>
-              <span className="inline-flex items-center rounded-full bg-slate-900 px-2.5 py-1 text-xs font-medium text-white">
+              <p className="text-sm font-semibold text-charcoal-700">Chat Preview</p>
+              <span className="inline-flex items-center rounded-full bg-charcoal-800 px-2.5 py-1 text-xs font-medium text-white">
                 Limited
               </span>
             </div>
 
-            <div className="h-56 overflow-y-auto space-y-3 bg-slate-50 border border-slate-100 rounded-xl p-4 mb-4">
+            <div className="h-56 overflow-y-auto space-y-3 bg-cream-50 border border-cream-200 rounded-xl p-4 mb-4">
               {chatMessages.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-8">Ask a question to see how the AI responds.</p>
+                <p className="text-sm text-charcoal-400 text-center py-8">Ask a question to see how the AI responds.</p>
               ) : (
                 chatMessages.map((m, idx) => (
                   <div key={`${m.role}-${idx}`} className={m.role === "ai" ? "" : "text-right"}>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1">
-                      {m.role === "ai" ? "SkinScope AI" : "You"}
+                    <p className="text-[10px] font-semibold text-charcoal-400 uppercase mb-1">
+                      {m.role === "ai" ? "Skin Assistant" : "You"}
                     </p>
                     <div className={`inline-block rounded-xl px-4 py-2 text-sm ${
                       m.role === "ai"
-                        ? "bg-white border border-slate-200 text-slate-700"
-                        : "bg-slate-900 text-white"
+                        ? "bg-white border border-cream-200 text-charcoal-700"
+                        : "bg-warm-500 text-white"
                     }`}>
                       {m.text}
                     </div>
@@ -342,12 +341,12 @@ function PublicTryPage() {
                 onChange={(e) => setChatInput(e.target.value)}
                 disabled={!sessionId || isChatting}
                 placeholder={sessionId ? "Ask a quick question" : "Run an analysis first"}
-                className={`${uiTokens.input} flex-1`}
+                className="input-warm flex-1"
               />
               <button
                 type="submit"
                 disabled={!sessionId || isChatting || !chatInput.trim()}
-                className={uiTokens.primaryButton}
+                className="btn-warm"
               >
                 {isChatting ? '...' : 'Send'}
               </button>
@@ -358,25 +357,25 @@ function PublicTryPage() {
 
       {/* Sign Up CTA */}
       {showResult && (
-        <div className={`${uiTokens.card} p-6 bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200/60`}>
+        <div className="card-warm p-6 bg-deep-50 border-deep-200">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-violet-600 mb-1">Save your progress</p>
-              <h3 className="text-xl font-bold text-slate-900">Sign up to save this case</h3>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-deep-600 mb-1">Save your progress</p>
+              <h3 className="text-xl font-semibold text-charcoal-900">Sign up to save this case</h3>
+              <p className="text-sm text-charcoal-600 mt-1">
                 Create a free account to store images, request doctor reviews, and continue conversations.
               </p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
               <Link
                 to={sessionId ? `/login?mode=signup&public_session_id=${sessionId}` : "/login?mode=signup"}
-                className={uiTokens.accentButton}
+                className="btn-deep"
               >
                 Sign up to save
               </Link>
               <Link
                 to="/login"
-                className={uiTokens.secondaryButton}
+                className="btn-soft"
               >
                 Log in
               </Link>

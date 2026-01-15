@@ -1,202 +1,381 @@
 import { useNavigate } from 'react-router-dom';
-import { uiTokens } from '../components/Layout';
 
-// Feature Card Component
-const FeatureCard = ({ icon, title, description }) => (
-  <div className="group relative rounded-2xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:bg-white">
-    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg shadow-teal-500/25">
-      {icon}
-    </div>
-    <h3 className="mb-2 text-lg font-semibold text-slate-900">{title}</h3>
-    <p className="text-sm leading-relaxed text-slate-600">{description}</p>
-  </div>
-);
+/* ═══════════════════════════════════════════════════════════════════════════
+   SkinScope Landing Page
 
-// Trust Badge Component
-const TrustBadge = ({ icon, label }) => (
-  <div className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200/60 px-4 py-2 shadow-sm">
-    <span className="text-teal-600">{icon}</span>
-    <span className="text-sm font-medium text-slate-700">{label}</span>
-  </div>
-);
+   Story: The journey from skin concern to confident care
+
+   This isn't a template. It's a story about a person who notices something
+   on their skin, feels that flutter of worry, and finds clarity through
+   technology and human expertise working together.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative -mt-8">
-      {/* Background Elements */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        {/* Gradient Orbs */}
-        <div className="absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-teal-400/20 blur-[120px]" />
-        <div className="absolute -right-32 top-32 h-[400px] w-[400px] rounded-full bg-violet-400/15 blur-[120px]" />
-        <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-teal-400/10 blur-[100px]" />
+    <div className="-mt-8">
+      {/* ═══════════════════════════════════════════════════════════════════
+          Hero Section: The moment of discovery
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative min-h-[90vh] flex items-center">
+        {/* Subtle organic pattern - inspired by skin cells, not gradient blobs */}
+        <div className="absolute inset-0 pattern-cells opacity-40" aria-hidden="true" />
 
-        {/* Subtle Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
+        <div className="relative z-10 w-full">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: The Story */}
+            <div className="animate-enter">
+              <p className="text-warm-600 font-medium mb-4 tracking-wide">
+                For moments of uncertainty
+              </p>
 
-      {/* Hero Section */}
-      <section className="relative flex min-h-[85vh] flex-col items-center justify-center px-4 py-20 text-center">
-        {/* Floating Badge */}
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200/60 px-4 py-2 shadow-sm animate-fade-in">
-          <span className="flex h-2 w-2 rounded-full bg-teal-500 pulse-dot" />
-          <span className="text-sm font-semibold text-teal-700">AI-Powered Skin Analysis</span>
-        </div>
+              <h1 className="heading-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] mb-6">
+                Your skin tells a story.{' '}
+                <span className="text-warm-600">
+                  We help you understand it.
+                </span>
+              </h1>
 
-        {/* Main Headline */}
-        <h1 className="mb-6 max-w-4xl text-4xl font-bold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl md:text-6xl lg:text-7xl animate-slide-up">
-          Expert dermatology insights,{' '}
-          <span className="relative">
-            <span className="bg-gradient-to-r from-teal-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
-              instantly accessible
-            </span>
-            <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 8.5C50 2.5 150 2.5 298 8.5" stroke="url(#underline-gradient)" strokeWidth="3" strokeLinecap="round"/>
-              <defs>
-                <linearGradient id="underline-gradient" x1="0" y1="0" x2="300" y2="0">
-                  <stop stopColor="#0d9488" stopOpacity="0.4"/>
-                  <stop offset="0.5" stopColor="#14b8a6"/>
-                  <stop offset="1" stopColor="#06b6d4" stopOpacity="0.4"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </span>
-        </h1>
+              <p className="text-lg text-charcoal-600 leading-relaxed mb-8 max-w-xl">
+                That new spot. That persistent rash. The questions that keep you up at night.
+                SkinScope brings AI-powered insights and board-certified dermatologists
+                together, so you can move from worry to clarity.
+              </p>
 
-        {/* Subheadline */}
-        <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl animate-slide-up" style={{ animationDelay: '100ms' }}>
-          Upload a photo, receive AI-powered analysis, and connect with board-certified dermatologists
-          for professional guidance when you need it.
-        </p>
+              {/* CTA Group */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <button
+                  onClick={() => navigate('/login?mode=signup')}
+                  className="btn-warm text-base px-8 py-4"
+                >
+                  Start Your Skin Journey
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </button>
 
-        {/* CTA Buttons */}
-        <div className="mb-12 flex flex-col items-center gap-4 sm:flex-row animate-slide-up" style={{ animationDelay: '200ms' }}>
-          <button
-            onClick={() => navigate('/login?mode=signup')}
-            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-teal-600/30 transition-all duration-300 hover:shadow-2xl hover:shadow-teal-600/40 hover:-translate-y-1"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              Start Your Analysis
-              <svg className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </span>
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-          </button>
+                <button
+                  onClick={() => navigate('/try-anonymous')}
+                  className="btn-soft text-base px-8 py-4"
+                >
+                  Try It First
+                </button>
+              </div>
 
-          <button
-            onClick={() => navigate('/login')}
-            className={`${uiTokens.secondaryButton} px-8 py-4 text-base`}
-          >
-            Sign In
-          </button>
-
-          <button
-            onClick={() => navigate('/try-anonymous')}
-            className="rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 px-8 py-4 text-base font-medium text-slate-600 transition-all duration-200 hover:border-teal-300 hover:bg-teal-50/50 hover:text-teal-700"
-          >
-            Try Without Account
-          </button>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-3 animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <TrustBadge
-            icon={<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
-            label="HIPAA Compliant"
-          />
-          <TrustBadge
-            icon={<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
-            label="End-to-End Encrypted"
-          />
-          <TrustBadge
-            icon={<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>}
-            label="Board-Certified Doctors"
-          />
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="relative py-20">
-        <div className="mx-auto max-w-5xl">
-          {/* Section Header */}
-          <div className="mb-16 text-center">
-            <span className="mb-4 inline-block rounded-full bg-teal-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-teal-700">
-              How It Works
-            </span>
-            <h2 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Professional care, simplified
-            </h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-600">
-              Get expert dermatology insights in three simple steps
-            </p>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <FeatureCard
-              icon={
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-              }
-              title="Upload a Photo"
-              description="Take a clear photo of the affected skin area. Our AI works best with well-lit, focused images."
-            />
-            <FeatureCard
-              icon={
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                </svg>
-              }
-              title="AI Analysis"
-              description="Our advanced AI analyzes your image instantly, identifying potential conditions with high accuracy."
-            />
-            <FeatureCard
-              icon={
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                </svg>
-              }
-              title="Expert Consultation"
-              description="Request a review from board-certified dermatologists for professional medical guidance."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative py-20">
-        <div className="mx-auto max-w-4xl">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-12 text-center shadow-2xl">
-            {/* Background Pattern */}
-            <div className="pointer-events-none absolute inset-0 opacity-10" aria-hidden="true">
-              <div className="absolute -left-20 -top-20 h-[300px] w-[300px] rounded-full bg-teal-400 blur-[100px]" />
-              <div className="absolute -bottom-20 -right-20 h-[300px] w-[300px] rounded-full bg-violet-400 blur-[100px]" />
+              {/* Human proof, not trust badges */}
+              <div className="flex items-center gap-4 text-sm text-charcoal-500">
+                <div className="flex -space-x-2">
+                  {/* Abstract human figures - warm, not clinical */}
+                  <div className="w-8 h-8 rounded-full bg-warm-200 border-2 border-cream-50 flex items-center justify-center">
+                    <span className="text-warm-700 text-xs font-medium">S</span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-deep-200 border-2 border-cream-50 flex items-center justify-center">
+                    <span className="text-deep-700 text-xs font-medium">M</span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-sage-200 border-2 border-cream-50 flex items-center justify-center">
+                    <span className="text-sage-700 text-xs font-medium">K</span>
+                  </div>
+                </div>
+                <span>Thousands have found clarity. You can too.</span>
+              </div>
             </div>
 
-            <div className="relative z-10">
-              <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-                Ready to take control of your skin health?
-              </h2>
-              <p className="mb-8 text-lg text-slate-300">
-                Join thousands who trust SkinScope for AI-powered dermatology insights.
+            {/* Right: The Experience (Product Preview) */}
+            <div className="relative animate-enter" style={{ animationDelay: '150ms' }}>
+              {/* Phone/App Mockup showing the actual product */}
+              <div className="relative mx-auto max-w-sm">
+                {/* Phone frame */}
+                <div className="rounded-[2.5rem] bg-charcoal-900 p-3 shadow-2xl">
+                  <div className="rounded-[2rem] bg-cream-50 overflow-hidden">
+                    {/* Status bar */}
+                    <div className="bg-charcoal-900 text-white px-6 py-2 flex justify-between items-center text-xs">
+                      <span>9:41</span>
+                      <div className="flex gap-1">
+                        <div className="w-4 h-2 bg-white/80 rounded-sm" />
+                      </div>
+                    </div>
+
+                    {/* App content preview */}
+                    <div className="p-5 space-y-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-warm-500 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                          </div>
+                          <span className="font-semibold text-charcoal-900">SkinScope</span>
+                        </div>
+                      </div>
+
+                      {/* Analysis Result Preview */}
+                      <div className="rounded-2xl bg-white border border-cream-300 p-4 shadow-sm">
+                        <div className="flex gap-3">
+                          <div className="w-16 h-16 rounded-xl bg-cream-200 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="badge-sage text-[10px] mb-1">Analysis Complete</div>
+                            <p className="text-sm font-medium text-charcoal-900">Low Risk Detected</p>
+                            <p className="text-xs text-charcoal-500 mt-1">Common condition identified</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chat Preview */}
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <div className="w-7 h-7 rounded-full bg-warm-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-warm-600 text-xs">AI</span>
+                          </div>
+                          <div className="rounded-2xl rounded-tl-sm bg-cream-100 px-3 py-2 max-w-[80%]">
+                            <p className="text-xs text-charcoal-700">Based on the image, this appears to be a common condition. Would you like more details?</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <div className="rounded-2xl rounded-tr-sm bg-warm-500 text-white px-3 py-2 max-w-[80%]">
+                            <p className="text-xs">Yes, tell me more</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action button */}
+                      <button className="w-full rounded-xl bg-deep-600 text-white text-sm py-3 font-medium">
+                        Request Doctor Review
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating badge */}
+                <div className="absolute -right-4 top-20 badge-sage shadow-lg">
+                  <span className="w-2 h-2 rounded-full bg-sage-500 status-dot" />
+                  AI Analyzed
+                </div>
+
+                {/* Floating doctor badge */}
+                <div className="absolute -left-4 bottom-32 badge-deep shadow-lg">
+                  <span className="w-2 h-2 rounded-full bg-deep-500" />
+                  Doctor Available
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          Story Section: The Journey
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="max-w-4xl mx-auto text-center mb-16">
+          <p className="text-warm-600 font-medium mb-3">The journey</p>
+          <h2 className="heading-display text-3xl sm:text-4xl mb-4">
+            From concern to confidence
+          </h2>
+          <p className="text-charcoal-600 text-lg">
+            We designed SkinScope around real human experiences, not workflows.
+          </p>
+        </div>
+
+        {/* Journey Steps - Storytelling, not feature lists */}
+        <div className="space-y-8 max-w-3xl mx-auto">
+          {/* Step 1 */}
+          <div className="card-warm p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-warm-100 flex items-center justify-center">
+              <span className="text-warm-600 font-semibold text-xl">1</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-charcoal-900 mb-2">
+                "What is this?"
+              </h3>
+              <p className="text-charcoal-600 leading-relaxed">
+                You notice something on your skin. A spot that wasn't there before.
+                A rash that won't go away. Instead of endless scrolling through scary
+                search results, you take a photo. Clear, focused, just like the tips suggest.
               </p>
-              <button
-                onClick={() => navigate('/login?mode=signup')}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-xl transition-all duration-200 hover:bg-slate-100 hover:-translate-y-0.5"
-              >
-                Create Free Account
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="card-warm p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-sage-100 flex items-center justify-center">
+              <span className="text-sage-600 font-semibold text-xl">2</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-charcoal-900 mb-2">
+                "Okay, this helps."
+              </h3>
+              <p className="text-charcoal-600 leading-relaxed">
+                Our AI—trained on millions of dermatology cases—analyzes your image in seconds.
+                Not to diagnose, but to inform. You see possible conditions, understand risk levels,
+                and finally have context instead of chaos.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="card-warm p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-deep-100 flex items-center justify-center">
+              <span className="text-deep-600 font-semibold text-xl">3</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-charcoal-900 mb-2">
+                "I need a real doctor."
+              </h3>
+              <p className="text-charcoal-600 leading-relaxed">
+                Sometimes AI isn't enough. With one tap, your case goes to a board-certified
+                dermatologist. Not a random one—your doctor. They review your images,
+                chat with you directly, and give you the professional guidance you need.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          Human Element: The Doctors
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 bg-cream-100/50">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-deep-600 font-medium mb-3">Real expertise</p>
+              <h2 className="heading-display text-3xl sm:text-4xl mb-6">
+                AI opens the door.{' '}
+                <span className="text-deep-600">Doctors guide you through.</span>
+              </h2>
+              <p className="text-charcoal-600 text-lg leading-relaxed mb-6">
+                We believe technology should enhance human connection, not replace it.
+                Every dermatologist on SkinScope is board-certified, practicing, and
+                genuinely invested in your skin health.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-charcoal-700">
+                  <span className="w-6 h-6 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  Board-certified dermatologists
+                </li>
+                <li className="flex items-center gap-3 text-charcoal-700">
+                  <span className="w-6 h-6 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  Direct, private conversations
+                </li>
+                <li className="flex items-center gap-3 text-charcoal-700">
+                  <span className="w-6 h-6 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  Your history, always accessible
+                </li>
+              </ul>
+            </div>
+
+            {/* Doctor illustration - abstract, warm */}
+            <div className="relative">
+              <div className="rounded-3xl bg-white border border-cream-300 p-8 shadow-lg">
+                <div className="flex items-start gap-5">
+                  {/* Doctor avatar - stylized, warm */}
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-deep-400 to-deep-600 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="badge-deep mb-2">Available Now</span>
+                    <h4 className="text-lg font-semibold text-charcoal-900">Dr. Sarah Chen</h4>
+                    <p className="text-charcoal-500 text-sm">Board-Certified Dermatologist</p>
+                    <p className="text-charcoal-600 text-sm mt-3 leading-relaxed">
+                      "Every skin concern deserves attention. I'm here to provide clarity and care."
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 pt-6 border-t border-cream-200 flex gap-3">
+                  <button className="btn-deep flex-1 py-3">
+                    Connect
+                  </button>
+                  <button className="btn-soft flex-1 py-3">
+                    View Profile
+                  </button>
+                </div>
+              </div>
+
+              {/* Decorative element */}
+              <div className="absolute -z-10 -bottom-4 -right-4 w-full h-full rounded-3xl bg-cream-200" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          Privacy Section: Because it matters
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="w-16 h-16 rounded-2xl bg-charcoal-100 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-charcoal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <h2 className="heading-display text-3xl sm:text-4xl mb-4">
+            Your skin, your data, your privacy.
+          </h2>
+          <p className="text-charcoal-600 text-lg leading-relaxed mb-8">
+            We handle sensitive information with the respect it deserves. Your images are encrypted,
+            your conversations are private, and your data is never sold. Period.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <div className="card-cream px-5 py-3 text-sm font-medium text-charcoal-700">
+              HIPAA Compliant
+            </div>
+            <div className="card-cream px-5 py-3 text-sm font-medium text-charcoal-700">
+              End-to-End Encrypted
+            </div>
+            <div className="card-cream px-5 py-3 text-sm font-medium text-charcoal-700">
+              No Data Sales
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          Final CTA: The Invitation
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-3xl bg-charcoal-900 p-10 sm:p-14 text-center relative overflow-hidden">
+            {/* Subtle pattern */}
+            <div className="absolute inset-0 opacity-5 pattern-dots" aria-hidden="true" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
+                Ready to understand your skin better?
+              </h2>
+              <p className="text-charcoal-300 text-lg mb-8 max-w-xl mx-auto">
+                No more uncertainty. No more late-night searches.
+                Just clarity, care, and confidence.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => navigate('/login?mode=signup')}
+                  className="btn-warm text-base px-8 py-4"
+                >
+                  Create Free Account
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-4 text-base font-semibold text-white border border-charcoal-700 rounded-xl hover:bg-charcoal-800 transition-colors"
+                >
+                  Sign In
+                </button>
+              </div>
             </div>
           </div>
         </div>

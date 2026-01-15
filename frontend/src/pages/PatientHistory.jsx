@@ -2,20 +2,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
-import { uiTokens } from '../components/Layout';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
   const config = {
-    pending: { label: 'Pending', className: uiTokens.badgeWarning, dot: 'bg-amber-500' },
-    accepted: { label: 'In Progress', className: uiTokens.badgeAccent, dot: 'bg-violet-500' },
-    reviewed: { label: 'Completed', className: uiTokens.badgeSuccess, dot: 'bg-emerald-500' },
-    none: { label: 'AI Only', className: uiTokens.badgeNeutral, dot: 'bg-slate-400' },
+    pending: { label: 'Pending', className: 'badge-amber', dot: 'bg-amber-500' },
+    accepted: { label: 'In Progress', className: 'badge-deep', dot: 'bg-deep-500' },
+    reviewed: { label: 'Completed', className: 'badge-sage', dot: 'bg-sage-500' },
+    none: { label: 'AI Only', className: 'bg-charcoal-100 border border-charcoal-200 text-charcoal-600 text-xs font-semibold px-3 py-1 rounded-full', dot: 'bg-charcoal-400' },
   };
   const { label, className, dot } = config[status] || config.none;
 
   return (
-    <span className={className}>
+    <span className={`inline-flex items-center gap-1.5 ${className}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
       {label}
     </span>
@@ -25,24 +24,24 @@ const StatusBadge = ({ status }) => {
 // Case Card Component
 const CaseCard = ({ report, onClick }) => {
   const borderColors = {
-    pending: 'border-l-amber-500',
-    accepted: 'border-l-violet-500',
-    reviewed: 'border-l-emerald-500',
-    none: 'border-l-slate-300',
+    pending: 'border-l-amber-400',
+    accepted: 'border-l-deep-500',
+    reviewed: 'border-l-sage-500',
+    none: 'border-l-charcoal-300',
   };
 
   return (
     <article
       aria-label={`Case ${report.id}`}
-      className={`${uiTokens.cardInteractive} p-5 border-l-4 ${borderColors[report.reviewStatus] || borderColors.none}`}
+      className={`card-warm p-5 border-l-4 cursor-pointer ${borderColors[report.reviewStatus] || borderColors.none}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <p className="text-xs font-medium text-slate-400 mb-1">
+          <p className="text-xs font-medium text-charcoal-400 mb-1">
             Case #{report.id}
           </p>
-          <h3 className="text-lg font-semibold text-slate-900 line-clamp-1">
+          <h3 className="text-lg font-semibold text-charcoal-900 line-clamp-1">
             {report.condition}
           </h3>
         </div>
@@ -52,35 +51,35 @@ const CaseCard = ({ report, onClick }) => {
       <div className="space-y-3">
         <div className="flex items-center gap-4 text-sm">
           <div>
-            <span className="text-slate-500">Severity: </span>
+            <span className="text-charcoal-500">Severity: </span>
             <span className={`font-semibold ${
               report.risk === 'High' ? 'text-red-600' :
-              report.risk === 'Medium' ? 'text-amber-600' : 'text-emerald-600'
+              report.risk === 'Medium' ? 'text-amber-600' : 'text-sage-600'
             }`}>
               {report.risk}
             </span>
           </div>
           {report.confidence && (
             <div>
-              <span className="text-slate-500">Confidence: </span>
-              <span className="font-semibold text-slate-700">{report.confidence}%</span>
+              <span className="text-charcoal-500">Confidence: </span>
+              <span className="font-semibold text-charcoal-700">{report.confidence}%</span>
             </div>
           )}
         </div>
 
-        <div className="rounded-lg bg-slate-50 border border-slate-100 p-3">
-          <p className="text-xs font-medium text-slate-500 mb-1">Recommendation</p>
-          <p className="text-sm text-slate-700 line-clamp-2">{report.advice}</p>
+        <div className="rounded-lg bg-cream-100 border border-cream-200 p-3">
+          <p className="text-xs font-medium text-charcoal-500 mb-1">Recommendation</p>
+          <p className="text-sm text-charcoal-700 line-clamp-2">{report.advice}</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-        <p className="text-xs text-slate-400">
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-cream-200">
+        <p className="text-xs text-charcoal-400">
           {report.createdAt ? new Date(report.createdAt).toLocaleDateString('en-US', {
             month: 'short', day: 'numeric', year: 'numeric'
           }) : 'Date unknown'}
         </p>
-        <span className="text-sm font-medium text-teal-600 group-hover:text-teal-700 flex items-center gap-1">
+        <span className="text-sm font-medium text-warm-600 flex items-center gap-1">
           View Details
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -145,25 +144,25 @@ const PatientHistory = () => {
   }, [reports]);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-enter">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link
             to="/patient-dashboard"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors mb-2"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-warm-600 hover:text-warm-700 transition-colors mb-2"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
             Dashboard
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Scan History</h1>
-          <p className="mt-1 text-[15px] text-slate-500">
+          <h1 className="text-3xl font-semibold text-charcoal-900">Scan History</h1>
+          <p className="mt-1 text-charcoal-500">
             Review your previous AI analyses and doctor consultations
           </p>
         </div>
-        <Link to="/patient-upload" className={uiTokens.primaryButton}>
+        <Link to="/patient-upload" className="btn-warm">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
@@ -175,9 +174,9 @@ const PatientHistory = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className={`${uiTokens.card} p-12 flex flex-col items-center justify-center`}>
-          <div className="h-10 w-10 border-4 border-slate-200 border-t-teal-600 rounded-full animate-spin mb-4" />
-          <p className="text-slate-600">Loading your reports...</p>
+        <div className="card-warm p-12 flex flex-col items-center justify-center">
+          <div className="h-10 w-10 border-4 border-cream-300 border-t-warm-500 rounded-full animate-spin mb-4" />
+          <p className="text-charcoal-600">Loading your reports...</p>
         </div>
       )}
 
@@ -193,15 +192,15 @@ const PatientHistory = () => {
 
       {/* Empty State */}
       {!loading && !error && normalizedReports.length === 0 && (
-        <div className={`${uiTokens.card} p-12 text-center`}>
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mb-4">
-            <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <div className="card-warm p-12 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream-200 mb-4">
+            <svg className="h-8 w-8 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-slate-900">No reports yet</h3>
-          <p className="mt-2 text-slate-500 mb-6">Upload a scan to generate your first AI analysis</p>
-          <Link to="/patient-upload" className={uiTokens.primaryButton}>
+          <h3 className="text-lg font-semibold text-charcoal-900">No reports yet</h3>
+          <p className="mt-2 text-charcoal-500 mb-6">Upload a scan to generate your first AI analysis</p>
+          <Link to="/patient-upload" className="btn-warm">
             Upload Your First Scan
           </Link>
         </div>
