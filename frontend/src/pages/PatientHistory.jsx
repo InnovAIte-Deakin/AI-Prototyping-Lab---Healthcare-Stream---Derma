@@ -56,6 +56,9 @@ const PatientHistory = () => {
         createdAt,
         reviewStatus: report.review_status || 'none',
         imageId: report.image_id,
+        // Doctor info for historical display (from the case, not current link) - S2-4
+        doctorId: report.doctor_id,
+        doctorName: report.doctor_name,
       };
     });
   }, [reports]);
@@ -142,6 +145,24 @@ const PatientHistory = () => {
                 <p className="text-sm">
                   <strong className="text-slate-700">Severity:</strong> {report.risk}
                 </p>
+
+                {/* Doctor info - shows the original doctor who handled this case (S2-4) */}
+                {report.doctorName && (
+                  <p className="text-sm text-slate-600">
+                    <strong className="text-slate-700">Reviewed by:</strong> {report.doctorName}
+                    {report.reviewStatus && report.reviewStatus !== 'none' && (
+                      <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                        report.reviewStatus === 'reviewed'
+                          ? 'bg-green-100 text-green-700'
+                          : report.reviewStatus === 'accepted'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {report.reviewStatus}
+                      </span>
+                    )}
+                  </p>
+                )}
 
                 <p className="mt-2 text-sm bg-blue-50 p-2 rounded text-blue-800 line-clamp-2">
                   <strong>Recommendation:</strong> {report.advice}
