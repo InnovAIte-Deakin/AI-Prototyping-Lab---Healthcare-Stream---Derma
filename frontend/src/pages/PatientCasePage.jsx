@@ -5,6 +5,32 @@ import UnifiedChat from '../components/UnifiedChat';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { uiTokens } from '../components/Layout';
 
+// Status Badge Component
+const StatusBadge = ({ status }) => {
+  const config = {
+    pending: { label: 'Pending Review', className: uiTokens.badgeWarning, icon: '⏳' },
+    accepted: { label: 'Physician Active', className: uiTokens.badgeAccent, icon: null },
+    reviewed: { label: 'Review Complete', className: uiTokens.badgeSuccess, icon: null },
+    none: { label: 'AI Only', className: uiTokens.badgeNeutral, icon: null },
+  };
+  const { label, className, icon } = config[status] || config.none;
+
+  return (
+    <span className={`${className} px-4 py-2`}>
+      {icon && <span className="mr-1">{icon}</span>}
+      {label}
+    </span>
+  );
+};
+
+// Stat Card Component
+const StatCard = ({ label, value, highlight }) => (
+  <div className="rounded-xl bg-white border border-slate-200/60 p-4">
+    <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">{label}</p>
+    <p className={`text-sm font-bold ${highlight || 'text-slate-700'}`}>{value}</p>
+  </div>
+);
+
 function PatientCasePage() {
   const { imageId } = useParams();
   const [report, setReport] = useState(null);
@@ -14,10 +40,7 @@ function PatientCasePage() {
 
   const fetchReport = useCallback(async () => {
     try {
-      console.log('[PatientCasePage] Fetching report...');
-      // Add timestamp to prevent browser caching
       const res = await apiClient.get(`/api/analysis/image/${imageId}?t=${Date.now()}`);
-      console.log('[PatientCasePage] Report data:', res.data);
       setReport(res.data);
     } catch (err) {
       console.error(err);
@@ -33,11 +56,8 @@ function PatientCasePage() {
   }, [imageId, fetchReport]);
 
   const handleStatusChange = useCallback(() => {
-    // Refresh report when status changes (e.g., doctor accepts or closes case)
-    console.log('[PatientCasePage] Status change detected, refreshing...');
-    // Add a small delay to ensure DB propagation and avoid race conditions
     setTimeout(() => {
-        fetchReport();
+      fetchReport();
     }, 500);
   }, [fetchReport]);
 
@@ -54,96 +74,148 @@ function PatientCasePage() {
     }
   };
 
-  // Only show full page spinner on INITIAL load to prevent Chat unmounting
+  // Loading State
   if (loading && !report) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="h-10 w-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-slate-200 border-t-teal-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Loading case details...</p>
+        </div>
       </div>
     );
   }
 
+  // Error State
   if (error) {
     return (
-      <div className="space-y-4">
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
-        <Link to="/patient-history" className="text-indigo-600 font-semibold text-sm hover:underline">← Back to History</Link>
+      <div className="space-y-4 animate-fade-in">
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+          <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          <p className="text-sm font-medium text-red-700">{error}</p>
+        </div>
+        <Link to="/patient-history" className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to History
+        </Link>
       </div>
     );
   }
 
-  // Calculate derived state: Pause AI only if doctor is active AND case is NOT reviewed (closed)
   const isPaused = report?.doctor_active === true && report?.review_status !== 'reviewed';
   const reviewStatus = report?.review_status || 'none';
 
+  const severityColor = report?.severity === 'High' ? 'text-red-600' :
+    report?.severity === 'Medium' ? 'text-amber-600' : 'text-emerald-600';
+
+  const statusColor = reviewStatus === 'accepted' ? 'text-violet-600' :
+    reviewStatus === 'reviewed' ? 'text-emerald-600' :
+    reviewStatus === 'pending' ? 'text-amber-600' : 'text-slate-500';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <Link to="/patient-history" className="text-indigo-600 font-semibold text-sm hover:underline mb-2 inline-block">← Back to History</Link>
-          <h1 className="text-2xl font-bold text-slate-900">Your Case</h1>
-          <p className="text-slate-500 text-sm">
-            Condition: <span className="font-medium text-slate-800">{report?.condition || 'Assessment Pending'}</span>
+          <Link
+            to="/patient-history"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors mb-2"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Back to History
+          </Link>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Case Details</h1>
+          <p className="mt-1 text-[15px] text-slate-500">
+            Condition: <span className="font-semibold text-slate-700">{report?.condition || 'Assessment Pending'}</span>
           </p>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-3 flex-wrap">
           {reviewStatus === 'none' && (
             <button
               onClick={handleRequestReview}
               disabled={isRequestingReview}
-              className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-purple-700 disabled:opacity-50 transition-all shadow-lg"
+              className={uiTokens.accentButton}
             >
-              {isRequestingReview ? '⏳ Requesting...' : '📨 Request Physician Review'}
+              {isRequestingReview ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Requesting...
+                </span>
+              ) : (
+                'Request Physician Review'
+              )}
             </button>
           )}
-          {reviewStatus === 'pending' && (
-            <span className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-xl text-sm font-black uppercase">⏳ Pending Review</span>
-          )}
-          {reviewStatus === 'accepted' && (
-            <span className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-xl text-sm font-black uppercase">👨‍⚕️ Physician Active</span>
-          )}
-          {reviewStatus === 'reviewed' && (
-            <span className="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-black uppercase">✅ Review Complete</span>
-          )}
+          <StatusBadge status={reviewStatus} />
         </div>
       </div>
 
       <DisclaimerBanner />
 
-      {/* Case Info */}
-      <div className={`${uiTokens.card} p-5 grid grid-cols-2 md:grid-cols-4 gap-4`}>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Severity</p>
-          <p className={`text-sm font-black ${report?.severity === 'High' ? 'text-red-600' : 'text-slate-700'}`}>{report?.severity || 'Unknown'}</p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Confidence</p>
-          <p className="text-sm font-black text-slate-700">{report?.confidence ? `${Math.round(report.confidence)}%` : 'N/A'}</p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Status</p>
-          <p className={`text-sm font-black uppercase ${reviewStatus === 'accepted' ? 'text-indigo-600' : reviewStatus === 'reviewed' ? 'text-green-600' : reviewStatus === 'pending' ? 'text-yellow-600' : 'text-slate-500'}`}>
-            {reviewStatus === 'none' ? 'AI Only' : reviewStatus}
-          </p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Created</p>
-          <p className="text-sm font-medium text-slate-700">{report?.created_at ? new Date(report.created_at).toLocaleString() : 'Unknown'}</p>
-        </div>
+      {/* Case Info Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Severity"
+          value={report?.severity || 'Unknown'}
+          highlight={severityColor}
+        />
+        <StatCard
+          label="Confidence"
+          value={report?.confidence ? `${Math.round(report.confidence)}%` : 'N/A'}
+        />
+        <StatCard
+          label="Status"
+          value={reviewStatus === 'none' ? 'AI Only' : reviewStatus.charAt(0).toUpperCase() + reviewStatus.slice(1)}
+          highlight={statusColor}
+        />
+        <StatCard
+          label="Created"
+          value={report?.created_at ? new Date(report.created_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+          }) : 'Unknown'}
+        />
       </div>
 
-      {/* Recommendation */}
-      <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-        <p className="text-[10px] font-bold text-blue-400 uppercase mb-1">AI Recommendation</p>
-        <p className="text-sm font-medium text-blue-900 leading-relaxed italic">"{report?.recommendation || 'No recommendation available.'}"</p>
+      {/* AI Recommendation */}
+      <div className={`${uiTokens.card} p-5 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 border-teal-200/60`}>
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 flex-shrink-0">
+            <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-teal-600 mb-1">AI Recommendation</p>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              {report?.recommendation || 'No recommendation available.'}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Chat Interface */}
       {report?.report_id && (
-        <div>
-          <h2 className="text-lg font-bold text-slate-800 mb-4">💬 Conversation</h2>
-          <UnifiedChat 
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900">Conversation</h2>
+            {isPaused && (
+              <span className={uiTokens.badgeAccent}>
+                <span className="h-1.5 w-1.5 rounded-full bg-violet-500 pulse-dot" />
+                Physician Active
+              </span>
+            )}
+          </div>
+          <UnifiedChat
             imageId={parseInt(imageId)}
             reportId={report.report_id}
             isPaused={isPaused}
@@ -154,9 +226,15 @@ function PatientCasePage() {
         </div>
       )}
 
+      {/* Pending Notice */}
       {reviewStatus === 'pending' && (
-        <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 text-center">
-          <p className="text-yellow-800 text-sm font-medium">A physician will review your case soon. You can still chat with the AI in the meantime.</p>
+        <div className={`${uiTokens.card} p-5 bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/60 text-center`}>
+          <div className="flex items-center justify-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-500 pulse-dot" />
+            <p className="font-medium text-amber-800">
+              A physician will review your case soon. You can continue chatting with the AI.
+            </p>
+          </div>
         </div>
       )}
     </div>
