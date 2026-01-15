@@ -65,6 +65,16 @@ const ReportCard = ({ report, onClick }) => {
             }) : 'Unknown'}
           </span>
         </div>
+        <div className="flex justify-between">
+          <span className="text-charcoal-500">Patient Rating</span>
+          {report.patientRating ? (
+            <span className="font-semibold text-amber-600">
+              {'★'.repeat(report.patientRating)}{'☆'.repeat(5 - report.patientRating)}
+            </span>
+          ) : (
+            <span className="text-charcoal-400">Pending</span>
+          )}
+        </div>
       </div>
 
       <div className="pt-4 mt-4 border-t border-cream-200">
@@ -134,6 +144,8 @@ function DoctorPatientDetail() {
         createdAt,
         reviewStatus: report.review_status || 'none',
         imageId: report.image_id,
+        patientRating: report.patient_rating,
+        patientFeedback: report.patient_feedback,
       };
     });
   }, [reports]);

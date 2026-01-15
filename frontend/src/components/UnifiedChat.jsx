@@ -10,11 +10,28 @@ import { useAuth } from '../context/AuthContext';
    ═══════════════════════════════════════════════════════════════════════════ */
 
 // eslint-disable-next-line no-unused-vars
-const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange, doctor }) => {
+const UnifiedChat = ({ 
+  imageId, 
+  reportId, 
+  isPaused, 
+  userRole, 
+  onStatusChange, 
+  doctor,
+  // Rating props (optional - only used for patient view)
+  reviewStatus,
+  patientRating,
+  patientFeedback,
+  onRatingSubmit,
+  ratingSuccess,
+  ratingError,
+  isSubmittingRating,
+}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [inlineRating, setInlineRating] = useState(0);
+  const [inlineFeedback, setInlineFeedback] = useState('');
   const { token } = useAuth();
 
   const wsRef = useRef(null);
@@ -353,6 +370,82 @@ const UnifiedChat = ({ imageId, reportId, isPaused, userRole, onStatusChange, do
           </div>
         )}
         {messages.map(renderMessage)}
+        
+        {/* Inline Rating Card - appears when case is reviewed and user is patient */}
+        {userRole === 'patient' && reviewStatus === 'reviewed' && (
+          <div className="flex justify-center my-4">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl px-6 py-5 max-w-[95%] shadow-lg w-full">
+              <div className="flex items-center gap-2 justify-center mb-3">
+                <span className="text-2xl">⭐</span>
+                <h3 className="text-lg font-bold text-amber-800">Rate Your Experience</h3>
+              </div>
+              <p className="text-sm text-amber-700 text-center mb-4">
+                How was your consultation with {doctor?.full_name || 'your physician'}?
+              </p>
+              
+              {patientRating ? (
+                // Already rated - show read-only view
+                <div className="space-y-3 text-center">
+                  <div className="flex items-center justify-center gap-1 text-amber-500 text-2xl">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star}>{star <= patientRating ? '★' : '☆'}</span>
+                    ))}
+                  </div>
+                  {patientFeedback && (
+                    <p className="text-sm text-amber-800 italic" data-testid="feedback-display">
+                      "{patientFeedback}"
+                    </p>
+                  )}
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs font-semibold text-green-700 bg-green-100 border border-green-200 px-3 py-1 rounded-full">
+                      ✓ Submitted
+                    </span>
+                  </div>
+                  {ratingSuccess && (
+                    <p className="text-sm text-green-600 font-medium">{ratingSuccess}</p>
+                  )}
+                </div>
+              ) : (
+                // Not yet rated - show rating form
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setInlineRating(star)}
+                        className={`text-3xl transition-transform hover:scale-110 ${inlineRating >= star ? 'text-amber-500' : 'text-slate-300'} hover:text-amber-500`}
+                        aria-label={`${star} star`}
+                        data-testid={`star-${star}`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={inlineFeedback}
+                    onChange={(e) => setInlineFeedback(e.target.value)}
+                    placeholder="Optional: Share your feedback..."
+                    className="w-full rounded-xl border border-amber-200 bg-white p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  />
+                  {ratingError && (
+                    <p className="text-sm text-red-600 text-center">{ratingError}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onRatingSubmit && onRatingSubmit(inlineRating, inlineFeedback)}
+                    disabled={isSubmittingRating || !inlineRating}
+                    className="w-full rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-50 transition-all shadow-md"
+                  >
+                    {isSubmittingRating ? '⏳ Submitting...' : '🌟 Submit Rating'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         <div ref={scrollRef} />
       </div>
 

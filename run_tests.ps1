@@ -87,8 +87,8 @@ $backendReady = $false
 
 while (-not $backendReady -and $retryCount -lt $maxRetries) {
     try {
-        $response = Invoke-WebRequest -Uri "http://127.0.0.1:8000/health" -Method Get -ErrorAction Stop
-        if ($response.StatusCode -eq 200) {
+        $response = Invoke-RestMethod -Uri "http://127.0.0.1:8000/health" -Method Get -ErrorAction Stop
+        if ($response.status -eq "ok") {
             $backendReady = $true
             Write-Host " [INFO] Backend is ready!" -ForegroundColor Green
         }
@@ -133,8 +133,14 @@ if ($e2eResult -ne 0) {
     Write-Host "`n [ERROR] E2E tests failed." -ForegroundColor Red
 } else {
     Write-Host "`n ================================================= " -ForegroundColor Cyan
-    Write-Host "      ALL TESTS PASSED SUCCESSFULLY! 🚀            " -ForegroundColor Green
+    Write-Host "      ALL TESTS PASSED SUCCESSFULLY!                 " -ForegroundColor Green
     Write-Host " ================================================= " -ForegroundColor Cyan
+}
+
+# Optional early exit for CI or non-interactive runs
+if ($env:DERMA_SKIP_DEV_SERVER -ieq "1" -or $env:DERMA_SKIP_DEV_SERVER -ieq "true") {
+    if ($e2eResult -ne 0) { exit 1 }
+    exit 0
 }
 
 # 10. Restart backend for development (real AI)

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import { uiTokens } from '../components/Layout';
+import ChangeDoctorModal from '../components/ChangeDoctorModal';
 
 // Doctor Card Component
 const DoctorCard = ({ doctor, onSelect, isSelecting }) => {
@@ -89,6 +90,7 @@ function PatientDashboard() {
   const [currentDoctor, setCurrentDoctor] = useState(null);
   const [availableDoctors, setAvailableDoctors] = useState([]);
   const [selectingDoctorId, setSelectingDoctorId] = useState(null);
+  const [showChangeDoctorModal, setShowChangeDoctorModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -139,6 +141,21 @@ function PatientDashboard() {
     } finally {
       setSelectingDoctorId(null);
     }
+  };
+
+  const handleNewScan = () => {
+    navigate('/patient-upload');
+  };
+
+  const handleViewHistory = () => {
+    navigate('/patient-history');
+  };
+
+  const handleDoctorChangeSuccess = (data) => {
+    // data contains: { doctor, status, previous_doctor_id }
+    setCurrentDoctor(data.doctor);
+    setShowChangeDoctorModal(false);
+    setError(null);
   };
 
   return (
@@ -254,6 +271,12 @@ function PatientDashboard() {
             <button onClick={() => navigate('/patient-history')} className="btn-soft">
               View Scan History
             </button>
+            <button
+              className="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 shadow-sm transition hover:border-amber-300 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+              onClick={() => setShowChangeDoctorModal(true)}
+            >
+              Change Doctor
+            </button>
           </div>
         </div>
       )}
@@ -301,6 +324,16 @@ function PatientDashboard() {
           <h3 className="mt-4 text-lg font-semibold text-charcoal-900">No doctors available</h3>
           <p className="mt-2 text-charcoal-500">Please check back later for available dermatologists.</p>
         </div>
+      )}
+
+      {/* Change Doctor Modal */}
+      {showChangeDoctorModal && (
+        <ChangeDoctorModal
+          currentDoctor={currentDoctor}
+          onClose={() => setShowChangeDoctorModal(false)}
+          onSuccess={handleDoctorChangeSuccess}
+          onError={(msg) => setError(msg)}
+        />
       )}
     </div>
   );

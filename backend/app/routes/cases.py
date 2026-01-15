@@ -6,6 +6,8 @@ from app.db import get_db
 from app.models import AnalysisReport, User, PatientDoctorLink, ChatMessage
 from app.auth_helpers import get_current_user, get_current_patient, get_current_doctor
 from app.routes.websocket import manager as ws_manager
+from app.schemas import CaseRatingRequest
+from app.services.report_service import submit_patient_rating
 
 router = APIRouter(prefix="/cases", tags=["Cases/Escalation"])
 
@@ -217,4 +219,29 @@ async def complete_case(
         "report_id": report.id,
         "review_status": report.review_status,
         "doctor_active": report.doctor_active
+    }
+
+
+@router.post("/{report_id}/rating")
+async def submit_case_rating(
+    report_id: int,
+    payload: CaseRatingRequest,
+    db: Session = Depends(get_db),
+    current_patient: User = Depends(get_current_patient),
+) -> Dict[str, Any]:
+    """
+    Patient submits a rating after a case review is complete.
+    """
+    report = submit_patient_rating(
+        db=db,
+        report_id=report_id,
+        current_patient=current_patient,
+        rating=payload.rating,
+        feedback=payload.feedback,
+    )
+    return {
+        "message": "Rating submitted",
+        "report_id": report.id,
+        "patient_rating": report.patient_rating,
+        "patient_feedback": report.patient_feedback,
     }

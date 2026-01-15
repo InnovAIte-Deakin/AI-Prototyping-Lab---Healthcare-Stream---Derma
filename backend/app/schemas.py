@@ -99,6 +99,18 @@ class SelectDoctorRequest(BaseModel):
     doctor_id: int
 
 
+class ChangeDoctorRequest(BaseModel):
+    """Request body for changing doctor (S2-4 Safe Doctor Switch)."""
+    doctor_id: int
+    reason: Optional[str] = Field(None, max_length=500)
+
+
+class ChangeDoctorResponse(BaseModel):
+    """Response after changing doctor (S2-4 Safe Doctor Switch)."""
+    doctor: DoctorResponse
+    status: str
+    previous_doctor_id: Optional[int] = None
+
 # Sprint 2: Add these additional schemas
 # class Token(BaseModel):
 #     access_token: str
@@ -164,3 +176,9 @@ class PublicChatResponse(BaseModel):
     session_id: str
     reply: str
     analysis: Dict[str, Any]
+
+
+class CaseRatingRequest(BaseModel):
+    """Request body for patient rating submission."""
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+    feedback: Optional[str] = Field(None, max_length=1000, description="Optional patient feedback")

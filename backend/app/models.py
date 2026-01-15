@@ -64,6 +64,8 @@ class AnalysisReport(Base):
     doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     review_status = Column(String, default="none", nullable=False) # none, pending, accepted, reviewed
     doctor_active = Column(Boolean, default=False, nullable=False)
+    patient_rating = Column(Integer, nullable=True)
+    patient_feedback = Column(Text, nullable=True)
     
     # Structured fields 
     condition = Column(String, nullable=True)  # Primary detected condition
@@ -92,3 +94,16 @@ class ChatMessage(Base):
 
     # Relationships
     report = relationship("AnalysisReport", back_populates="chat_messages")
+
+
+class DoctorChangeLog(Base):
+    """Log of doctor changes for a patient (S2-4 - Safe Doctor Switch)."""
+    __tablename__ = "doctor_change_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    old_doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    new_doctor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    changed_at = Column(DateTime(timezone=True), server_default=func.now())
+    reason = Column(String, nullable=True)  # Optional reason for change
+

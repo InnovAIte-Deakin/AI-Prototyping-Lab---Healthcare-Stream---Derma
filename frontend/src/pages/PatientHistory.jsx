@@ -71,6 +71,13 @@ const CaseCard = ({ report, onClick }) => {
           <p className="text-xs font-medium text-charcoal-500 mb-1">Recommendation</p>
           <p className="text-sm text-charcoal-700 line-clamp-2">{report.advice}</p>
         </div>
+
+        {report.doctorName && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-charcoal-500">Reviewed by:</span>
+            <span className="font-medium text-charcoal-700">{report.doctorName}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-cream-200">
@@ -139,6 +146,9 @@ const PatientHistory = () => {
         createdAt,
         reviewStatus: report.review_status || 'none',
         imageId: report.image_id,
+        // Doctor info for historical display (from the case, not current link) - S2-4
+        doctorId: report.doctor_id,
+        doctorName: report.doctor_name,
       };
     });
   }, [reports]);

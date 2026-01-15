@@ -36,6 +36,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.db import Base, get_db
 from app.models import User, Image, DoctorProfile
+from app.config import MEDIA_ROOT
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -172,20 +173,27 @@ def sample_user(db_session, sample_user_data):
 
 
 @pytest.fixture
-def sample_image(db_session, sample_user, tmp_path):
+def sample_image(db_session, sample_user):
     """
-    Create a fake image record + actual temp file on disk so
-    the analysis route tests can find it.
+    Create a fake image record + actual file on disk under MEDIA_ROOT.
     """
-    # create a temporary file to simulate an uploaded image
-    image_file = tmp_path / "test_image.jpg"
+    from uuid import uuid4
+
+    media_dir = MEDIA_ROOT / "tests"
+    media_dir.mkdir(parents=True, exist_ok=True)
+    image_file = media_dir / f"test_image_{uuid4().hex}.jpg"
     image_file.write_bytes(b"fake image data")
 
     image = Image(
         patient_id=sample_user.id,
-        image_url=str(image_file),
+        image_url=f"tests/{image_file.name}",
     )
     db_session.add(image)
     db_session.commit()
     db_session.refresh(image)
-    return image
+
+    try:
+        yield image
+    finally:
+        if image_file.exists():
+            image_file.unlink()
