@@ -354,6 +354,17 @@ async def get_patient_reports(
         data["patient_rating"] = report.patient_rating
         data["patient_feedback"] = report.patient_feedback
         data["created_at"] = report.created_at.isoformat()
+        data["doctor_id"] = report.doctor_id
+        
+        # Fetch doctor name if doctor_id exists (for historical display - S2-4)
+        if report.doctor_id:
+            profile = db.query(DoctorProfile).filter(
+                DoctorProfile.user_id == report.doctor_id
+            ).first()
+            data["doctor_name"] = profile.full_name if profile else None
+        else:
+            data["doctor_name"] = None
+            
         results.append(data)
         
     return results

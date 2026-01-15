@@ -768,7 +768,7 @@ I need to Apply Styling and Layout
 - [ ] S2-1 – UI Improvements
 - [ ] S2-2 – Usage Guides
 - [ ] S2-3 – Clinic Branding
-- [ ] S2-4 – Safe Doctor Switch
+- [x] S2-4 – Safe Doctor Switch
 - [x] S2-5 – Post-Consultation Doctor Rating
 - [ ] S2-6 – Medical Admin Role
 - [ ] S2-7 – Observability
