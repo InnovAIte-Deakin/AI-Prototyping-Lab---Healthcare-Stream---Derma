@@ -19,10 +19,7 @@ function LandingPage() {
           Hero Section: The moment of discovery
           ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative min-h-[90vh] flex items-center">
-        {/* Subtle organic pattern - inspired by skin cells, not gradient blobs */}
-        <div className="absolute inset-0 pattern-cells opacity-40" aria-hidden="true" />
-
-        <div className="relative z-10 w-full">
+        <div className="w-full">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: The Story */}
             <div className="animate-enter">
@@ -145,18 +142,6 @@ function LandingPage() {
                       </button>
                     </div>
                   </div>
-                </div>
-
-                {/* Floating badge */}
-                <div className="absolute -right-4 top-20 badge-sage shadow-lg">
-                  <span className="w-2 h-2 rounded-full bg-sage-500 status-dot" />
-                  AI Analyzed
-                </div>
-
-                {/* Floating doctor badge */}
-                <div className="absolute -left-4 bottom-32 badge-deep shadow-lg">
-                  <span className="w-2 h-2 rounded-full bg-deep-500" />
-                  Doctor Available
                 </div>
               </div>
             </div>
@@ -283,7 +268,7 @@ function LandingPage() {
               <div className="rounded-3xl bg-white border border-cream-300 p-8 shadow-lg">
                 <div className="flex items-start gap-5">
                   {/* Doctor avatar - stylized, warm */}
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-deep-400 to-deep-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-20 h-20 rounded-2xl bg-deep-600 flex items-center justify-center flex-shrink-0">
                     <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
@@ -350,11 +335,8 @@ function LandingPage() {
           ═══════════════════════════════════════════════════════════════════ */}
       <section className="py-24">
         <div className="max-w-3xl mx-auto">
-          <div className="rounded-3xl bg-charcoal-900 p-10 sm:p-14 text-center relative overflow-hidden">
-            {/* Subtle pattern */}
-            <div className="absolute inset-0 opacity-5 pattern-dots" aria-hidden="true" />
-
-            <div className="relative z-10">
+          <div className="rounded-3xl bg-charcoal-900 p-10 sm:p-14 text-center">
+            <div>
               <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
                 Ready to understand your skin better?
               </h2>
