@@ -53,7 +53,7 @@ test.describe('Anonymous Flow', () => {
 
         // 5. Sign up to save
         console.log('Step 5: Clicking Sign Up Link...');
-        const signupLink = page.getByRole('link', { name: /Sign up to save this case/i });
+        const signupLink = page.getByRole('link', { name: /Sign up to save/i });
         await expect(signupLink).toBeVisible();
         
         // Debug: Verify session ID is in link

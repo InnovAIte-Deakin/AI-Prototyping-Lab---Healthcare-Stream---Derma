@@ -26,7 +26,7 @@ test.describe('Doctor Switch (S2-4)', () => {
         
         // Verify current doctor is displayed
         console.log('Step 3: Looking for current doctor info...');
-        await expect(page.getByText('Your Dermatologist')).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText('Your Dermatologist', { exact: true })).toBeVisible({ timeout: 10000 });
         console.log('Step 3: Current doctor section visible');
         
         // Find and click the Change Doctor button
