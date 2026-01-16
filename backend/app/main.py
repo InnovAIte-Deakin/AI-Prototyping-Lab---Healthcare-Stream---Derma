@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.observability import configure_logging, request_id_middleware
 from app.routes import (
     auth,
     doctors,
@@ -20,6 +21,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
+configure_logging()
+
 
 
 origins = [
@@ -33,7 +36,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
 )
+
+app.middleware("http")(request_id_middleware)
 
 # Include WebSocket router FIRST (before static files)
 app.include_router(websocket.router)
