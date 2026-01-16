@@ -32,7 +32,7 @@ const renderWithRouter = (initialPath) => {
 describe('App Component', () => {
   it('renders Landing Page by default', async () => {
     renderWithRouter('/');
-    expect(await screen.findByText(/Your skin tells a story/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Identify skin concerns/i)).toBeInTheDocument();
     const brands = await screen.findAllByText('SkinScope');
     expect(brands.length).toBeGreaterThan(0);
   });
@@ -40,20 +40,18 @@ describe('App Component', () => {
   it('renders Patient Dashboard on /patient-dashboard', async () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
     renderWithRouter('/patient-dashboard');
-    expect(await screen.findByText('Your Dashboard')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
-    expect(brands.length).toBeGreaterThan(0);
+    expect(await screen.findByText('Patient Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('SkinScope')).toBeInTheDocument();
   });
 
   it('renders Patient Upload on /patient-upload', async () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
     renderWithRouter('/patient-upload');
-    expect(await screen.findByText('Upload Skin Image')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
-    expect(brands.length).toBeGreaterThan(0);
+    expect(await screen.findByText('Patient Upload')).toBeInTheDocument();
+    expect(await screen.findByText('SkinScope')).toBeInTheDocument();
     expect(
       await screen.findByText(
-        /AI.*not.*diagnos/i
+        'This AI-generated report is not a medical diagnosis. Always consult a qualified healthcare professional.'
       )
     ).toBeInTheDocument();
   });
@@ -62,26 +60,25 @@ describe('App Component', () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
     renderWithRouter('/doctor-dashboard');
     expect(await screen.findByText('Doctor Dashboard')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
-    expect(brands.length).toBeGreaterThan(0);
+    expect(await screen.findByText('SkinScope')).toBeInTheDocument();
   });
 
   it('renders Doctor Patient Detail on /doctor/patients/:patientId', async () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
     renderWithRouter('/doctor/patients/123');
     expect(await screen.findByText('Patient Reports')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
-    expect(brands.length).toBeGreaterThan(0);
+    expect(await screen.findByText('SkinScope')).toBeInTheDocument();
     expect(
-      await screen.findByText(/AI.*not.*diagnos/i)
+      await screen.findByText(
+        'This AI-generated report is not a medical diagnosis. Always consult a qualified healthcare professional.'
+      )
     ).toBeInTheDocument();
   });
 
   it('renders Patient History on /patient-history', async () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
     renderWithRouter('/patient-history');
-    expect(await screen.findByText('Scan History')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
-    expect(brands.length).toBeGreaterThan(0);
+    expect(await screen.findByText('Patient History')).toBeInTheDocument();
+    expect(await screen.findByText('SkinScope')).toBeInTheDocument();
   });
 });
