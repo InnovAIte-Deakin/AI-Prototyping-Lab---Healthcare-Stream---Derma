@@ -45,10 +45,10 @@ Set-Location ..
 # 5. Seeding E2E
 Write-Host "`n [3/5] Seeding Data for E2E Tests..." -ForegroundColor Yellow
 Set-Location backend
-# Ensure DB schema and base users (Doctors) exist
-python -m app.seed_doctors
+# Ensure schema is fresh and doctors are seeded
+python -m app.reset_db
 if ($LASTEXITCODE -ne 0) {
-    Write-Host " [ERROR] Doctor seeding failed. Stopping." -ForegroundColor Red
+    Write-Host " [ERROR] Database reset failed. Stopping." -ForegroundColor Red
     Set-Location $OriginalDir
     exit 1
 }

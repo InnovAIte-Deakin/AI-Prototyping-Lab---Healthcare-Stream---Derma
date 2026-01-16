@@ -4,6 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import DoctorDashboard from '../pages/DoctorDashboard';
 import DoctorPatientDetail from '../pages/DoctorPatientDetail';
 import { apiClient } from '../context/AuthContext';
+import { ToastProvider } from '../context/ToastContext';
 
 describe('Doctor flows', () => {
   afterEach(() => {
@@ -19,9 +20,11 @@ describe('Doctor flows', () => {
     });
 
     render(
-      <MemoryRouter>
-        <DoctorDashboard />
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter>
+          <DoctorDashboard />
+        </MemoryRouter>
+      </ToastProvider>
     );
 
     await waitFor(() => {

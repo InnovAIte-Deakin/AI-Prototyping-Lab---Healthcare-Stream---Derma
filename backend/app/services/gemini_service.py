@@ -1,8 +1,11 @@
 import os
 import base64
+import logging
 from pathlib import Path
 import google.generativeai as genai
 from typing import Dict, Any
+
+logger = logging.getLogger("app.gemini")
 
 class GeminiService:
     """Service for AI-powered skin lesion analysis using Google Gemini"""
@@ -10,6 +13,7 @@ class GeminiService:
     def __init__(self):
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
+            logger.error("gemini.api_key_missing")
             raise ValueError("GOOGLE_API_KEY not found in environment variables")
         
         genai.configure(api_key=api_key)
@@ -69,7 +73,13 @@ class GeminiService:
             }
             
         except Exception as e:
-            print(f"GEMINI ERROR: {e}")
+            logger.exception(
+                "gemini.analysis_failed",
+                extra={
+                    "image_file": Path(image_path).name,
+                    "error_type": type(e).__name__,
+                },
+            )
             return {
                 "status": "error",
                 "error": str(e),
@@ -121,7 +131,13 @@ class GeminiService:
             response = await self.model.generate_content_async(context_prompt)
             return response.text
         except Exception as e:
-            print(f"GEMINI CHAT ERROR: {e}")
+            logger.exception(
+                "gemini.chat_failed",
+                extra={
+                    "error_type": type(e).__name__,
+                    "history_count": len(history or []),
+                },
+            )
             return "I apologize, but I'm having trouble processing your request right now. Please try again later."
 
     def _parse_json_response(self, text: str) -> Dict[str, Any]:
@@ -143,7 +159,10 @@ class GeminiService:
         try:
             return json.loads(cleaned_text)
         except json.JSONDecodeError:
-            print(f"FAILED TO PARSE JSON: {text}")
+            logger.warning(
+                "gemini.parse_json_failed",
+                extra={"text_length": len(text)},
+            )
             # Fallback to a basic structure if parsing fails
             return {
                 "condition": "Error parsing result",

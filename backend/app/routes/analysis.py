@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import Dict, Any, List
 import json
+import logging
 from app.services.media_service import resolve_media_path
 from app.db import get_db
 from app.models import Image, User, AnalysisReport, ChatMessage, DoctorProfile
@@ -18,6 +19,7 @@ from app.services.report_service import (
 
 router = APIRouter(prefix="/api/analysis", tags=["AI Analysis"])
 
+logger = logging.getLogger("app.analysis")
 
 
 
@@ -62,7 +64,10 @@ async def analyze_image(
     
     if analysis_result["status"] == "error":
         error_msg = analysis_result.get('error', 'Unknown error')
-        print(f"[Analysis] Error encountered: {error_msg}")
+        logger.warning(
+            "analysis.gemini_error",
+            extra={"error": error_msg},
+        )
         
         # Create fallback result so user flow isn't blocked
         analysis_result = {
