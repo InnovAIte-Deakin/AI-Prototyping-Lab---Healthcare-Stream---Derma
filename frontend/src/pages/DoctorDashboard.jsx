@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import { uiTokens } from '../components/Layout';
+import { useToast } from '../context/ToastContext';
 
 const DoctorDashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -9,6 +10,7 @@ const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { pushToast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +47,10 @@ const DoctorDashboard = () => {
           err.response?.data?.detail ||
           'Could not load dashboard data. Please try again.';
         setError(message);
+        pushToast({
+          title: 'Dashboard error',
+          message,
+        });
       } finally {
         setLoading(false);
       }

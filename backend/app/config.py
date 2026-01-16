@@ -6,6 +6,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 # JWT Settings
 SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_change_in_production")

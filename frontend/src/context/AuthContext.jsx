@@ -10,17 +10,17 @@ export const apiClient = axios.create({
 
 // Helper functions for managing API client headers (defined outside component to avoid re-creation)
 const setHeadersFromUser = (u) => {
-  apiClient.defaults.headers['X-User-Id'] = u.id;
-  apiClient.defaults.headers['X-User-Role'] = u.role;
+  apiClient.defaults.headers.common['X-User-Id'] = u.id;
+  apiClient.defaults.headers.common['X-User-Role'] = u.role;
   if (u.access_token) {
-    apiClient.defaults.headers['Authorization'] = `Bearer ${u.access_token}`;
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${u.access_token}`;
   }
 };
 
 const clearHeaders = () => {
-  delete apiClient.defaults.headers['X-User-Id'];
-  delete apiClient.defaults.headers['X-User-Role'];
-  delete apiClient.defaults.headers['Authorization'];
+  delete apiClient.defaults.headers.common['X-User-Id'];
+  delete apiClient.defaults.headers.common['X-User-Role'];
+  delete apiClient.defaults.headers.common['Authorization'];
 };
 
 export function AuthProvider({ children }) {

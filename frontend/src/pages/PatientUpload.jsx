@@ -4,6 +4,7 @@ import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import { uiTokens } from '../components/Layout';
 import UnifiedChat from '../components/UnifiedChat';
+import { useToast } from '../context/ToastContext';
 
 const PatientUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -12,6 +13,7 @@ const PatientUpload = () => {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [reviewStatus, setReviewStatus] = useState('none');
+  const { pushToast } = useToast();
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0] || null;
@@ -48,7 +50,12 @@ const PatientUpload = () => {
       }
     } catch (err) {
       console.error('Analysis Error:', err.response?.data || err.message);
-      setError(`Analysis failed: ${err.response?.data?.detail || 'Something went wrong.'}`);
+      const detail = err.response?.data?.detail || 'Something went wrong.';
+      setError(`Analysis failed: ${detail}`);
+      pushToast({
+        title: 'Analysis failed',
+        message: detail,
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -71,6 +78,10 @@ const PatientUpload = () => {
       console.error('Request review error:', err);
       const detail = err?.response?.data?.detail;
       setError(detail || 'Failed to request doctor review.');
+      pushToast({
+        title: 'Review request failed',
+        message: detail || 'Failed to request doctor review.',
+      });
     } finally {
       setIsRequestingReview(false);
     }
@@ -143,6 +154,10 @@ const PatientUpload = () => {
                   }
                 } catch (err) {
                   console.error('Failed to refresh status:', err);
+                  pushToast({
+                    title: 'Status refresh failed',
+                    message: 'Could not refresh the review status. Please try again.',
+                  });
                 }
               }}
             />

@@ -29,6 +29,15 @@ The backend now treats uploaded media as sensitive content:
 
 ---
 
+## Observability & Health Checks (S2-7)
+
+- `GET /health` and `GET /ready` validate DB connectivity and required env flags.
+- Responses return HTTP 200 when healthy and HTTP 503 when degraded.
+- Every response includes an `X-Request-ID` header. Include it in bug reports.
+- Configure backend verbosity via `LOG_LEVEL` (e.g., `INFO`, `DEBUG`).
+
+---
+
 ## 1. Backend Testing (FastAPI)
 
 We will use **pytest** as the primary test runner.

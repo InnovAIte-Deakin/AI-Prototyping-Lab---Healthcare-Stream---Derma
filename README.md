@@ -22,6 +22,7 @@ DERMA (internally referred to as **DermaAI**) is a containerized web application
 - **[AGENTS.md](AGENTS.md):** Master context for AI Agents (Mission, Rules, Tech Stack).
 - **[docs/SRS.md](docs/SRS.md):** Software Requirements Specification.
 - **[docs/TESTING.md](docs/TESTING.md):** Testing Strategy and Commands.
+- **[docs/OPERATIONS.md](docs/OPERATIONS.md):** Operations runbook (health checks, logs, migrations).
 - **[docs/WEEK_6_STATUS_REPORT.md](docs/WEEK_6_STATUS_REPORT.md):** Week 6 Project Status Report.
 - **[TASKS.md](TASKS.md):** Active Task Checklist.
 
@@ -94,6 +95,7 @@ python -m app.seed_doctors
 uvicorn app.main:app --reload
 ```
 _Backend running at: http://localhost:8000_
+_Health check: http://localhost:8000/health_
 
 ### 3. Frontend Setup
 Open a **new terminal** (keep backend running).

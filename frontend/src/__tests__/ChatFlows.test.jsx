@@ -4,6 +4,7 @@ import UnifiedChat from '../components/UnifiedChat';
 import PatientUpload from '../pages/PatientUpload';
 import { apiClient } from '../context/AuthContext';
 import { MemoryRouter } from 'react-router-dom';
+import { ToastProvider } from '../context/ToastContext';
 
 /* 
   MOCKING WEBSOCKET
@@ -148,9 +149,11 @@ describe('ChatFlows', () => {
     });
 
     render(
-        <MemoryRouter>
-            <PatientUpload />
-        </MemoryRouter>
+        <ToastProvider>
+            <MemoryRouter>
+                <PatientUpload />
+            </MemoryRouter>
+        </ToastProvider>
     );
 
     // 1. Simulate Upload & Analyze
