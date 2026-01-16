@@ -3,17 +3,23 @@ import base64
 from pathlib import Path
 import google.generativeai as genai
 from typing import Dict, Any
+import asyncio
+from app.config import AI_TIMEOUT_SECONDS
 
 class GeminiService:
     """Service for AI-powered skin lesion analysis using Google Gemini"""
     
     def __init__(self):
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY not found in environment variables")
+        self.api_key = os.getenv("GOOGLE_API_KEY")
+        self.is_ready = False
         
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
+        if self.api_key:
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
+            self.is_ready = True
+        else:
+            print("WARNING: GOOGLE_API_KEY not found. AI features will be unavailable.")
+            self.model = None
     
     async def analyze_skin_lesion(self, image_path: str) -> Dict[str, Any]:
         """
@@ -26,6 +32,13 @@ class GeminiService:
             Dictionary containing analysis results
         """
         try:
+            if not self.is_ready:
+                return {
+                    "status": "error",
+                    "error": "API_KEY_MISSING",
+                    "message": "AI analysis is currently unavailable (API key not configured)."
+                }
+
             # Read the image file
             with open(image_path, 'rb') as img_file:
                 image_data = img_file.read()
@@ -56,8 +69,18 @@ class GeminiService:
                 }
             ]
             
-            # Generate analysis
-            response = await self.model.generate_content_async([prompt, image_parts[0]])
+            # Generate analysis with timeout
+            try:
+                response = await asyncio.wait_for(
+                    self.model.generate_content_async([prompt, image_parts[0]]),
+                    timeout=AI_TIMEOUT_SECONDS
+                )
+            except asyncio.TimeoutError:
+                return {
+                    "status": "error",
+                    "error": "TIMEOUT",
+                    "message": f"AI analysis timed out after {AI_TIMEOUT_SECONDS} seconds."
+                }
             
             # Parse and structure the response
             analysis_data = self._parse_json_response(response.text)

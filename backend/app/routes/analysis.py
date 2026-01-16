@@ -61,47 +61,63 @@ async def analyze_image(
     analysis_result = await get_gemini_service().analyze_skin_lesion(image_path)
     
     if analysis_result["status"] == "error":
-        error_msg = analysis_result.get('error', 'Unknown error')
-        print(f"[Analysis] Error encountered: {error_msg}")
+        error_code = analysis_result.get('error', 'Unknown error')
+        error_msg = analysis_result.get('message', 'Failed to analyze the image.')
+        print(f"[Analysis] Error encountered: {error_code} - {error_msg}")
         
+        # Create descriptive fallback based on error code
+        recommendation = "The AI service is currently unavailable. Please escalate this case to a human physician for review."
+        explanation = f"Service Error: {error_msg}. Please try again later or consult a doctor directly."
+        
+        if error_code == "TIMEOUT":
+            explanation = "The AI analysis took too long to respond. This can happen with very high-resolution images or high server load."
+        elif error_code == "API_KEY_MISSING":
+            explanation = "The AI service is not properly configured. Please contact the administrator."
+
         # Create fallback result so user flow isn't blocked
-        analysis_result = {
+        fallback_result = {
             "status": "error",
-            "condition": "Service Unavailable",
+            "error_code": error_code,
+            "condition": "Analysis Unavailable",
             "severity": "Unknown",
             "confidence": 0,
-            "recommendation": "The AI service is currently unavailable due to high demand (Quota Exceeded). Please escalate to a human physician.",
-            "explanation": f"Service Error: {error_msg}. Please try again later or consult a doctor directly.",
-            "precautions": ["Consult a doctor"]
+            "recommendation": recommendation,
+            "explanation": explanation,
+            "precautions": ["Consult a doctor"],
+            "is_fallback": True
         }
         
         # We continue to save this as a valid (but error-state) report
         # This allows the user to still use the chat and escalate features
         report = AnalysisReport(
             image_id=image.id,
-            report_json=json.dumps(analysis_result),
+            report_json=fallback_result, # SQLAlchemy handles dict to JSON if configured, or use json.dumps
             patient_id=current_user.id
         )
+        # Note: AnalysisReport.report_json is Text in models.py, so we should dumps it if not handled by SQLAlchemy
+        if isinstance(report.report_json, dict):
+            report.report_json = json.dumps(report.report_json)
+
         db.add(report)
         db.commit()
         db.refresh(report)
         
-        # Add a system message to the chat explaning the situation
+        # Add a system message to the chat explaining the situation
         system_msg = ChatMessage(
             report_id=report.id,
             sender_role="system",
-            message=f"⚠️ I was unable to perform the visual analysis due to a service limit ({error_msg}).\n\nHowever, a case has been created. You can using the button below to escalate this directly to a human dermatologist for review."
+            message=f"⚠️ Analysis Unavailable: {explanation}\n\nYou can still discuss this with our team or escalate it for human review."
         )
         db.add(system_msg)
         db.commit()
         
         # Add return fields
-        analysis_result["report_id"] = report.id
-        analysis_result["image_id"] = image.id
-        analysis_result["review_status"] = report.review_status
-        analysis_result["doctor_active"] = report.doctor_active
+        fallback_result["report_id"] = report.id
+        fallback_result["image_id"] = image.id
+        fallback_result["review_status"] = report.review_status
+        fallback_result["doctor_active"] = report.doctor_active
         
-        return analysis_result
+        return fallback_result
     
     # Save analysis results to database
     report = AnalysisReport(

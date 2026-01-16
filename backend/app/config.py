@@ -19,3 +19,8 @@ MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT", DEFAULT_MEDIA_ROOT))
 MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 MEDIA_URL = "/media"
 MEDIA_URL_TTL_SECONDS = int(os.getenv("MEDIA_URL_TTL_SECONDS", "300"))
+
+# Resilience Settings
+MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
+ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
+AI_TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT_SECONDS", "30"))
