@@ -32,7 +32,7 @@ test.describe('Anonymous Flow', () => {
         
         // 3. Click Analyze
         console.log('Step 3: Clicking Analyze...');
-        await page.getByRole('button', { name: 'Run quick analysis' }).click();
+        await page.getByRole('button', { name: /Run Quick Analysis/i }).click();
 
         // Check for errors using role='alert' selector
         const errorAlert = page.getByRole('alert');
@@ -68,19 +68,20 @@ test.describe('Anonymous Flow', () => {
         // 6. Complete Signup Flow
         console.log('Step 6: Filling Signup Form...');
         await expect(page).toHaveURL(/.*login.*mode=signup/);
-        
+
+        // Wait for form to be visible
+        await page.waitForSelector('form', { timeout: 30000 });
+
         // Generate unique email
         const timestamp = new Date().getTime();
         const email = `anon_saved_${timestamp}@test.com`;
-        
-        await page.getByLabel('Email address').clear();
-        await page.getByLabel('Email address').fill(email);
 
-        await page.getByLabel('Password').clear();
-        await page.getByLabel('Password').fill('password123');
+        // Use direct selectors for reliability
+        await page.locator('input#email').fill(email);
+        await page.locator('input#password').fill('password123');
 
         console.log('Step 6: Submitting Form...');
-        await page.getByRole('button', { name: 'Create Account' }).click();
+        await page.locator('button[type="submit"]').click();
 
         // 7. Verify Dashboard & Persistence
         console.log('Step 7: Verifying Dashboard Redirect...');

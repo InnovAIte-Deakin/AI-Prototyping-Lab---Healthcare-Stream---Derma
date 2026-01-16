@@ -14,11 +14,14 @@ test.describe('Patient Rating Flow', () => {
         // 1. Login Logic (Since we don't have a pre-saved state for this specific user yet)
         console.log('Step 1: Navigating to login...');
         await page.goto('/login');
-        
+
+        // Wait for form to be visible
+        await page.waitForSelector('form', { timeout: 30000 });
+
         console.log('Step 1: Logging in as reviewed patient...');
-        await page.getByLabel('Email address').fill(PATIENT_EMAIL);
-        await page.getByLabel('Password').fill(PATIENT_PASSWORD);
-        await page.getByRole('button', { name: 'Sign In' }).click();
+        await page.locator('input#email').fill(PATIENT_EMAIL);
+        await page.locator('input#password').fill(PATIENT_PASSWORD);
+        await page.locator('button[type="submit"]').click();
 
         // Verify dashboard load
         await expect(page).toHaveURL(/.*patient-dashboard/);

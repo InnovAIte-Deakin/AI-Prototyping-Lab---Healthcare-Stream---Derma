@@ -14,13 +14,14 @@ test.describe('Authentication Flow', () => {
 
         // 1. Go to Login
         await page.goto('/login');
-        
-        // 2. Log In
-        await page.getByLabel('Email address').clear();
-        await page.getByLabel('Email address').fill(email);
-        await page.getByLabel('Password').clear();
-        await page.getByLabel('Password').fill(password);
-        await page.getByRole('button', { name: 'Sign In' }).click();
+
+        // Wait for form to be visible
+        await page.waitForSelector('form', { timeout: 30000 });
+
+        // 2. Log In using direct selectors
+        await page.locator('input#email').fill(email);
+        await page.locator('input#password').fill(password);
+        await page.locator('button[type="submit"]').click();
 
         // 3. Verify Dashboard
         await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
