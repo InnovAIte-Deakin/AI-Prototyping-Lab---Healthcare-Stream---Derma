@@ -15,7 +15,7 @@ class TestGeminiService:
             mock_genai.configure.assert_called_once_with(api_key='test_key')
     
     def test_gemini_service_missing_api_key(self):
-        """Test that Gemini service raises error when API key is missing"""
+        """Test that Gemini service raises ValueError when API key is missing"""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError, match="GOOGLE_API_KEY not found"):
                 GeminiService()

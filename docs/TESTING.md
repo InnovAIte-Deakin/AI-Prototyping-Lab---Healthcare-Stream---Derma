@@ -29,6 +29,17 @@ The backend now treats uploaded media as sensitive content:
 
 ---
 
+## Resilience & AI Pipeline (S2-9)
+
+The application now includes safety measures for high-traffic or unstable conditions:
+
+- **Upload Validation:** The backend enforces a 5MB limit (`MAX_UPLOAD_SIZE_MB`) and specific MIME types (`image/jpeg`, `image/png`, `image/webp`). The frontend performs pre-upload checks to provide immediate feedback.
+- **AI Timeouts:** AI analysis requests now have a 30-second timeout (`AI_TIMEOUT_SECONDS`). If the timeout is reached, the system returns a "TIMEOUT" status instead of hanging.
+- **Graceful Fallbacks:** If the AI service fails (e.g., missing API key, quota limit, or timeout), a "Analysis Unavailable" report is still created. This allows the patient to continue to the chat interface and escalate the case to a human physician.
+- **Retry Logic:** The frontend provides "Retry" buttons if an upload or analysis step fails, allowing users to recover without re-uploading the image.
+
+---
+
 ## Observability & Health Checks (S2-7)
 
 - `GET /health` and `GET /ready` validate DB connectivity and required env flags.

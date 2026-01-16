@@ -17,27 +17,52 @@ const PatientUpload = () => {
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0] || null;
+    if (file) {
+      // Client-side validation
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      const maxSizeMB = 5;
+
+      if (!allowedTypes.includes(file.type)) {
+        setError(`Invalid file type: ${file.type}. Please upload a JPG, PNG, or WebP image.`);
+        setSelectedFile(null);
+        event.target.value = '';
+        return;
+      }
+
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum allowed size is ${maxSizeMB}MB.`);
+        setSelectedFile(null);
+        event.target.value = '';
+        return;
+      }
+    }
+    setError(null);
     setSelectedFile(file);
+    setResult(null); // Reset result if file changes
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) {
+  const handleAnalyze = async (existingImageId = null) => {
+    if (!selectedFile && !existingImageId) {
       setError('Please select an image to upload.');
       return;
     }
 
     setError(null);
-    setResult(null);
+    if (!existingImageId) setResult(null);
     setIsAnalyzing(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
+      let imageId = existingImageId;
 
-      const uploadRes = await apiClient.post('/images', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      const imageId = uploadRes.data?.image_id ?? uploadRes.data?.id;
+      if (!imageId) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const uploadRes = await apiClient.post('/images', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        imageId = uploadRes.data?.image_id ?? uploadRes.data?.id;
+      }
 
       if (!imageId) {
         throw new Error('Image ID missing');
@@ -50,11 +75,12 @@ const PatientUpload = () => {
       }
     } catch (err) {
       console.error('Analysis Error:', err.response?.data || err.message);
-      const detail = err.response?.data?.detail || 'Something went wrong.';
-      setError(`Analysis failed: ${detail}`);
+      const detail = err.response?.data?.detail;
+      const errorMsg = typeof detail === 'string' ? detail : 'Something went wrong.';
+      setError(`Analysis failed: ${errorMsg}`);
       pushToast({
         title: 'Analysis failed',
-        message: detail,
+        message: errorMsg,
       });
     } finally {
       setIsAnalyzing(false);
@@ -134,14 +160,36 @@ const PatientUpload = () => {
         </button>
 
         {error && (
-          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
-            {error}
-          </p>
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 flex flex-col gap-3">
+            <p className="text-sm text-red-700 font-medium">{error}</p>
+            {/* If we have an image but analysis failed, show retry */}
+            {result?.image_id && !result?.report_id && (
+              <button
+                onClick={() => handleAnalyze(result.image_id)}
+                className="text-xs font-bold text-red-800 underline uppercase tracking-tight self-start"
+              >
+                Retry Analysis
+              </button>
+            )}
+          </div>
         )}
 
         {result && result.report_id && (
-          <div className="space-y-4">
-            <UnifiedChat 
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {result.is_fallback && (
+              <div className="rounded-xl bg-orange-50 border border-orange-100 p-4 mb-2">
+                <p className="text-orange-800 text-sm font-semibold">
+                  ⚠️ AI Analysis Unavailable: {result.explanation}
+                </p>
+                <button
+                  onClick={() => handleAnalyze(result.image_id)}
+                  className="mt-2 text-xs font-bold text-orange-900 underline uppercase tracking-tight"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+            <UnifiedChat
               imageId={result.image_id}
               reportId={result.report_id}
               isPaused={reviewStatus === 'accepted'}
