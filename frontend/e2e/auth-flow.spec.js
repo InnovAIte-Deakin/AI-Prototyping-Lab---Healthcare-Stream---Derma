@@ -16,11 +16,11 @@ test.describe('Authentication Flow', () => {
         await page.goto('/login');
         
         // 2. Log In
-        await page.getByLabel('Email').clear();
-        await page.getByLabel('Email').fill(email);
+        await page.getByLabel('Email address').clear();
+        await page.getByLabel('Email address').fill(email);
         await page.getByLabel('Password').clear();
         await page.getByLabel('Password').fill(password);
-        await page.getByRole('button', { name: 'Log In' }).click();
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         // 3. Verify Dashboard
         await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();

@@ -73,14 +73,14 @@ test.describe('Anonymous Flow', () => {
         const timestamp = new Date().getTime();
         const email = `anon_saved_${timestamp}@test.com`;
         
-        await page.getByLabel('Email').clear();
-        await page.getByLabel('Email').fill(email); 
-        
+        await page.getByLabel('Email address').clear();
+        await page.getByLabel('Email address').fill(email);
+
         await page.getByLabel('Password').clear();
         await page.getByLabel('Password').fill('password123');
-        
+
         console.log('Step 6: Submitting Form...');
-        await page.getByRole('button', { name: 'Sign Up' }).click();
+        await page.getByRole('button', { name: 'Create Account' }).click();
 
         // 7. Verify Dashboard & Persistence
         console.log('Step 7: Verifying Dashboard Redirect...');

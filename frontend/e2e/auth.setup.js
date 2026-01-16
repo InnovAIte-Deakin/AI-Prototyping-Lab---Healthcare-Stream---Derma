@@ -32,13 +32,13 @@ const ACCOUNTS = {
 for (const [name, account] of Object.entries(ACCOUNTS)) {
   setup(`authenticate as ${name}`, async ({ page }) => {
     await page.goto('/login');
-    await page.getByLabel('Email').clear();
-    await page.getByLabel('Email').fill(account.email);
-    
+    await page.getByLabel('Email address').clear();
+    await page.getByLabel('Email address').fill(account.email);
+
     await page.getByLabel('Password').clear();
     await page.getByLabel('Password').fill(account.password);
-    
-    await page.getByRole('button', { name: 'Log In' }).click();
+
+    await page.getByRole('button', { name: 'Sign In' }).click();
     
     // Wait for dashboard to confirm login success
     await expect(page.getByRole('heading', { name: /Dashboard/i })).toBeVisible({ timeout: 10000 });
