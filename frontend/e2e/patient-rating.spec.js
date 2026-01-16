@@ -40,7 +40,7 @@ test.describe('Patient Rating Flow', () => {
         // 3. Select the reviewed case
         console.log('Step 3: Selecting the reviewed case...');
         // Verify we are not in empty state
-        const emptyState = page.getByText('No reports available yet');
+        const emptyState = page.getByText('No reports yet');
         if (await emptyState.isVisible()) {
             console.error('ERROR: No reports found in Patient History. Seeding may have failed or API returning empty list.');
             throw new Error('E2E Failure: Report list is empty, expected seeded case.');

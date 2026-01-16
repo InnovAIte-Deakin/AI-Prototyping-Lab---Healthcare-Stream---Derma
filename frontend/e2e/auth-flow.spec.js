@@ -25,8 +25,8 @@ test.describe('Authentication Flow', () => {
         // 3. Verify Dashboard
         await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
 
-        // 4. Click Logout
-        await page.getByRole('button', { name: /Logout/i }).click();
+        // 4. Click Sign out
+        await page.getByRole('button', { name: /Sign out/i }).click();
 
         // 5. Verify Redirect to Landing Page (or Login)
         // Adjust regex to match your actual landing page URL pattern (often just /)

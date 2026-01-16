@@ -57,10 +57,10 @@ test.describe('Doctor Review', () => {
         console.log('Step 6: Waiting for WebSocket connection (input enabled)...');
         const chatInput = page.getByRole('textbox');
         
-        // Wait for "CONNECTING..." to disappear (indicates WebSocket connected)
-        const connectingBadge = page.getByText('CONNECTING...');
+        // Wait for "Connecting..." to disappear (indicates WebSocket connected)
+        const connectingBadge = page.getByText('Connecting...');
         if (await connectingBadge.isVisible({ timeout: 1000 }).catch(() => false)) {
-            console.log('Step 6: CONNECTING badge visible, waiting for it to disappear...');
+            console.log('Step 6: Connecting badge visible, waiting for it to disappear...');
             await expect(connectingBadge).not.toBeVisible({ timeout: 30000 });
         }
         
