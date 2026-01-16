@@ -22,15 +22,15 @@ test.describe('Patient Rating Flow', () => {
 
         // Verify dashboard load
         await expect(page).toHaveURL(/.*patient-dashboard/);
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
 
         // 2. Navigate to History
         console.log('Step 2: Navigating to Patient History...');
-        await page.getByRole('button', { name: 'View History' }).first().click();
+        await page.getByRole('button', { name: 'View Scan History' }).first().click();
         
         // Wait for history page
         await expect(page).toHaveURL(/.*patient-history/);
-        await expect(page.getByRole('heading', { name: 'Patient History' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Scan History' })).toBeVisible();
 
         // Wait for loading to finish
         console.log('Step 2.5: Waiting for reports to load...');
