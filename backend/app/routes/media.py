@@ -1,4 +1,5 @@
 import mimetypes
+import logging
 
 from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import FileResponse
@@ -7,6 +8,7 @@ from app.config import MEDIA_URL_TTL_SECONDS
 from app.services.media_service import resolve_media_path, verify_media_token
 
 router = APIRouter(prefix="/media", tags=["Media"])
+logger = logging.getLogger("app.media")
 
 
 @router.get("/{media_path:path}")
@@ -15,6 +17,10 @@ def get_media_file(media_path: str, token: str = Query(default=None)) -> FileRes
     Serve protected media files using a short-lived signed token.
     """
     if not token or not verify_media_token(token, media_path):
+        logger.warning(
+            "media.token_invalid",
+            extra={"path": media_path, "has_token": bool(token)},
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid or missing media token",

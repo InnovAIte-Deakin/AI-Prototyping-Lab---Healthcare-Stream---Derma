@@ -1,11 +1,14 @@
 from uuid import uuid4
 from pathlib import Path
+import logging
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.config import MEDIA_ROOT
 from app.models import Image, PatientDoctorLink
+
+logger = logging.getLogger("app.media")
 
 
 def _write_media_file(file_bytes: bytes, subdir: str = "uploads") -> str:
@@ -21,6 +24,10 @@ def _write_media_file(file_bytes: bytes, subdir: str = "uploads") -> str:
         with open(file_path, "wb") as destination:
             destination.write(file_bytes)
     except OSError as exc:
+        logger.exception(
+            "media.write_failed",
+            extra={"subdir": subdir, "file_name": file_name},
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to store uploaded image",
@@ -34,6 +41,7 @@ def save_patient_image(db: Session, patient_id: int, file_bytes: bytes) -> Image
     Persist an uploaded image for a patient that is linked to a doctor.
     """
     if not file_bytes:
+        logger.warning("media.upload.empty", extra={"patient_id": patient_id})
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uploaded file is empty",

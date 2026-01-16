@@ -10,11 +10,21 @@ $env:DATABASE_URL = "sqlite:///./derma.db"
 $env:MOCK_AI = "true"
 Write-Host " [INFO] Environment set: MOCK_AI=true, DATABASE=sqlite" -ForegroundColor Gray
 
-# 2. Stop any existing backend
+# 2. Stop any existing backend (aggressive cleanup)
 Write-Host " [INFO] Stopping any existing backend..." -ForegroundColor Gray
-$existingBackend = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
-if ($existingBackend) {
-    Stop-Process -Id $existingBackend -Force -ErrorAction SilentlyContinue
+$existingBackends = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+foreach ($procId in $existingBackends) {
+    Write-Host " [INFO] Killing process $procId on port 8000" -ForegroundColor Gray
+    Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+}
+# Wait and verify port is free
+Start-Sleep -Seconds 3
+$stillRunning = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue
+if ($stillRunning) {
+    Write-Host " [WARN] Port 8000 still in use, attempting forceful cleanup..." -ForegroundColor Yellow
+    $stillRunning | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object {
+        Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue
+    }
     Start-Sleep -Seconds 2
 }
 
@@ -45,10 +55,10 @@ Set-Location ..
 # 5. Seeding E2E
 Write-Host "`n [3/5] Seeding Data for E2E Tests..." -ForegroundColor Yellow
 Set-Location backend
-# Ensure DB schema and base users (Doctors) exist
-python -m app.seed_doctors
+# Ensure schema is fresh and doctors are seeded
+python -m app.reset_db
 if ($LASTEXITCODE -ne 0) {
-    Write-Host " [ERROR] Doctor seeding failed. Stopping." -ForegroundColor Red
+    Write-Host " [ERROR] Database reset failed. Stopping." -ForegroundColor Red
     Set-Location $OriginalDir
     exit 1
 }

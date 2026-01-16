@@ -1,19 +1,36 @@
 import os
 import base64
+import logging
 from pathlib import Path
 import google.generativeai as genai
 from typing import Dict, Any
+import asyncio
+from app.config import AI_TIMEOUT_SECONDS
+
+logger = logging.getLogger("app.gemini")
 
 class GeminiService:
     """Service for AI-powered skin lesion analysis using Google Gemini"""
     
     def __init__(self):
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY not found in environment variables")
+        self.api_key = os.getenv("GOOGLE_API_KEY")
+        self.is_ready = False
         
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
+        # Check if we are in mock mode
+        is_mock = os.getenv("MOCK_AI", "").lower() == "true"
+        
+        if self.api_key:
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
+            self.is_ready = True
+        elif is_mock:
+            # In mock mode, we don't need the real API key
+            self.model = None
+            self.is_ready = False
+        else:
+            logger.error("gemini.api_key_missing")
+            self.model = None
+            raise ValueError("GOOGLE_API_KEY not found in environment variables")
     
     async def analyze_skin_lesion(self, image_path: str) -> Dict[str, Any]:
         """
@@ -26,6 +43,13 @@ class GeminiService:
             Dictionary containing analysis results
         """
         try:
+            if not self.is_ready:
+                return {
+                    "status": "error",
+                    "error": "API_KEY_MISSING",
+                    "message": "AI analysis is currently unavailable (API key not configured)."
+                }
+
             # Read the image file
             with open(image_path, 'rb') as img_file:
                 image_data = img_file.read()
@@ -56,8 +80,18 @@ class GeminiService:
                 }
             ]
             
-            # Generate analysis
-            response = await self.model.generate_content_async([prompt, image_parts[0]])
+            # Generate analysis with timeout
+            try:
+                response = await asyncio.wait_for(
+                    self.model.generate_content_async([prompt, image_parts[0]]),
+                    timeout=AI_TIMEOUT_SECONDS
+                )
+            except asyncio.TimeoutError:
+                return {
+                    "status": "error",
+                    "error": "TIMEOUT",
+                    "message": f"AI analysis timed out after {AI_TIMEOUT_SECONDS} seconds."
+                }
             
             # Parse and structure the response
             analysis_data = self._parse_json_response(response.text)
@@ -69,7 +103,13 @@ class GeminiService:
             }
             
         except Exception as e:
-            print(f"GEMINI ERROR: {e}")
+            logger.exception(
+                "gemini.analysis_failed",
+                extra={
+                    "image_file": Path(image_path).name,
+                    "error_type": type(e).__name__,
+                },
+            )
             return {
                 "status": "error",
                 "error": str(e),
@@ -121,7 +161,13 @@ class GeminiService:
             response = await self.model.generate_content_async(context_prompt)
             return response.text
         except Exception as e:
-            print(f"GEMINI CHAT ERROR: {e}")
+            logger.exception(
+                "gemini.chat_failed",
+                extra={
+                    "error_type": type(e).__name__,
+                    "history_count": len(history or []),
+                },
+            )
             return "I apologize, but I'm having trouble processing your request right now. Please try again later."
 
     def _parse_json_response(self, text: str) -> Dict[str, Any]:
@@ -143,7 +189,10 @@ class GeminiService:
         try:
             return json.loads(cleaned_text)
         except json.JSONDecodeError:
-            print(f"FAILED TO PARSE JSON: {text}")
+            logger.warning(
+                "gemini.parse_json_failed",
+                extra={"text_length": len(text)},
+            )
             # Fallback to a basic structure if parsing fails
             return {
                 "condition": "Error parsing result",

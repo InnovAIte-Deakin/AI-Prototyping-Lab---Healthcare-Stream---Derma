@@ -16,6 +16,7 @@ afterEach(() => {
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from '../App';
 import { AuthProvider } from '../context/AuthContext';
+import { ToastProvider } from '../context/ToastContext';
 
 // Helper to render with router
 const renderWithRouter = (initialPath) => {
@@ -23,9 +24,11 @@ const renderWithRouter = (initialPath) => {
     initialEntries: [initialPath],
   });
   render(
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ToastProvider>
   );
 };
 

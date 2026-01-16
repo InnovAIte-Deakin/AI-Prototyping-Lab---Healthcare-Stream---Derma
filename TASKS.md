@@ -771,7 +771,7 @@ I need to Apply Styling and Layout
 - [x] S2-4 – Safe Doctor Switch
 - [x] S2-5 – Post-Consultation Doctor Rating
 - [ ] S2-6 – Medical Admin Role
-- [ ] S2-7 – Observability
+- [x] S2-7 – Observability
 - [ ] S2-8 – Data Lifecycle
-- [ ] S2-9 – Resilience
+- [x] S2-9 – Resilience
 

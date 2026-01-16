@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import UnifiedChat from '../components/UnifiedChat';
+import { useToast } from '../context/ToastContext';
 
 const PatientUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -12,10 +13,32 @@ const PatientUpload = () => {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [reviewStatus, setReviewStatus] = useState('none');
+  const { pushToast } = useToast();
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0] || null;
+    if (file) {
+      // Client-side validation
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      const maxSizeMB = 5;
+
+      if (!allowedTypes.includes(file.type)) {
+        setError(`Invalid file type: ${file.type}. Please upload a JPG, PNG, or WebP image.`);
+        setSelectedFile(null);
+        event.target.value = '';
+        return;
+      }
+
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum allowed size is ${maxSizeMB}MB.`);
+        setSelectedFile(null);
+        event.target.value = '';
+        return;
+      }
+    }
+    setError(null);
     setSelectedFile(file);
+    setResult(null); // Reset result if file changes
     if (file) {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
@@ -24,24 +47,28 @@ const PatientUpload = () => {
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) {
+  const handleAnalyze = async (existingImageId = null) => {
+    if (!selectedFile && !existingImageId) {
       setError('Please select an image to upload.');
       return;
     }
 
     setError(null);
-    setResult(null);
+    if (!existingImageId) setResult(null);
     setIsAnalyzing(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
+      let imageId = existingImageId;
 
-      const uploadRes = await apiClient.post('/images', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      const imageId = uploadRes.data?.image_id ?? uploadRes.data?.id;
+      if (!imageId) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const uploadRes = await apiClient.post('/images', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        imageId = uploadRes.data?.image_id ?? uploadRes.data?.id;
+      }
 
       if (!imageId) {
         throw new Error('Image ID missing');
@@ -54,7 +81,13 @@ const PatientUpload = () => {
       }
     } catch (err) {
       console.error('Analysis Error:', err.response?.data || err.message);
-      setError(`Analysis failed: ${err.response?.data?.detail || 'Something went wrong.'}`);
+      const detail = err.response?.data?.detail;
+      const errorMsg = typeof detail === 'string' ? detail : 'Something went wrong.';
+      setError(`Analysis failed: ${errorMsg}`);
+      pushToast({
+        title: 'Analysis failed',
+        message: errorMsg,
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -77,6 +110,10 @@ const PatientUpload = () => {
       console.error('Request review error:', err);
       const detail = err?.response?.data?.detail;
       setError(detail || 'Failed to request doctor review.');
+      pushToast({
+        title: 'Review request failed',
+        message: detail || 'Failed to request doctor review.',
+      });
     } finally {
       setIsRequestingReview(false);
     }

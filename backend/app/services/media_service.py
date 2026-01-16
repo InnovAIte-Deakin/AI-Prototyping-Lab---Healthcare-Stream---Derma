@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import logging
 from pathlib import Path, PurePosixPath
 from typing import Optional
 from urllib.parse import unquote, urlparse
@@ -16,12 +17,15 @@ from app.config import (
     SECRET_KEY,
 )
 
+logger = logging.getLogger("app.media")
+
 
 def normalize_media_path(raw_path: str) -> str:
     """
     Normalize a media path to a relative POSIX path under MEDIA_ROOT.
     """
     if not raw_path:
+        logger.warning("media.path.missing")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Missing media path",
@@ -38,6 +42,10 @@ def normalize_media_path(raw_path: str) -> str:
     posix_path = PurePosixPath(path)
 
     if ".." in posix_path.parts or path == "":
+        logger.warning(
+            "media.path.invalid",
+            extra={"path": posix_path.as_posix()},
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid media path",
@@ -50,6 +58,7 @@ def _media_path_from_absolute(path: Path) -> str:
     try:
         relative = path.resolve().relative_to(MEDIA_ROOT.resolve())
     except ValueError as exc:
+        logger.warning("media.path.outside_root")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Media path is outside the media root",
@@ -71,6 +80,10 @@ def resolve_media_path(raw_path: str) -> Path:
 
     candidate = candidate.resolve()
     if not candidate.exists():
+        logger.warning(
+            "media.path.not_found",
+            extra={"path": candidate.as_posix()},
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Media file not found",
@@ -140,6 +153,7 @@ def safe_remove_media_file(raw_path: str) -> bool:
 
         candidate = candidate.resolve()
     except HTTPException:
+        logger.warning("media.delete.invalid_path")
         return False
 
     if not candidate.exists():
@@ -149,4 +163,5 @@ def safe_remove_media_file(raw_path: str) -> bool:
         candidate.unlink()
         return True
     except OSError:
+        logger.exception("media.delete_failed", extra={"path": candidate.as_posix()})
         return False
