@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
-import { uiTokens } from '../components/Layout';
 import UnifiedChat from '../components/UnifiedChat';
 
 const PatientUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isRequestingReview, setIsRequestingReview] = useState(false);
   const [error, setError] = useState(null);
@@ -16,6 +16,12 @@ const PatientUpload = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -77,105 +83,259 @@ const PatientUpload = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold text-slate-900">Patient Upload</h1>
-          <p className="text-sm text-slate-500">
-            Upload a clear photo of the affected skin area to generate an AI-assisted report.
+    <div className="space-y-6 animate-enter">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Link
+            to="/patient-dashboard"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-warm-600 hover:text-warm-700 transition-colors mb-2"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Back to Dashboard
+          </Link>
+          <h1 className="text-3xl font-semibold text-charcoal-900">Upload Skin Image</h1>
+          <p className="mt-1 text-charcoal-500">
+            Upload a clear photo of the affected area for AI-powered analysis
           </p>
         </div>
-        <Link
-          to="/patient-dashboard"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-800"
-        >
-          ← Back to dashboard
-        </Link>
       </div>
 
       <DisclaimerBanner />
 
-      <div className={`${uiTokens.card} p-5 space-y-4`}>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-800" htmlFor="upload-input">
-            Upload image
-          </label>
-          <input
-            id="upload-input"
-            type="file"
-            accept="image/*"
-            aria-label="Upload image"
-            onChange={handleFileChange}
-            className={uiTokens.input}
-          />
-          <p className="text-xs text-slate-500">
-            Supported formats: JPG, PNG. Ensure good lighting and focus on the lesion.
-          </p>
-        </div>
+      {/* Upload Card */}
+      <div className="card-warm p-6 sm:p-8">
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Upload Section */}
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-charcoal-700 mb-3">
+                Select Image
+              </label>
 
-        <button
-          type="button"
-          className={uiTokens.primaryButton}
-          disabled={!selectedFile || isAnalyzing}
-          onClick={handleAnalyze}
-        >
-          {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-        </button>
-
-        {error && (
-          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
-            {error}
-          </p>
-        )}
-
-        {result && result.report_id && (
-          <div className="space-y-4">
-            <UnifiedChat 
-              imageId={result.image_id}
-              reportId={result.report_id}
-              isPaused={reviewStatus === 'accepted'}
-              userRole="patient"
-              onStatusChange={async () => {
-                try {
-                  const res = await apiClient.get(`/api/analysis/report/${result.report_id}`);
-                  if (res.data?.review_status) {
-                    setReviewStatus(res.data.review_status);
-                  }
-                } catch (err) {
-                  console.error('Failed to refresh status:', err);
-                }
-              }}
-            />
-
-            {reviewStatus === 'none' && result.report_id && (
-              <div className={`${uiTokens.card} p-4 bg-purple-50 border-purple-100`}>
-                <div className="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                  <div>
-                    <h3 className="text-purple-900 font-bold">Unsure about the AI's assessment?</h3>
-                    <p className="text-purple-700 text-sm">Escalate this case to a human dermatologist for a professional review.</p>
+              {/* Drop Zone */}
+              <div className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 ${
+                previewUrl
+                  ? 'border-warm-300 bg-warm-50/50'
+                  : 'border-cream-300 hover:border-warm-300 hover:bg-cream-100'
+              }`}>
+                {previewUrl ? (
+                  <div className="p-4">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-64 object-contain rounded-xl"
+                    />
+                    <button
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                      className="mt-3 text-sm text-charcoal-500 hover:text-red-500 transition-colors"
+                    >
+                      Remove image
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="whitespace-nowrap rounded-xl bg-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-purple-700 transition-all hover:scale-105 disabled:opacity-50"
-                    disabled={isRequestingReview}
-                    onClick={handleRequestReview}
-                  >
-                    {isRequestingReview ? 'Requesting...' : '📨 Request Physician Review'}
-                  </button>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-64 cursor-pointer">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-warm-100 border border-warm-200 mb-4">
+                        <svg className="h-7 w-7 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-charcoal-700">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="mt-1 text-xs text-charcoal-400">
+                        PNG, JPG up to 10MB
+                      </p>
+                    </div>
+                    <input
+                      id="upload-input"
+                      type="file"
+                      accept="image/*"
+                      aria-label="Upload image"
+                      onChange={handleFileChange}
+                      className="sr-only"
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div className="rounded-xl bg-cream-100 border border-cream-300 p-4">
+              <h4 className="text-sm font-semibold text-charcoal-700 mb-2">Tips for best results</h4>
+              <ul className="space-y-1.5 text-sm text-charcoal-600">
+                <li className="flex items-start gap-2">
+                  <svg className="h-4 w-4 text-sage-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  Use good lighting (natural light works best)
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg className="h-4 w-4 text-sage-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  Focus directly on the affected area
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg className="h-4 w-4 text-sage-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  Avoid blurry or distant shots
+                </li>
+              </ul>
+            </div>
+
+            {/* Analyze Button */}
+            <button
+              type="button"
+              className="btn-warm w-full py-3.5 text-base"
+              disabled={!selectedFile || isAnalyzing}
+              onClick={handleAnalyze}
+            >
+              {isAnalyzing ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Analyzing Image...
+                </span>
+              ) : (
+                <>
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                  Analyze Image
+                </>
+              )}
+            </button>
+
+            {/* Error */}
+            {error && (
+              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+                <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <p className="text-sm font-medium text-red-700">{error}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-6">
+            {!result && !isAnalyzing && (
+              <div className="flex h-full min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-cream-300 bg-cream-50">
+                <div className="text-center p-8">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream-200 mb-4">
+                    <svg className="h-8 w-8 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-charcoal-700">No analysis yet</h3>
+                  <p className="mt-2 text-sm text-charcoal-500">
+                    Upload an image and click Analyze to see AI insights
+                  </p>
                 </div>
               </div>
             )}
 
-            {reviewStatus === 'pending' && (
-              <div className="rounded-xl bg-yellow-50 border border-yellow-100 p-4 text-center">
-                <p className="text-yellow-800 text-sm font-bold uppercase tracking-widest">
-                  ⏳ Review Pending - A physician will be with you shortly
-                </p>
+            {isAnalyzing && (
+              <div className="flex h-full min-h-[400px] items-center justify-center rounded-2xl border border-cream-300 bg-white">
+                <div className="text-center p-8">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-warm-100 mb-4">
+                    <svg className="h-8 w-8 text-warm-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-charcoal-700">Analyzing your image...</h3>
+                  <p className="mt-2 text-sm text-charcoal-500">
+                    Our AI is examining the skin characteristics
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Results & Chat Section */}
+      {result && result.report_id && (
+        <div className="space-y-6">
+          <UnifiedChat
+            imageId={result.image_id}
+            reportId={result.report_id}
+            isPaused={reviewStatus === 'accepted'}
+            userRole="patient"
+            onStatusChange={async () => {
+              try {
+                const res = await apiClient.get(`/api/analysis/report/${result.report_id}`);
+                if (res.data?.review_status) {
+                  setReviewStatus(res.data.review_status);
+                }
+              } catch (err) {
+                console.error('Failed to refresh status:', err);
+              }
+            }}
+          />
+
+          {/* Request Review CTA */}
+          {reviewStatus === 'none' && result.report_id && (
+            <div className="card-warm p-6 bg-deep-50 border-deep-200">
+              <div className="flex flex-col sm:flex-row items-center gap-4 justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-deep-100 flex-shrink-0">
+                    <svg className="h-6 w-6 text-deep-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-deep-900">Want a professional opinion?</h3>
+                    <p className="text-sm text-deep-700 mt-0.5">
+                      Request a review from a board-certified dermatologist
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-deep whitespace-nowrap"
+                  disabled={isRequestingReview}
+                  onClick={handleRequestReview}
+                >
+                  {isRequestingReview ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Requesting...
+                    </span>
+                  ) : (
+                    'Request Physician Review'
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Pending Status */}
+          {reviewStatus === 'pending' && (
+            <div className="card-warm p-6 bg-amber-50 border-amber-200 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500 status-dot" />
+                <p className="font-semibold text-amber-800">
+                  Review Pending - A physician will be with you shortly
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
