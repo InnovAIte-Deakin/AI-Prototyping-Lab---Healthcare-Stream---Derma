@@ -773,5 +773,5 @@ I need to Apply Styling and Layout
 - [ ] S2-6 – Medical Admin Role
 - [x] S2-7 – Observability
 - [ ] S2-8 – Data Lifecycle
-- [ ] S2-9 – Resilience
+- [x] S2-9 – Resilience
 
