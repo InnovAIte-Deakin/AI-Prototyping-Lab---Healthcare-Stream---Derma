@@ -38,7 +38,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
     });
 
     renderWithRouter('/patient-dashboard');
-    expect(await screen.findByText('Your Dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Patient Dashboard')).toBeInTheDocument();
   });
 
   describe('Doctor Selection Flow', () => {
@@ -78,7 +78,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
 
       // Wait for doctors to load
       await waitFor(() => {
-        expect(screen.getByText('Choose Your Dermatologist')).toBeInTheDocument();
+        expect(screen.getByText('Select a Doctor')).toBeInTheDocument();
       });
 
       // Verify first doctor's profile is displayed
@@ -126,7 +126,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
       renderWithRouter('/patient-dashboard');
 
       await waitFor(() => {
-        expect(screen.getByText('Choose Your Dermatologist')).toBeInTheDocument();
+        expect(screen.getByText('Select a Doctor')).toBeInTheDocument();
       });
 
       // Verify availability badge is present
@@ -168,11 +168,11 @@ describe('PatientDashboard - Doctor Profile Display', () => {
         expect(screen.getByText('Dr. Jane Smith')).toBeInTheDocument();
       });
 
-      const selectButton = screen.getByRole('button', { name: /Connect with This Doctor/i });
+      const selectButton = screen.getByRole('button', { name: /Select Doctor/i });
       fireEvent.click(selectButton);
 
       // Verify the selection button shows loading state
-      expect(screen.getByRole('button', { name: /Connecting.../i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Selecting.../i })).toBeInTheDocument();
 
       // Verify the API was called with correct doctor ID
       await waitFor(() => {
@@ -207,7 +207,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
 
       // Verify current doctor section is displayed
       await waitFor(() => {
-        expect(screen.getByText('Your Dermatologist')).toBeInTheDocument();
+        expect(screen.getByText('Your doctor')).toBeInTheDocument();
       });
 
       expect(screen.getByText('Dr. Jane Smith')).toBeInTheDocument();
@@ -216,7 +216,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
       expect(screen.getByText('jane@dermacare.com')).toBeInTheDocument();
 
       // Verify active status badge
-      expect(screen.getByText('Connected')).toBeInTheDocument();
+      expect(screen.getByText('Active')).toBeInTheDocument();
 
       // Verify avatar is displayed
       const avatarImages = screen.getAllByRole('img');
@@ -245,7 +245,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
       renderWithRouter('/patient-dashboard');
 
       await waitFor(() => {
-        expect(screen.getByText('Your Dermatologist')).toBeInTheDocument();
+        expect(screen.getByText('Your doctor')).toBeInTheDocument();
       });
 
       // Should display doctor name even if other fields are missing
@@ -386,7 +386,7 @@ describe('PatientDashboard - Doctor Profile Display', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/No doctors available/i)
+          screen.getByText(/No available doctors found yet/i)
         ).toBeInTheDocument();
       });
     });

@@ -60,8 +60,8 @@ describe('Doctor flows', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('report-5-risk')).toHaveTextContent(/Severity.*High/i);
-      expect(screen.getByTestId('report-5-advice')).toHaveTextContent(/Schedule an in-person consult/i);
+      expect(screen.getByTestId('report-5-risk')).toHaveTextContent(/Severity:.*High/);
+      expect(screen.getByTestId('report-5-advice')).toHaveTextContent(/Recommendation:.*Schedule an in-person consult/);
     });
   });
 });

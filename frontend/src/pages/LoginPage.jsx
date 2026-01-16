@@ -1,25 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { uiTokens } from '../components/Layout';
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LoginPage — The Welcome
-
-   This is often the first real interaction someone has with SkinScope.
-   It should feel welcoming, not like a barrier. Warm, simple, human.
-   ═══════════════════════════════════════════════════════════════════════════ */
+const accent = 'from-[#e7f7f4] via-white to-[#f7ecf7]';
+const heroTitleAccent = 'text-[#4c7dff]';
 
 function LoginPage() {
   const [searchParams] = useSearchParams();
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // Role is now auto-assigned: Patient for signup, auto-detected for login.
+  // const [role, setRole] = useState('patient'); 
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const { login, signup } = useAuth();
   const navigate = useNavigate();
 
+  // Detect mode from URL (e.g. /login?mode=signup)
   useEffect(() => {
     if (searchParams.get('mode') === 'signup') {
       setIsSignup(true);
@@ -31,7 +31,7 @@ function LoginPage() {
     setError(null);
 
     const emailTrim = email.trim();
-    if (!emailTrim || !password) {
+    if (!emailTrim || !password) { // Don't trim password
       setError('Please enter both email and password.');
       return;
     }
@@ -41,16 +41,19 @@ function LoginPage() {
 
       let user;
       if (isSignup) {
-        user = await signup({
-          email: emailTrim,
-          password,
+        // Signup forces 'patient' role for now
+        user = await signup({ 
+          email: emailTrim, 
+          password, 
           role: 'patient',
           public_session_id: searchParams.get('public_session_id')
         });
       } else {
+        // Login detects role automatically
         user = await login({ email: emailTrim, password });
       }
 
+      // Route based on role
       const userRole = user.role;
       if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
@@ -59,14 +62,16 @@ function LoginPage() {
       }
     } catch (err) {
       console.error(err);
+      // Enhanced Error Parsing
       let msg = 'Authentication failed. Please check your credentials.';
 
       const detail = err.response?.data?.detail;
-
+      
       if (Array.isArray(detail)) {
+        // Pydantic validation error array
         msg = detail.map(d => {
           if (d.loc.includes('password') && d.type === 'string_too_short') {
-            return 'Password must be at least 6 characters';
+            return 'Password has to be greater than 6 characters';
           }
           return d.msg;
         }).join('. ');
@@ -86,144 +91,101 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center -mt-8 py-12">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 pattern-cells opacity-30" aria-hidden="true" />
+    <div className="relative mx-auto flex min-h-[80vh] max-w-6xl items-center justify-center px-6 py-16">
+      <div
+        className={`absolute inset-0 -z-10 bg-gradient-to-br ${accent}`}
+        aria-hidden
+      />
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute left-6 top-12 h-72 w-72 rounded-full bg-teal-200/25 blur-[120px]" />
+        <div className="absolute right-8 bottom-12 h-72 w-72 rounded-full bg-pink-200/30 blur-[120px]" />
+      </div>
 
-      <div className="relative w-full max-w-md px-4">
-        {/* Card */}
-        <div className="card-warm p-8 sm:p-10">
-          {/* Header */}
-          <div className="mb-8 text-center">
-            {/* Icon */}
-            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-warm-100 border border-warm-200">
-              <svg className="h-7 w-7 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-              </svg>
-            </div>
-
-            <h1 className="mb-2 text-2xl font-semibold text-charcoal-900">
-              {isSignup ? 'Create your account' : 'Welcome back'}
-            </h1>
-            <p className="text-charcoal-500">
-              {isSignup
-                ? 'Start your journey to better skin health'
-                : 'Sign in to continue your skin health journey'}
-            </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-semibold text-charcoal-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="input-warm"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-semibold text-charcoal-700">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="input-warm"
-                placeholder={isSignup ? 'Create a secure password' : 'Enter your password'}
-              />
-              {isSignup && (
-                <p className="text-xs text-charcoal-400 mt-1">
-                  Must be at least 6 characters
-                </p>
-              )}
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
-                <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                </svg>
-                <p className="text-sm font-medium text-red-700">{error}</p>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn-warm w-full py-3.5 text-base"
-            >
-              {submitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Processing...
-                </span>
-              ) : (
-                isSignup ? 'Create Account' : 'Sign In'
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-cream-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-charcoal-400">or</span>
-            </div>
-          </div>
-
-          {/* Toggle Mode */}
-          <div className="text-center">
-            <p className="text-sm text-charcoal-600">
-              {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="font-semibold text-warm-600 hover:text-warm-700 transition-colors"
-              >
-                {isSignup ? 'Sign in' : 'Create one'}
-              </button>
-            </p>
-          </div>
-
-          {/* Try Anonymous Link */}
-          <div className="mt-6 text-center">
-            <Link
-              to="/try-anonymous"
-              className="inline-flex items-center gap-2 text-sm text-charcoal-500 hover:text-charcoal-700 transition-colors"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              Try without an account
-            </Link>
-          </div>
+      <div className="grid w-full items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-6 text-center md:text-left hidden md:block">
+          {/* Left side content - same as before but hidden on mobile for cleaner login focus */}
+          <p className="inline-flex rounded-full bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur">
+            SkinScope
+          </p>
+          <h1 className="text-5xl font-black leading-tight text-slate-900 sm:text-6xl">
+            Identify skin concerns{' '}
+            <span className={heroTitleAccent}>instantly</span> with AI
+          </h1>
+          <p className="max-w-xl text-lg text-[#333]">
+            Login to access your dashboard.
+          </p>
         </div>
 
-        {/* Footer Text */}
-        <p className="mt-8 text-center text-xs text-charcoal-400">
-          By continuing, you agree to our Terms of Service and Privacy Policy
-        </p>
+        <form
+          onSubmit={handleSubmit}
+          className="mx-auto w-full max-w-md space-y-6 rounded-[32px] border border-white/70 bg-white/90 p-10 shadow-[0_25px_65px_-40px_rgba(40,50,80,0.55)] backdrop-blur"
+        >
+          <div className="space-y-1 text-center">
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              {isSignup ? 'Create Account' : 'Welcome Back'}
+            </h2>
+            <p className="text-slate-500 text-sm">
+              {isSignup ? 'Start your journey as a Patient' : 'Please enter your details'}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-800" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={`${uiTokens.input} rounded-[26px] text-[#1f2933]`}
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-800" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={`${uiTokens.input} rounded-[26px] text-[#1f2933]`}
+              placeholder="Enter your password"
+            />
+            {isSignup && <p className="text-xs text-slate-400 px-2">Must be at least 6 characters.</p>}
+          </div>
+
+          {/* Role selection removed */}
+
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className={`${uiTokens.primaryButton} w-full justify-center rounded-[26px] bg-gradient-to-r from-[#4c7dff] to-[#5f8dff] text-white shadow-md hover:from-[#426ef0] hover:to-[#557ff5]`}
+          >
+            {submitting ? 'Please wait...' : isSignup ? 'Sign Up' : 'Log In'}
+          </button>
+
+          <div className="pt-2 text-center text-sm">
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="text-[#4c7dff] underline transition hover:text-[#3f6ae0]"
+            >
+              {isSignup ? 'Already have an account? Log in' : 'Need an account? Sign up'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
