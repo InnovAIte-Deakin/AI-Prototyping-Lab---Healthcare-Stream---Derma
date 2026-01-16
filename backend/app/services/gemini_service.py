@@ -13,13 +13,21 @@ class GeminiService:
         self.api_key = os.getenv("GOOGLE_API_KEY")
         self.is_ready = False
         
+        # Check if we are in mock mode
+        is_mock = os.getenv("MOCK_AI", "").lower() == "true"
+        
         if self.api_key:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('gemini-2.5-flash')
             self.is_ready = True
+        elif is_mock:
+            # In mock mode, we don't need the real API key
+            self.model = None
+            self.is_ready = False
         else:
             print("WARNING: GOOGLE_API_KEY not found. AI features will be unavailable.")
             self.model = None
+            raise ValueError("GOOGLE_API_KEY not found")
     
     async def analyze_skin_lesion(self, image_path: str) -> Dict[str, Any]:
         """

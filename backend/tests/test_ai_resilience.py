@@ -23,24 +23,29 @@ async def test_gemini_timeout(test_db):
         mock_model.generate_content_async = AsyncMock(side_effect=slow_generate)
         service.model = mock_model
         
-        # Patch the timeout value where it's imported in gemini_service
-        with patch('app.services.gemini_service.AI_TIMEOUT_SECONDS', 0.001):
-            result = await service.analyze_skin_lesion('test_image.jpg')
+        # Create a dummy image file
+        image_path = os.path.abspath('test_image.jpg')
+        with open(image_path, 'wb') as f:
+            f.write(b"fake data")
             
-            assert result['status'] == 'error'
-            assert result['error'] == 'TIMEOUT'
-            assert "timed out" in result['message']
+        try:
+            # Patch the timeout value where it's imported in gemini_service
+            with patch('app.services.gemini_service.AI_TIMEOUT_SECONDS', 0.001):
+                result = await service.analyze_skin_lesion(image_path)
+                
+                assert result['status'] == 'error'
+                assert result['error'] == 'TIMEOUT'
+                assert "timed out" in result['message']
+        finally:
+            if os.path.exists(image_path):
+                os.remove(image_path)
 
 @pytest.mark.asyncio
 async def test_gemini_missing_key():
-    """Test that GeminiService handles missing API key gracefully."""
+    """Test that GeminiService raises ValueError when API key is missing."""
     with patch.dict(os.environ, {}, clear=True):
-        service = GeminiService()
-        assert service.is_ready is False
-        
-        result = await service.analyze_skin_lesion('test_image.jpg')
-        assert result['status'] == 'error'
-        assert result['error'] == 'API_KEY_MISSING'
+        with pytest.raises(ValueError, match="GOOGLE_API_KEY not found"):
+            GeminiService()
 
 def test_analysis_route_fallback(client, test_db):
     """Test that the analysis endpoint creates a fallback report on AI error."""
