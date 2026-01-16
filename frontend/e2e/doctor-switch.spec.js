@@ -21,12 +21,12 @@ test.describe('Doctor Switch (S2-4)', () => {
         await page.goto('/patient-dashboard');
         
         console.log('Step 2: Verifying dashboard loads...');
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible({ timeout: 10000 });
         console.log('Step 2: Dashboard heading visible');
         
         // Verify current doctor is displayed
         console.log('Step 3: Looking for current doctor info...');
-        await expect(page.getByText('Your doctor')).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText('Your Dermatologist')).toBeVisible({ timeout: 10000 });
         console.log('Step 3: Current doctor section visible');
         
         // Find and click the Change Doctor button
@@ -60,7 +60,7 @@ test.describe('Doctor Switch (S2-4)', () => {
     test('Modal shows available doctors and allows selection', async ({ page }) => {
         console.log('Step 1: Navigating to patient dashboard...');
         await page.goto('/patient-dashboard');
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible({ timeout: 10000 });
         
         console.log('Step 2: Opening Change Doctor modal...');
         const changeDoctorBtn = page.getByRole('button', { name: /Change Doctor/i });
@@ -101,7 +101,7 @@ test.describe('Doctor Switch Blocking', () => {
     test('Switch is blocked when patient has pending case', async ({ page }) => {
         console.log('Step 1: Navigating to patient dashboard as patient with pending case...');
         await page.goto('/patient-dashboard');
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible({ timeout: 10000 });
         
         console.log('Step 2: Opening Change Doctor modal...');
         const changeDoctorBtn = page.getByRole('button', { name: /Change Doctor/i });

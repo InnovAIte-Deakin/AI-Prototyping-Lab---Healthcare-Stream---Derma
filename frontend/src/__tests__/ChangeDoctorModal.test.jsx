@@ -427,7 +427,7 @@ describe('PatientDashboard - Change Doctor Integration', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText('Select a Doctor')).toBeInTheDocument();
+            expect(screen.getByText('Choose Your Dermatologist')).toBeInTheDocument();
         });
 
         // Change Doctor button should NOT be present
