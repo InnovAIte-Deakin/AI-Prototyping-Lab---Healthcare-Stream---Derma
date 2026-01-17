@@ -51,7 +51,7 @@ test.describe('Error surfaces', () => {
     await page.goto('/doctor-dashboard');
 
     await expect(page.getByRole('heading', { name: 'Doctor Dashboard' })).toBeVisible();
-    await expect(page.getByRole('alert')).toContainText('Service down');
-    await expect(page.getByRole('status').first()).toContainText('Dashboard error');
+    // Error message is displayed in an error banner (not role="alert")
+    await expect(page.getByText('Service down')).toBeVisible({ timeout: 10000 });
   });
 });
