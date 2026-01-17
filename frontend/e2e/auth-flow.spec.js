@@ -20,7 +20,7 @@ test.describe('Authentication Flow', () => {
         await page.getByLabel('Email').fill(email);
         await page.getByLabel('Password').clear();
         await page.getByLabel('Password').fill(password);
-        await page.getByRole('button', { name: 'Log In' }).click();
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         // 3. Verify Dashboard
         await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();

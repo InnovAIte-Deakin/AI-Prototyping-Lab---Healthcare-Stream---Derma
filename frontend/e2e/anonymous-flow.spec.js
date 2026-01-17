@@ -80,7 +80,7 @@ test.describe('Anonymous Flow', () => {
         await page.getByLabel('Password').fill('password123');
         
         console.log('Step 6: Submitting Form...');
-        await page.getByRole('button', { name: 'Sign Up' }).click();
+        await page.getByRole('button', { name: 'Create Account' }).click();
 
         // 7. Verify Dashboard & Persistence
         console.log('Step 7: Verifying Dashboard Redirect...');

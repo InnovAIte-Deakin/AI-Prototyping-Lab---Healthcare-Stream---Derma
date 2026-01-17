@@ -18,7 +18,7 @@ test.describe('Patient Rating Flow', () => {
         console.log('Step 1: Logging in as reviewed patient...');
         await page.getByLabel('Email').fill(PATIENT_EMAIL);
         await page.getByLabel('Password').fill(PATIENT_PASSWORD);
-        await page.getByRole('button', { name: 'Log In' }).click();
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         // Verify dashboard load
         await expect(page).toHaveURL(/.*patient-dashboard/);
