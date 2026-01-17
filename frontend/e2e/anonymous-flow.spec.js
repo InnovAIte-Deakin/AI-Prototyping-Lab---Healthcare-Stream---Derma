@@ -80,12 +80,12 @@ test.describe('Anonymous Flow', () => {
         await page.getByLabel('Password').fill('password123');
         
         console.log('Step 6: Submitting Form...');
-        await page.getByRole('button', { name: 'Sign Up' }).click();
+        await page.getByRole('button', { name: 'Create Account' }).click();
 
         // 7. Verify Dashboard & Persistence
         console.log('Step 7: Verifying Dashboard Redirect...');
         await expect(page).toHaveURL(/.*patient-dashboard/, { timeout: 30000 });
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
         
         // Verify the saved case exists
         console.log('Step 7: Verifying History...');
