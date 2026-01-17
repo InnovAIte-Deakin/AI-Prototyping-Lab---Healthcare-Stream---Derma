@@ -772,6 +772,6 @@ I need to Apply Styling and Layout
 - [x] S2-5 – Post-Consultation Doctor Rating
 - [ ] S2-6 – Medical Admin Role
 - [x] S2-7 – Observability
-- [ ] S2-8 – Data Lifecycle
+- [x] S2-8 – Data Lifecycle
 - [x] S2-9 – Resilience
 
