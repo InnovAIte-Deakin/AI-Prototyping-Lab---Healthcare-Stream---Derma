@@ -91,8 +91,8 @@ test.describe('Anonymous Flow', () => {
         console.log('Step 7: Verifying History...');
         await page.getByRole('button', { name: 'View Scan History' }).click();
         
-        // Verify at least one case exists (using resilient selector - link says "View Details")
-        await expect(page.getByRole('link', { name: /View/i }).first()).toBeVisible({ timeout: 10000 });
+        // Verify at least one case exists (cases are article elements with onClick, not links)
+        await expect(page.getByText('View Details').first()).toBeVisible({ timeout: 10000 });
         console.log('Test Complete: Success - Anonymous case saved');
     });
 });
