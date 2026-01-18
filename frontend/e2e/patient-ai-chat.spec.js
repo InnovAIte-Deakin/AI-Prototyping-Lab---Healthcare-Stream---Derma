@@ -20,8 +20,8 @@ test.describe('Patient AI Chat', () => {
         // Verify history page loads
         await expect(page.getByRole('heading', { name: /History/i })).toBeVisible();
         
-        // Open the first case
-        const caseLink = page.getByRole('link', { name: /Open/i }).first();
+        // Open the first case (link says "View Details")
+        const caseLink = page.getByRole('link', { name: /View/i }).first();
         await expect(caseLink).toBeVisible({ timeout: 10000 });
         await caseLink.click();
         
