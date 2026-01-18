@@ -31,8 +31,7 @@ test.describe('Observability', () => {
 test.describe('Error surfaces', () => {
   test.use({ storageState: '.auth/doctor.json' });
 
-  // TODO: Fix flaky test - skipping temporarily to unblock PR
-  test.skip('Doctor dashboard shows error toast and alert on API failure', async ({ page }) => {
+  test('Doctor dashboard shows error toast and alert on API failure', async ({ page }) => {
     await page.route('**/doctor/patients', (route) => {
       route.fulfill({
         status: 500,

@@ -19,8 +19,7 @@ const __dirname = path.dirname(__filename);
 
 test.describe('Anonymous Flow', () => {
 
-    // TODO: Fix flaky test - skipping temporarily to unblock PR
-    test.skip('Anonymous user can analyze image and sign up to save results', async ({ page }) => {
+    test('Anonymous user can analyze image and sign up to save results', async ({ page }) => {
         // 1. Navigate to Anonymous Try Page
         await page.goto('/try-anonymous');
         await expect(page.getByRole('heading', { name: 'Try DermaAI without signing up' })).toBeVisible();
@@ -92,8 +91,8 @@ test.describe('Anonymous Flow', () => {
         console.log('Step 7: Verifying History...');
         await page.getByRole('button', { name: 'View History' }).click();
         
-        // Verify at least one case exists (using resilient selector - link says "View Details")
-        await expect(page.getByRole('link', { name: /View/i }).first()).toBeVisible({ timeout: 10000 });
+        // Verify at least one case exists (cases are article elements with onClick, not links)
+        await expect(page.getByText('View Details').first()).toBeVisible({ timeout: 10000 });
         console.log('Test Complete: Success - Anonymous case saved');
     });
 });

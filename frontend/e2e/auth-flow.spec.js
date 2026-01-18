@@ -8,8 +8,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flow', () => {
 
-    // TODO: Fix flaky test - skipping temporarily to unblock PR
-    test.skip('User can log in and successfully log out', async ({ page }) => {
+    test('User can log in and successfully log out', async ({ page }) => {
         const email = 'e2e_patient_aichat@test.com'; // Use a seeded account
         const password = 'password123';
 

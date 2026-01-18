@@ -9,8 +9,7 @@ test.describe('Patient Rating Flow', () => {
     // so retries would fail because the case would already be rated
     test.describe.configure({ retries: 0 });
 
-    // TODO: Fix flaky test - skipping temporarily to unblock PR
-    test.skip('Patient can rate doctor after case review', async ({ page, request }) => {
+    test('Patient can rate doctor after case review', async ({ page, request }) => {
         
         // 1. Login Logic (Since we don't have a pre-saved state for this specific user yet)
         console.log('Step 1: Navigating to login...');
