@@ -20,14 +20,14 @@ function LandingPage() {
 
             <div className="space-y-8 text-center">
                 <p className="inline-flex rounded-full bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur">
-                    DermaAI
+                    DermaAI Platform
                 </p>
                 <h1 className="mx-auto max-w-4xl text-5xl font-black leading-tight text-slate-900 sm:text-7xl">
                     Identify skin concerns{' '}
                     <span className={heroTitleAccent}>instantly</span> with AI
                 </h1>
                 <p className="mx-auto max-w-xl text-lg text-[#333]">
-                    Upload or log in to track your dermatology journey, connect with doctors, and get AI-assisted insights in seconds.
+                    Connect with board-certified dermatologists at our partner clinics. Upload images for instant AI analysis, track your journey, and receive expert medical guidance.
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">

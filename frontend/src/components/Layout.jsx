@@ -24,10 +24,10 @@ const Layout = () => {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <Link to={user ? (user.role === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard') : '/'} className="text-xl font-bold text-slate-900">
-              SkinScope
+              DermaAI
             </Link>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
-              Teledermatology
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              AI-Powered Care
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm text-slate-600">
