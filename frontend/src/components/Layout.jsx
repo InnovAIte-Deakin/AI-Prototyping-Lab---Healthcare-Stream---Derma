@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Footer from './Footer';
 
 export const uiTokens = {
   primaryButton:
@@ -24,10 +25,10 @@ const Layout = () => {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <Link to={user ? (user.role === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard') : '/'} className="text-xl font-bold text-slate-900">
-              SkinScope
+              DermaAI
             </Link>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
-              Teledermatology
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              AI-Powered Care
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm text-slate-600">
@@ -53,9 +54,28 @@ const Layout = () => {
                 </button>
               </>
             ) : (
-              <div className="hidden text-xs uppercase tracking-wide text-slate-400 sm:block">
-                Welcome Guest
-              </div>
+              <>
+                <nav className="hidden items-center gap-4 sm:flex">
+                  <Link to="/about" className="text-sm text-slate-600 hover:text-blue-600 transition">
+                    About
+                  </Link>
+                  <Link to="/doctors" className="text-sm text-slate-600 hover:text-blue-600 transition">
+                    Doctors
+                  </Link>
+                  <Link to="/services" className="text-sm text-slate-600 hover:text-blue-600 transition">
+                    Services
+                  </Link>
+                  <Link to="/contact" className="text-sm text-slate-600 hover:text-blue-600 transition">
+                    Contact
+                  </Link>
+                </nav>
+                <Link
+                  to="/login"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                >
+                  Login
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -64,6 +84,8 @@ const Layout = () => {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   );
 };
