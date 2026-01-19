@@ -29,6 +29,7 @@ configure_logging()
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "http://127.0.0.1:5173",  # CI uses 127.0.0.1 instead of localhost
 ]
 
 app.add_middleware(
