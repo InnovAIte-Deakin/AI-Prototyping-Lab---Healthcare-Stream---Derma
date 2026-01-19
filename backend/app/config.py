@@ -25,3 +25,8 @@ MEDIA_URL_TTL_SECONDS = int(os.getenv("MEDIA_URL_TTL_SECONDS", "300"))
 MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
 ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 AI_TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT_SECONDS", "30"))
+
+# Data Retention Settings (days, 0 = no auto-cleanup)
+MEDIA_RETENTION_DAYS = int(os.getenv("MEDIA_RETENTION_DAYS", "365"))
+CHAT_RETENTION_DAYS = int(os.getenv("CHAT_RETENTION_DAYS", "365"))
+ANALYSIS_RETENTION_DAYS = int(os.getenv("ANALYSIS_RETENTION_DAYS", "730"))  # 2 years

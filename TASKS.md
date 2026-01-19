@@ -767,11 +767,11 @@ I need to Apply Styling and Layout
 ### Sprint 2 Advanced (Plug & Play)
 - [ ] S2-1 – UI Improvements
 - [ ] S2-2 – Usage Guides
-- [ ] S2-3 – Clinic Branding
+- [x] S2-3 – Clinic Branding
 - [x] S2-4 – Safe Doctor Switch
 - [x] S2-5 – Post-Consultation Doctor Rating
 - [ ] S2-6 – Medical Admin Role
 - [x] S2-7 – Observability
-- [ ] S2-8 – Data Lifecycle
+- [x] S2-8 – Data Lifecycle
 - [x] S2-9 – Resilience
 

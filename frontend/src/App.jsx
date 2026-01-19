@@ -11,6 +11,11 @@ import DoctorCasePage from './pages/DoctorCasePage';
 import PatientHistory from './pages/PatientHistory';
 import PatientCasePage from './pages/PatientCasePage';
 import PublicTryPage from './pages/PublicTryPage';
+import AboutPage from './pages/AboutPage';
+import DoctorsPage from './pages/DoctorsPage';
+import ServicesPage from './pages/ServicesPage';
+import ContactPage from './pages/ContactPage';
+import FAQPage from './pages/FAQPage';
 
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -33,6 +38,26 @@ export const routes = [
       {
         path: '/try-anonymous',
         element: <PublicTryPage />,
+      },
+      {
+        path: '/about',
+        element: <AboutPage />,
+      },
+      {
+        path: '/doctors',
+        element: <DoctorsPage />,
+      },
+      {
+        path: '/services',
+        element: <ServicesPage />,
+      },
+      {
+        path: '/contact',
+        element: <ContactPage />,
+      },
+      {
+        path: '/faq',
+        element: <FAQPage />,
       },
       {
         path: '/patient-dashboard',

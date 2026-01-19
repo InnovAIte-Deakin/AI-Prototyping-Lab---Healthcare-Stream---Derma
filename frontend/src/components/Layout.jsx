@@ -92,6 +92,23 @@ const Layout = () => {
 
           {/* User Area */}
           <div className="flex items-center gap-4">
+            {!user && (
+              <nav className="hidden items-center gap-6 sm:flex mr-2">
+                <Link to="/about" className="text-sm font-medium text-charcoal-600 hover:text-warm-600 transition-colors">
+                  About
+                </Link>
+                <Link to="/doctors" className="text-sm font-medium text-charcoal-600 hover:text-warm-600 transition-colors">
+                  Doctors
+                </Link>
+                <Link to="/services" className="text-sm font-medium text-charcoal-600 hover:text-warm-600 transition-colors">
+                  Services
+                </Link>
+                <Link to="/contact" className="text-sm font-medium text-charcoal-600 hover:text-warm-600 transition-colors">
+                  Contact
+                </Link>
+              </nav>
+            )}
+            
             {user ? (
               <>
                 {/* Role indicator */}
