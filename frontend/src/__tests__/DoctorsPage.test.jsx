@@ -23,9 +23,11 @@ const renderDoctorsPage = () => {
 };
 
 describe('DoctorsPage', () => {
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     renderDoctorsPage();
-    expect(document.body).toBeInTheDocument();
+    await waitFor(() => {
+      expect(document.body).toBeInTheDocument();
+    });
   });
 
   it('displays "Meet Our Dermatologists" heading', async () => {
@@ -35,11 +37,13 @@ describe('DoctorsPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows loading spinner initially', () => {
+  it('shows loading spinner initially', async () => {
     // Reset mock to not resolve immediately
     vi.spyOn(apiClient, 'get').mockImplementation(() => new Promise(() => {}));
     renderDoctorsPage();
-    expect(document.querySelector('.animate-spin')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(document.querySelector('.animate-spin')).toBeInTheDocument();
+    });
   });
 
   it('displays error message when API fails', async () => {
@@ -80,13 +84,17 @@ describe('DoctorsPage', () => {
 
   it('displays credentials banner statistics', async () => {
     renderDoctorsPage();
-    expect(screen.getByText('100%')).toBeInTheDocument();
-    expect(screen.getByText('15+ Years')).toBeInTheDocument();
-    expect(screen.getByText('4')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('100%')).toBeInTheDocument();
+      expect(screen.getByText('15+ Years')).toBeInTheDocument();
+      expect(screen.getByText('4')).toBeInTheDocument();
+    });
   });
 
   it('displays Our Specialist Team heading', async () => {
     renderDoctorsPage();
-    expect(screen.getByRole('heading', { name: 'Our Specialist Team' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Our Specialist Team' })).toBeInTheDocument();
+    });
   });
 });

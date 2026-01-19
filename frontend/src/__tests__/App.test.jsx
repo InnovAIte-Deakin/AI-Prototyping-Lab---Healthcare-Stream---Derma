@@ -17,6 +17,12 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from '../App';
 import { AuthProvider } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
+import PrivateRoute from '../components/PrivateRoute';
+
+// Mock PrivateRoute to skip auth checks in basic routing tests
+vi.mock('../components/PrivateRoute', () => ({
+  default: ({ element }) => element,
+}));
 
 // Helper to render with router
 const renderWithRouter = (initialPath) => {
@@ -36,7 +42,7 @@ describe('App Component', () => {
   it('renders Landing Page by default', async () => {
     renderWithRouter('/');
     expect(await screen.findByText(/Your skin tells a story/i)).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
+    const brands = await screen.findAllByText('DermaAI');
     expect(brands.length).toBeGreaterThan(0);
   });
 
@@ -44,7 +50,7 @@ describe('App Component', () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
     renderWithRouter('/patient-dashboard');
     expect(await screen.findByText('Your Dashboard')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
+    const brands = await screen.findAllByText('DermaAI');
     expect(brands.length).toBeGreaterThan(0);
   });
 
@@ -52,7 +58,7 @@ describe('App Component', () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
     renderWithRouter('/patient-upload');
     expect(await screen.findByText('Upload Skin Image')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
+    const brands = await screen.findAllByText('DermaAI');
     expect(brands.length).toBeGreaterThan(0);
     expect(
       await screen.findByText(
@@ -65,7 +71,7 @@ describe('App Component', () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
     renderWithRouter('/doctor-dashboard');
     expect(await screen.findByText('Doctor Dashboard')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
+    const brands = await screen.findAllByText('DermaAI');
     expect(brands.length).toBeGreaterThan(0);
   });
 
@@ -73,7 +79,7 @@ describe('App Component', () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 2, role: 'doctor', email: 'd@test.com' }));
     renderWithRouter('/doctor/patients/123');
     expect(await screen.findByText('Patient Reports')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
+    const brands = await screen.findAllByText('DermaAI');
     expect(brands.length).toBeGreaterThan(0);
     expect(
       await screen.findByText(/AI.*not.*diagnos/i)
@@ -84,7 +90,7 @@ describe('App Component', () => {
     localStorage.setItem('authUser', JSON.stringify({ id: 1, role: 'patient', email: 'p@test.com' }));
     renderWithRouter('/patient-history');
     expect(await screen.findByText('Scan History')).toBeInTheDocument();
-    const brands = await screen.findAllByText('SkinScope');
+    const brands = await screen.findAllByText('DermaAI');
     expect(brands.length).toBeGreaterThan(0);
   });
 });

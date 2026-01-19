@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   UnifiedChat — The Heart of SkinScope Communication
+   UnifiedChat — The Heart of DermaAI Communication
 
    This isn't just a chat widget. It's where humans connect—whether through
    AI-powered insights or direct physician conversation. The design should
@@ -71,7 +71,7 @@ const UnifiedChat = ({
         wsRef.current = null;
       }
 
-      const wsUrl = `ws://localhost:8000/ws/chat/${reportId}`;
+      const wsUrl = `ws://127.0.0.1:8000/ws/chat/${reportId}`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
