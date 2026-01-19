@@ -21,24 +21,24 @@ test.describe('Doctor Switch (S2-4)', () => {
         await page.goto('/patient-dashboard');
         
         console.log('Step 2: Verifying dashboard loads...');
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
         console.log('Step 2: Dashboard heading visible');
         
         // Verify current doctor is displayed
         console.log('Step 3: Looking for current doctor info...');
-        await expect(page.getByText('Your doctor')).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText('Your Dermatologist', { exact: true })).toBeVisible();
         console.log('Step 3: Current doctor section visible');
         
         // Find and click the Change Doctor button
         console.log('Step 4: Looking for Change Doctor button...');
         const changeDoctorBtn = page.getByRole('button', { name: /Change Doctor/i });
-        await expect(changeDoctorBtn).toBeVisible({ timeout: 5000 });
+        await expect(changeDoctorBtn).toBeVisible();
         console.log('Step 4: Change Doctor button found, clicking...');
         await changeDoctorBtn.click();
         
         // Verify modal opens - modal title is 'Change Doctor' in the header
         console.log('Step 5: Verifying modal opens...');
-        await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+        await expect(page.getByRole('dialog')).toBeVisible();
         console.log('Step 5: Modal opened successfully');
         
         // Verify modal content
@@ -51,7 +51,7 @@ test.describe('Doctor Switch (S2-4)', () => {
         // Close modal
         console.log('Step 7: Closing modal...');
         await closeBtn.click();
-        await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 3000 });
+        await expect(page.getByRole('dialog')).not.toBeVisible();
         console.log('Step 7: Modal closed');
         
         console.log('✅ Doctor Switch Dashboard Access Test Complete');
@@ -60,11 +60,11 @@ test.describe('Doctor Switch (S2-4)', () => {
     test('Modal shows available doctors and allows selection', async ({ page }) => {
         console.log('Step 1: Navigating to patient dashboard...');
         await page.goto('/patient-dashboard');
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
         
         console.log('Step 2: Opening Change Doctor modal...');
         const changeDoctorBtn = page.getByRole('button', { name: /Change Doctor/i });
-        await expect(changeDoctorBtn).toBeVisible({ timeout: 5000 });
+        await expect(changeDoctorBtn).toBeVisible();
         await changeDoctorBtn.click();
         
         console.log('Step 3: Waiting for doctor list to load...');
@@ -82,7 +82,7 @@ test.describe('Doctor Switch (S2-4)', () => {
             
             // Confirm button should be enabled now
             const confirmBtn = page.getByRole('button', { name: /Confirm/i });
-            await expect(confirmBtn).toBeEnabled({ timeout: 2000 });
+            await expect(confirmBtn).toBeEnabled();
             console.log('Step 5: Confirm button is enabled');
         } else if (await noDocsMessage.isVisible().catch(() => false)) {
             console.log('Step 3: No other doctors available (expected if only one doctor in system)');
@@ -101,13 +101,13 @@ test.describe('Doctor Switch Blocking', () => {
     test('Switch is blocked when patient has pending case', async ({ page }) => {
         console.log('Step 1: Navigating to patient dashboard as patient with pending case...');
         await page.goto('/patient-dashboard');
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
         
         console.log('Step 2: Opening Change Doctor modal...');
         const changeDoctorBtn = page.getByRole('button', { name: /Change Doctor/i });
         
         // This patient may or may not have Change Doctor visible depending on fixture state
-        if (await changeDoctorBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        if (await changeDoctorBtn.isVisible().catch(() => false)) {
             await changeDoctorBtn.click();
             
             console.log('Step 3: Checking for blocked message...');
@@ -123,7 +123,7 @@ test.describe('Doctor Switch Blocking', () => {
                     
                     // Should see error message about active case - use first() since it appears in both dashboard and modal
                     const errorMessage = page.getByText(/active case|pending|cannot change/i).first();
-                    await expect(errorMessage).toBeVisible({ timeout: 5000 });
+                    await expect(errorMessage).toBeVisible();
                     console.log('Step 4: Blocking error message displayed');
                 }
             }

@@ -12,7 +12,7 @@ test.describe('Upload Validation', () => {
     await page.goto('/patient-upload');
 
     // Wait for page to load
-    await expect(page.getByRole('heading', { name: 'Patient Upload' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Upload Skin Image' })).toBeVisible();
 
     // Try uploading a .txt file
     const fileInput = page.locator('input[type="file"]');
@@ -33,7 +33,7 @@ test.describe('Upload Validation', () => {
     await page.goto('/patient-upload');
 
     // Wait for page to load
-    await expect(page.getByRole('heading', { name: 'Patient Upload' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Upload Skin Image' })).toBeVisible();
 
     // Create a "large" fake image buffer (>5MB)
     // Note: We can't actually test a 5MB file in E2E easily, but we can verify the error message pattern

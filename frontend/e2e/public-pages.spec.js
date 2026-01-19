@@ -12,17 +12,16 @@ test.describe('Public Pages Navigation', () => {
     await page.goto('/');
     
     // Hero section
-    await expect(page.getByText('DermaAI Platform')).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Identify skin concerns/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Your skin tells a story/i })).toBeVisible();
     
-    // How It Works section
-    await expect(page.getByRole('heading', { name: 'How It Works' })).toBeVisible();
+    // Journey section
+    await expect(page.getByRole('heading', { name: 'From concern to confidence' })).toBeVisible();
     
-    // Partner Clinics section
-    await expect(page.getByRole('heading', { name: 'Our Partner Clinics' })).toBeVisible();
+    // Doctors section
+    await expect(page.getByRole('heading', { name: /AI opens the door/i })).toBeVisible();
     
-    // Testimonials section
-    await expect(page.getByRole('heading', { name: 'Trusted by Patients' })).toBeVisible();
+    // Privacy section
+    await expect(page.getByRole('heading', { name: 'Your skin, your data, your privacy.' })).toBeVisible();
     
     // Footer
     await expect(page.locator('footer')).toBeVisible();
@@ -36,7 +35,7 @@ test.describe('Public Pages Navigation', () => {
     await expect(page.locator('header').getByRole('link', { name: 'Doctors' })).toBeVisible();
     await expect(page.locator('header').getByRole('link', { name: 'Services' })).toBeVisible();
     await expect(page.locator('header').getByRole('link', { name: 'Contact' })).toBeVisible();
-    await expect(page.locator('header').getByRole('link', { name: 'Login' })).toBeVisible();
+    await expect(page.locator('header').getByRole('link', { name: 'Sign in' })).toBeVisible();
   });
 
   test('Navigate to About page via header', async ({ page }) => {

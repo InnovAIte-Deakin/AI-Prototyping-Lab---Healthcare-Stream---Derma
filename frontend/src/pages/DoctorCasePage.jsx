@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import UnifiedChat from '../components/UnifiedChat';
-import { uiTokens } from '../components/Layout';
+
+// Stat Card Component
+const StatCard = ({ label, value, highlight }) => (
+  <div className="rounded-xl bg-white border border-cream-200 p-4">
+    <p className="text-xs font-medium uppercase tracking-wider text-charcoal-400 mb-1">{label}</p>
+    <p className={`text-sm font-bold ${highlight || 'text-charcoal-700'}`}>{value}</p>
+  </div>
+);
 
 function DoctorCasePage() {
   const { reportId } = useParams();
@@ -52,85 +59,152 @@ function DoctorCasePage() {
     }
   };
 
+  // Loading State
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="h-10 w-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <div className="text-center">
+          <div className="h-12 w-12 border-4 border-cream-300 border-t-deep-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-charcoal-600">Loading case details...</p>
+        </div>
       </div>
     );
   }
 
+  // Error State
   if (error) {
     return (
-      <div className="space-y-4">
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
-        <Link to="/doctor-dashboard" className="text-indigo-600 font-semibold text-sm hover:underline">← Back to Dashboard</Link>
+      <div className="space-y-4 animate-enter">
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+          <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          <p className="text-sm font-medium text-red-700">{error}</p>
+        </div>
+        <Link to="/doctor-dashboard" className="inline-flex items-center gap-1.5 text-sm font-medium text-warm-600 hover:text-warm-700">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to Dashboard
+        </Link>
       </div>
     );
   }
 
+  const reviewStatus = report?.review_status || 'pending';
+
+  const severityColor = report?.severity === 'High' ? 'text-red-600' :
+    report?.severity === 'Medium' ? 'text-amber-600' : 'text-sage-600';
+
+  const statusColor = reviewStatus === 'accepted' ? 'text-deep-600' :
+    reviewStatus === 'reviewed' ? 'text-sage-600' : 'text-amber-600';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-enter">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <Link to="/doctor-dashboard" className="text-indigo-600 font-semibold text-sm hover:underline mb-2 inline-block">← Back to Dashboard</Link>
-          <h1 className="text-2xl font-bold text-slate-900">Case #{reportId}</h1>
-          <p className="text-slate-500 text-sm">
-            Condition: <span className="font-medium text-slate-800">{report?.condition || 'Assessment Pending'}</span>
+          <Link
+            to="/doctor-dashboard"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-warm-600 hover:text-warm-700 transition-colors mb-2"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Back to Dashboard
+          </Link>
+          <h1 className="text-3xl font-semibold text-charcoal-900">Case #{reportId}</h1>
+          <p className="mt-1 text-charcoal-500">
+            Condition: <span className="font-semibold text-charcoal-700">{report?.condition || 'Assessment Pending'}</span>
           </p>
         </div>
-        <div className="flex gap-3">
-          {report?.review_status === 'pending' && (
+
+        <div className="flex items-center gap-3 flex-wrap">
+          {reviewStatus === 'pending' && (
             <button
               onClick={handleAccept}
               disabled={isProcessing}
-              className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg"
+              className="btn-deep"
             >
-              {isProcessing ? '⏳ Processing...' : '🤝 Accept Case'}
+              {isProcessing ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                'Accept Case'
+              )}
             </button>
           )}
-          {report?.review_status === 'accepted' && (
+          {reviewStatus === 'accepted' && (
             <button
               onClick={handleComplete}
               disabled={isProcessing}
-              className="rounded-xl bg-green-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 transition-all shadow-lg"
+              className="btn-warm"
             >
-              {isProcessing ? '⏳ Processing...' : '✅ Close Case'}
+              {isProcessing ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                'Complete Case'
+              )}
             </button>
           )}
-          {report?.review_status === 'reviewed' && (
-            <span className="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-black uppercase">Finalized</span>
+          {reviewStatus === 'reviewed' && (
+            <span className="badge-sage px-4 py-2">
+              Finalized
+            </span>
           )}
         </div>
       </div>
 
-      {/* Case Info */}
-      <div className={`${uiTokens.card} p-5 grid grid-cols-2 md:grid-cols-4 gap-4`}>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Severity</p>
-          <p className={`text-sm font-black ${report?.severity === 'High' ? 'text-red-600' : 'text-slate-700'}`}>{report?.severity || 'Unknown'}</p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Confidence</p>
-          <p className="text-sm font-black text-slate-700">{report?.confidence ? `${Math.round(report.confidence)}%` : 'N/A'}</p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Status</p>
-          <p className={`text-sm font-black uppercase ${report?.review_status === 'accepted' ? 'text-indigo-600' : report?.review_status === 'reviewed' ? 'text-green-600' : 'text-yellow-600'}`}>
-            {report?.review_status}
-          </p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Created</p>
-          <p className="text-sm font-medium text-slate-700">{report?.created_at ? new Date(report.created_at).toLocaleString() : 'Unknown'}</p>
-        </div>
+      {/* Case Info Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Severity"
+          value={report?.severity || 'Unknown'}
+          highlight={severityColor}
+        />
+        <StatCard
+          label="Confidence"
+          value={report?.confidence ? `${Math.round(report.confidence)}%` : 'N/A'}
+        />
+        <StatCard
+          label="Status"
+          value={reviewStatus.charAt(0).toUpperCase() + reviewStatus.slice(1)}
+          highlight={statusColor}
+        />
+        <StatCard
+          label="Created"
+          value={report?.created_at ? new Date(report.created_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+          }) : 'Unknown'}
+        />
       </div>
 
-      {/* Recommendation */}
-      <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-        <p className="text-[10px] font-bold text-blue-400 uppercase mb-1">AI Recommendation</p>
-        <p className="text-sm font-medium text-blue-900 leading-relaxed italic">"{report?.recommendation || 'No recommendation available.'}"</p>
+      {/* AI Recommendation */}
+      <div className="card-warm p-5 bg-warm-50 border-warm-200">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warm-100 flex-shrink-0">
+            <svg className="h-5 w-5 text-warm-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-warm-700 mb-1">AI Recommendation</p>
+            <p className="text-sm text-charcoal-700 leading-relaxed">
+              {report?.recommendation || 'No recommendation available.'}
+            </p>
+          </div>
+        </div>
       </div>
 
       {report?.patient_rating && (
@@ -148,10 +222,10 @@ function DoctorCasePage() {
       )}
 
       {/* Chat Interface - Show for accepted cases */}
-      {report?.review_status === 'accepted' && (
-        <div>
-          <h2 className="text-lg font-bold text-slate-800 mb-4">💬 Patient Consultation</h2>
-          <UnifiedChat 
+      {reviewStatus === 'accepted' && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-charcoal-900">Patient Consultation</h2>
+          <UnifiedChat
             imageId={report.image_id}
             reportId={parseInt(reportId)}
             isPaused={true}
@@ -160,32 +234,36 @@ function DoctorCasePage() {
         </div>
       )}
 
-      {/* Pending state - show accept prompt */}
-      {report?.review_status === 'pending' && (
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">⏳</span>
+      {/* Pending state */}
+      {reviewStatus === 'pending' && (
+        <div className="card-warm p-8 bg-amber-50 border-amber-200 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 mb-4">
+            <svg className="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <h3 className="text-xl font-bold text-yellow-800 mb-2">Case Awaiting Review</h3>
-          <p className="text-yellow-700 mb-6">Accept this case to begin consulting with the patient and access the chat interface.</p>
+          <h3 className="text-xl font-semibold text-amber-800 mb-2">Case Awaiting Review</h3>
+          <p className="text-amber-700 mb-6">Accept this case to begin consulting with the patient and access the chat interface.</p>
           <button
             onClick={handleAccept}
             disabled={isProcessing}
-            className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg"
+            className="btn-deep"
           >
-            {isProcessing ? '⏳ Processing...' : '🤝 Accept & Start Consultation'}
+            {isProcessing ? 'Processing...' : 'Accept & Start Consultation'}
           </button>
         </div>
       )}
 
-      {/* Reviewed state - case closed */}
-      {report?.review_status === 'reviewed' && (
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">✅</span>
+      {/* Reviewed state */}
+      {reviewStatus === 'reviewed' && (
+        <div className="card-warm p-8 bg-sage-50 border-sage-200 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sage-100 mb-4">
+            <svg className="h-8 w-8 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <h3 className="text-xl font-bold text-green-800 mb-2">Case Completed</h3>
-          <p className="text-green-700">This consultation has been finalized. The patient has been notified.</p>
+          <h3 className="text-xl font-semibold text-sage-800 mb-2">Case Completed</h3>
+          <p className="text-sage-700">This consultation has been finalized. The patient has been notified.</p>
         </div>
       )}
     </div>

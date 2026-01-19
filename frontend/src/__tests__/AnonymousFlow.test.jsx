@@ -29,7 +29,7 @@ afterEach(() => {
 describe("Anonymous/Public Flow", () => {
   it("shows CTA on landing page", () => {
     renderAt("/");
-    expect(screen.getByText(/Try without signing up/i)).toBeInTheDocument();
+    expect(screen.getByText(/Try It First/i)).toBeInTheDocument();
   });
 
   it("runs a public analysis without touching auth storage", async () => {

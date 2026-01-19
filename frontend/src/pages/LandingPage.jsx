@@ -1,260 +1,366 @@
-import { useNavigate, Link } from 'react-router-dom';
-import { uiTokens } from '../components/Layout';
+import { useNavigate } from 'react-router-dom';
 
-const accent = 'from-[#e7f7f4] via-white to-[#f7ecf7]';
-const heroTitleAccent = 'text-[#4c7dff]';
+/* ═══════════════════════════════════════════════════════════════════════════
+   DermaAI Landing Page
+
+   Story: The journey from skin concern to confident care
+
+   This isn't a template. It's a story about a person who notices something
+   on their skin, feels that flutter of worry, and finds clarity through
+   technology and human expertise working together.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 function LandingPage() {
   const navigate = useNavigate();
 
-  const partnerClinics = [
-    { name: 'Melbourne Skin Centre', location: 'Melbourne, VIC' },
-    { name: 'Sydney Dermatology Institute', location: 'Sydney, NSW' },
-    { name: 'Brisbane Skin Specialists', location: 'Brisbane, QLD' },
-    { name: 'Perth Dermcare Clinic', location: 'Perth, WA' },
-  ];
-
-  const testimonials = [
-    {
-      quote: 'The AI analysis was incredibly accurate and the doctor review gave me peace of mind. Highly recommend!',
-      author: 'Sarah M.',
-      role: 'Patient',
-    },
-    {
-      quote: 'As a busy professional, having access to dermatology care from home has been a game-changer.',
-      author: 'James K.',
-      role: 'Patient',
-    },
-    {
-      quote: 'The platform is intuitive and the doctors are very responsive. Great experience overall.',
-      author: 'Emily R.',
-      role: 'Patient',
-    },
-  ];
-
   return (
-    <div className="space-y-20 pb-16">
-      {/* Hero Section */}
-      <section className="relative mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-6 py-16">
-        <div
-          className={`absolute inset-0 -z-10 bg-gradient-to-br ${accent}`}
-          aria-hidden
-        />
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute left-6 top-12 h-72 w-72 rounded-full bg-teal-200/25 blur-[120px]" />
-          <div className="absolute right-8 bottom-12 h-72 w-72 rounded-full bg-pink-200/30 blur-[120px]" />
-        </div>
+    <div className="-mt-8">
+      {/* ═══════════════════════════════════════════════════════════════════
+          Hero Section: The moment of discovery
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative min-h-[90vh] flex items-center">
+        <div className="w-full">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: The Story */}
+            <div className="animate-enter">
+              <p className="text-warm-600 font-medium mb-4 tracking-wide">
+                For moments of uncertainty
+              </p>
 
-        <div className="space-y-8 text-center">
-          <p className="inline-flex rounded-full bg-white/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur">
-            DermaAI Platform
-          </p>
-          <h1 className="mx-auto max-w-4xl text-5xl font-black leading-tight text-slate-900 sm:text-7xl">
-            Identify skin concerns{' '}
-            <span className={heroTitleAccent}>instantly</span> with AI
-          </h1>
-          <p className="mx-auto max-w-xl text-lg text-[#333]">
-            Connect with board-certified dermatologists at our partner clinics.
-            Upload images for instant AI analysis, track your journey, and receive
-            expert medical guidance.
-          </p>
+              <h1 className="heading-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] mb-6">
+                Your skin tells a story.{' '}
+                <span className="text-warm-600">
+                  We help you understand it.
+                </span>
+              </h1>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <button
-              onClick={() => navigate('/login?mode=signup')}
-              className={`${uiTokens.primaryButton} h-12 rounded-full px-8 text-base shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-200 bg-gradient-to-r from-[#4c7dff] to-[#5f8dff]`}
-            >
-              Get Started
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="h-12 rounded-full border border-slate-200 bg-white px-8 text-base font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300"
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => navigate('/try-anonymous')}
-              className="h-12 rounded-full border border-indigo-100 bg-indigo-50 px-8 text-base font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-100"
-            >
-              Try without signing up
-            </button>
+              <p className="text-lg text-charcoal-600 leading-relaxed mb-8 max-w-xl">
+                That new spot. That persistent rash. The questions that keep you up at night.
+                DermaAI brings AI-powered insights and board-certified dermatologists
+                together, so you can move from worry to clarity.
+              </p>
+
+              {/* CTA Group */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <button
+                  onClick={() => navigate('/login?mode=signup')}
+                  className="btn-warm text-base px-8 py-4"
+                >
+                  Start Your Skin Journey
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => navigate('/try-anonymous')}
+                  className="btn-soft text-base px-8 py-4"
+                >
+                  Try It First
+                </button>
+              </div>
+
+              {/* Human proof, not trust badges */}
+              <div className="flex items-center gap-4 text-sm text-charcoal-500">
+                <div className="flex -space-x-2">
+                  {/* Abstract human figures - warm, not clinical */}
+                  <div className="w-8 h-8 rounded-full bg-warm-200 border-2 border-cream-50 flex items-center justify-center">
+                    <span className="text-warm-700 text-xs font-medium">S</span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-deep-200 border-2 border-cream-50 flex items-center justify-center">
+                    <span className="text-deep-700 text-xs font-medium">M</span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-sage-200 border-2 border-cream-50 flex items-center justify-center">
+                    <span className="text-sage-700 text-xs font-medium">K</span>
+                  </div>
+                </div>
+                <span>Thousands have found clarity. You can too.</span>
+              </div>
+            </div>
+
+            {/* Right: The Experience (Product Preview) */}
+            <div className="relative animate-enter" style={{ animationDelay: '150ms' }}>
+              {/* Phone/App Mockup showing the actual product */}
+              <div className="relative mx-auto max-w-sm">
+                {/* Phone frame */}
+                <div className="rounded-[2.5rem] bg-charcoal-900 p-3 shadow-2xl">
+                  <div className="rounded-[2rem] bg-cream-50 overflow-hidden">
+                    {/* Status bar */}
+                    <div className="bg-charcoal-900 text-white px-6 py-2 flex justify-between items-center text-xs">
+                      <span>9:41</span>
+                      <div className="flex gap-1">
+                        <div className="w-4 h-2 bg-white/80 rounded-sm" />
+                      </div>
+                    </div>
+
+                    {/* App content preview */}
+                    <div className="p-5 space-y-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-warm-500 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                          </div>
+                          <span className="font-semibold text-charcoal-900">DermaAI</span>
+                        </div>
+                      </div>
+
+                      {/* Analysis Result Preview */}
+                      <div className="rounded-2xl bg-white border border-cream-300 p-4 shadow-sm">
+                        <div className="flex gap-3">
+                          <div className="w-16 h-16 rounded-xl bg-cream-200 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="badge-sage text-[10px] mb-1">Analysis Complete</div>
+                            <p className="text-sm font-medium text-charcoal-900">Low Risk Detected</p>
+                            <p className="text-xs text-charcoal-500 mt-1">Common condition identified</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Chat Preview */}
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <div className="w-7 h-7 rounded-full bg-warm-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-warm-600 text-xs">AI</span>
+                          </div>
+                          <div className="rounded-2xl rounded-tl-sm bg-cream-100 px-3 py-2 max-w-[80%]">
+                            <p className="text-xs text-charcoal-700">Based on the image, this appears to be a common condition. Would you like more details?</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <div className="rounded-2xl rounded-tr-sm bg-warm-500 text-white px-3 py-2 max-w-[80%]">
+                            <p className="text-xs">Yes, tell me more</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action button */}
+                      <button className="w-full rounded-xl bg-deep-600 text-white text-sm py-3 font-medium">
+                        Request Doctor Review
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="mx-auto max-w-4xl px-4">
-        <h2 className="text-center text-3xl font-bold text-slate-900">How It Works</h2>
-        <p className="mx-auto mt-2 max-w-xl text-center text-slate-600">
-          Get expert dermatology care in three simple steps
-        </p>
+      {/* ═══════════════════════════════════════════════════════════════════
+          Story Section: The Journey
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="max-w-4xl mx-auto text-center mb-16">
+          <p className="text-warm-600 font-medium mb-3">The journey</p>
+          <h2 className="heading-display text-3xl sm:text-4xl mb-4">
+            From concern to confidence
+          </h2>
+          <p className="text-charcoal-600 text-lg">
+            We designed DermaAI around real human experiences, not workflows.
+          </p>
+        </div>
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-3">
-          {[
-            {
-              step: '1',
-              title: 'Upload Your Photo',
-              description:
-                'Take a clear photo of your skin concern and securely upload it to our platform.',
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              ),
-            },
-            {
-              step: '2',
-              title: 'AI Analysis',
-              description:
-                'Our AI provides instant preliminary insights powered by Google Gemini technology.',
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              ),
-            },
-            {
-              step: '3',
-              title: 'Doctor Review',
-              description:
-                'A board-certified dermatologist reviews your case and provides medical guidance.',
-              icon: (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              ),
-            },
-          ].map((item) => (
-            <div key={item.step} className="text-center">
-              <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {item.icon}
-                </svg>
-                <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                  {item.step}
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h3>
-              <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+        {/* Journey Steps - Storytelling, not feature lists */}
+        <div className="space-y-8 max-w-3xl mx-auto">
+          {/* Step 1 */}
+          <div className="card-warm p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-warm-100 flex items-center justify-center">
+              <span className="text-warm-600 font-semibold text-xl">1</span>
             </div>
-          ))}
+            <div>
+              <h3 className="text-xl font-semibold text-charcoal-900 mb-2">
+                "What is this?"
+              </h3>
+              <p className="text-charcoal-600 leading-relaxed">
+                You notice something on your skin. A spot that wasn't there before.
+                A rash that won't go away. Instead of endless scrolling through scary
+                search results, you take a photo. Clear, focused, just like the tips suggest.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="card-warm p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-sage-100 flex items-center justify-center">
+              <span className="text-sage-600 font-semibold text-xl">2</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-charcoal-900 mb-2">
+                "Okay, this helps."
+              </h3>
+              <p className="text-charcoal-600 leading-relaxed">
+                Our AI—trained on millions of dermatology cases—analyzes your image in seconds.
+                Not to diagnose, but to inform. You see possible conditions, understand risk levels,
+                and finally have context instead of chaos.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="card-warm p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-deep-100 flex items-center justify-center">
+              <span className="text-deep-600 font-semibold text-xl">3</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-charcoal-900 mb-2">
+                "I need a real doctor."
+              </h3>
+              <p className="text-charcoal-600 leading-relaxed">
+                Sometimes AI isn't enough. With one tap, your case goes to a board-certified
+                dermatologist. Not a random one—your doctor. They review your images,
+                chat with you directly, and give you the professional guidance you need.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Partner Clinics */}
-      <section className="rounded-2xl bg-slate-900 mx-4 p-8 text-white sm:p-12">
-        <h2 className="text-center text-3xl font-bold">Our Partner Clinics</h2>
-        <p className="mx-auto mt-2 max-w-xl text-center text-slate-300">
-          Trusted dermatology centers across Australia (fictional for POC)
-        </p>
-
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {partnerClinics.map((clinic) => (
-            <div
-              key={clinic.name}
-              className="rounded-xl bg-white/10 p-5 backdrop-blur-sm transition hover:bg-white/15"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
-              </div>
-              <h3 className="mt-4 font-semibold">{clinic.name}</h3>
-              <p className="mt-1 text-sm text-slate-400">{clinic.location}</p>
+      {/* ═══════════════════════════════════════════════════════════════════
+          Human Element: The Doctors
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 bg-cream-100/50">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-deep-600 font-medium mb-3">Real expertise</p>
+              <h2 className="heading-display text-3xl sm:text-4xl mb-6">
+                AI opens the door.{' '}
+                <span className="text-deep-600">Doctors guide you through.</span>
+              </h2>
+              <p className="text-charcoal-600 text-lg leading-relaxed mb-6">
+                We believe technology should enhance human connection, not replace it.
+                Every dermatologist on DermaAI is board-certified, practicing, and
+                genuinely invested in your skin health.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-charcoal-700">
+                  <span className="w-6 h-6 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  Board-certified dermatologists
+                </li>
+                <li className="flex items-center gap-3 text-charcoal-700">
+                  <span className="w-6 h-6 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  Direct, private conversations
+                </li>
+                <li className="flex items-center gap-3 text-charcoal-700">
+                  <span className="w-6 h-6 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  Your history, always accessible
+                </li>
+              </ul>
             </div>
-          ))}
-        </div>
 
-        <div className="mt-8 text-center">
-          <Link
-            to="/doctors"
-            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400 hover:underline"
-          >
-            Meet our dermatologists
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            {/* Doctor illustration - abstract, warm */}
+            <div className="relative">
+              <div className="rounded-3xl bg-white border border-cream-300 p-8 shadow-lg">
+                <div className="flex items-start gap-5">
+                  {/* Doctor avatar - stylized, warm */}
+                  <div className="w-20 h-20 rounded-2xl bg-deep-600 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="badge-deep mb-2">Available Now</span>
+                    <h4 className="text-lg font-semibold text-charcoal-900">Dr. Sarah Chen</h4>
+                    <p className="text-charcoal-500 text-sm">Board-Certified Dermatologist</p>
+                    <p className="text-charcoal-600 text-sm mt-3 leading-relaxed">
+                      "Every skin concern deserves attention. I'm here to provide clarity and care."
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 pt-6 border-t border-cream-200 flex gap-3">
+                  <button className="btn-deep flex-1 py-3">
+                    Connect
+                  </button>
+                  <button className="btn-soft flex-1 py-3">
+                    View Profile
+                  </button>
+                </div>
+              </div>
+
+              {/* Decorative element */}
+              <div className="absolute -z-10 -bottom-4 -right-4 w-full h-full rounded-3xl bg-cream-200" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          Privacy Section: Because it matters
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="w-16 h-16 rounded-2xl bg-charcoal-100 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-charcoal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
-          </Link>
+          </div>
+          <h2 className="heading-display text-3xl sm:text-4xl mb-4">
+            Your skin, your data, your privacy.
+          </h2>
+          <p className="text-charcoal-600 text-lg leading-relaxed mb-8">
+            We handle sensitive information with the respect it deserves. Your images are encrypted,
+            your conversations are private, and your data is never sold. Period.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <div className="card-cream px-5 py-3 text-sm font-medium text-charcoal-700">
+              HIPAA Compliant
+            </div>
+            <div className="card-cream px-5 py-3 text-sm font-medium text-charcoal-700">
+              End-to-End Encrypted
+            </div>
+            <div className="card-cream px-5 py-3 text-sm font-medium text-charcoal-700">
+              No Data Sales
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="mx-auto max-w-4xl px-4">
-        <h2 className="text-center text-3xl font-bold text-slate-900">
-          Trusted by Patients
-        </h2>
-        <p className="mx-auto mt-2 max-w-xl text-center text-slate-600">
-          See what our users are saying (fictional testimonials for POC)
-        </p>
-
-        <div className="mt-10 grid gap-6 sm:grid-cols-3">
-          {testimonials.map((testimonial, index) => (
-            <div
-              key={index}
-              className={`${uiTokens.card} p-6`}
-            >
-              <div className="flex gap-1 text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="mt-4 text-sm text-slate-600">"{testimonial.quote}"</p>
-              <div className="mt-4">
-                <p className="font-medium text-slate-900">{testimonial.author}</p>
-                <p className="text-xs text-slate-500">{testimonial.role}</p>
+      {/* ═══════════════════════════════════════════════════════════════════
+          Final CTA: The Invitation
+          ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-3xl bg-charcoal-900 p-10 sm:p-14 text-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
+                Ready to understand your skin better?
+              </h2>
+              <p className="text-charcoal-300 text-lg mb-8 max-w-xl mx-auto">
+                No more uncertainty. No more late-night searches.
+                Just clarity, care, and confidence.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => navigate('/login?mode=signup')}
+                  className="btn-warm text-base px-8 py-4"
+                >
+                  Create Free Account
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-4 text-base font-semibold text-white border border-charcoal-700 rounded-xl hover:bg-charcoal-800 transition-colors"
+                >
+                  Sign In
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="mx-4 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 p-8 text-center text-white sm:p-12">
-        <h2 className="text-3xl font-bold">Ready to Get Started?</h2>
-        <p className="mx-auto mt-3 max-w-xl text-blue-100">
-          Join thousands of patients who trust DermaAI for their dermatology care.
-          Create your free account today.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <button
-            onClick={() => navigate('/login?mode=signup')}
-            className="h-12 rounded-full bg-white px-8 text-base font-semibold text-blue-600 shadow-lg transition hover:bg-blue-50"
-          >
-            Create Free Account
-          </button>
-          <Link
-            to="/services"
-            className="h-12 flex items-center rounded-full border-2 border-white/40 px-8 text-base font-semibold text-white transition hover:bg-white/10"
-          >
-            Learn More
-          </Link>
-        </div>
-      </section>
-
-      {/* Disclaimer */}
-      <section className="mx-auto max-w-2xl px-4 text-center">
-        <p className="text-xs text-slate-500">
-          <strong>Important:</strong> DermaAI is a Proof of Concept for educational purposes only.
-          It is NOT a substitute for professional medical advice. All doctors, clinics, and
-          testimonials shown are fictional. For real medical concerns, please consult a licensed
-          healthcare provider.
-        </p>
       </section>
     </div>
   );

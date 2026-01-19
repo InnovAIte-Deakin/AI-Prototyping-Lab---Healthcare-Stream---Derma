@@ -31,7 +31,7 @@ if ($stillRunning) {
 # 3. Backend Tests
 Write-Host "`n [1/5] Running Backend Unit Tests (pytest)..." -ForegroundColor Yellow
 Set-Location backend
-python -m pytest
+python -m pytest -v
 if ($LASTEXITCODE -ne 0) {
     Write-Host " [ERROR] Backend tests failed. Stopping." -ForegroundColor Red
     Set-Location $OriginalDir
@@ -123,8 +123,19 @@ Write-Host " [INFO] Backend started with MOCK_AI=true" -ForegroundColor Gray
 # 7. E2E Tests
 Write-Host "`n [5/5] Running E2E Tests (Playwright)..." -ForegroundColor Yellow
 Set-Location frontend
-npx playwright test
-$e2eResult = $LASTEXITCODE
+
+# Run Playwright directly in foreground for better visibility
+npx playwright test --retries=0
+$e2eExitCode = $LASTEXITCODE
+
+if ($e2eExitCode -ne 0) {
+    Write-Host " [ERROR] E2E Tests failed." -ForegroundColor Red
+    $e2eResult = 1
+} else {
+    Write-Host " [PASS] E2E Tests passed." -ForegroundColor Green
+    $e2eResult = 0
+}
+
 Set-Location ..
 
 # 8. Stop mocked backend
@@ -146,23 +157,5 @@ if ($e2eResult -ne 0) {
     Write-Host "      ALL TESTS PASSED SUCCESSFULLY!                 " -ForegroundColor Green
     Write-Host " ================================================= " -ForegroundColor Cyan
 }
-
-# Optional early exit for CI or non-interactive runs
-if ($env:DERMA_SKIP_DEV_SERVER -ieq "1" -or $env:DERMA_SKIP_DEV_SERVER -ieq "true") {
-    if ($e2eResult -ne 0) { exit 1 }
-    exit 0
-}
-
-# 10. Restart backend for development (real AI)
-Write-Host " [INFO] Restarting backend for development (real AI)..." -ForegroundColor Gray
-Write-Host " [INFO] Server running in THIS terminal. Press Ctrl+C to stop." -ForegroundColor Yellow
-
-Remove-Item Env:MOCK_AI -ErrorAction SilentlyContinue
-Set-Location "$OriginalDir\backend"
-$env:DATABASE_URL = "sqlite:///./derma.db"
-
-# Run directly in this console (Blocking)
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-
-# Exit with test result code after server stops
 if ($e2eResult -ne 0) { exit 1 }
+exit 0
