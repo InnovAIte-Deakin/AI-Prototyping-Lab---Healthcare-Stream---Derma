@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 /* ═══════════════════════════════════════════════════════════════════════════
    LoginPage — The Welcome
 
-   This is often the first real interaction someone has with SkinScope.
+   This is often the first real interaction someone has with DermaAI.
    It should feel welcoming, not like a barrier. Warm, simple, human.
    ═══════════════════════════════════════════════════════════════════════════ */
 

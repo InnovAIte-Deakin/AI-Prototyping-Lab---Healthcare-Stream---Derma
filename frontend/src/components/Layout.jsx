@@ -71,7 +71,7 @@ const Layout = () => {
       <header className={`sticky top-0 z-50 transition-all duration-300 ${
         isLandingPage
           ? 'bg-transparent'
-          : 'bg-cream-50/90 backdrop-blur-sm border-b border-cream-300'
+          : 'bg-cream-50 border-b border-cream-300'
       }`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           {/* Logo & Brand */}
