@@ -230,6 +230,10 @@ function DoctorCasePage() {
             reportId={parseInt(reportId)}
             isPaused={true}
             userRole="doctor"
+            onStatusChange={() => {
+              console.log('DoctorCasePage: Received status update, refreshing...');
+              // We could fetchReport here if we wanted the doctor UI to update on external changes
+            }}
           />
         </div>
       )}

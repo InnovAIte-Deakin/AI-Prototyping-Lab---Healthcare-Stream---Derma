@@ -41,6 +41,9 @@ function PatientCasePage() {
   const [ratingError, setRatingError] = useState(null);
   const [ratingSuccess, setRatingSuccess] = useState(null);
 
+  /* New state for visual debugging of status updates */
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const fetchReport = useCallback(async () => {
     try {
       const res = await apiClient.get(`/api/analysis/image/${imageId}?t=${Date.now()}`);
@@ -48,6 +51,9 @@ function PatientCasePage() {
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.detail || 'Could not load case details.');
+    } finally {
+      /* Clear refreshing state when done */
+      setIsRefreshing(false);
     }
   }, [imageId]);
 
@@ -66,12 +72,17 @@ function PatientCasePage() {
   }, [report?.patient_rating, report?.patient_feedback]);
 
   const handleStatusChange = useCallback(() => {
+    console.log('PatientCasePage: handleStatusChange triggered');
+    /* Set refreshing state to visible */
+    setIsRefreshing(true);
     setTimeout(() => {
+      console.log('PatientCasePage: Calling fetchReport from handleStatusChange');
       fetchReport();
     }, 500);
   }, [fetchReport]);
 
   const handleRequestReview = async () => {
+    // ... existing ... 
     if (!report?.report_id) return;
     setIsRequestingReview(true);
     try {
@@ -83,6 +94,8 @@ function PatientCasePage() {
       setIsRequestingReview(false);
     }
   };
+  
+  // ... (handleSubmitRating remains the same) ...
 
   const handleSubmitRating = async (ratingValue, feedbackValue) => {
     if (!report?.report_id) return;
@@ -129,6 +142,7 @@ function PatientCasePage() {
 
   // Error State
   if (error) {
+    // ... existing error render ...
     return (
       <div className="space-y-4 animate-enter">
         <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
@@ -157,6 +171,8 @@ function PatientCasePage() {
     reviewStatus === 'reviewed' ? 'text-sage-600' :
     reviewStatus === 'pending' ? 'text-amber-600' : 'text-charcoal-500';
 
+  console.log(`PatientCasePage: Render. Report: ${report?.report_id}, Status: ${report?.review_status}`);
+
   return (
     <div className="space-y-6 animate-enter">
       {/* Header */}
@@ -171,7 +187,18 @@ function PatientCasePage() {
             </svg>
             Back to History
           </Link>
-          <h1 className="text-3xl font-semibold text-charcoal-900">Case Details</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-semibold text-charcoal-900">Case Details</h1>
+            {isRefreshing && (
+              <span className="flex items-center gap-1 text-xs font-semibold text-warm-600 bg-warm-100 px-2 py-1 rounded-full animate-pulse transition-all">
+                <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Syncing...
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-charcoal-500">
             Condition: <span className="font-semibold text-charcoal-700">{report?.condition || 'Assessment Pending'}</span>
           </p>
