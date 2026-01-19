@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SkinScope Landing Page
+   DermaAI Landing Page
 
    Story: The journey from skin concern to confident care
 
@@ -36,7 +36,7 @@ function LandingPage() {
 
               <p className="text-lg text-charcoal-600 leading-relaxed mb-8 max-w-xl">
                 That new spot. That persistent rash. The questions that keep you up at night.
-                SkinScope brings AI-powered insights and board-certified dermatologists
+                DermaAI brings AI-powered insights and board-certified dermatologists
                 together, so you can move from worry to clarity.
               </p>
 
@@ -103,7 +103,7 @@ function LandingPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                             </svg>
                           </div>
-                          <span className="font-semibold text-charcoal-900">SkinScope</span>
+                          <span className="font-semibold text-charcoal-900">DermaAI</span>
                         </div>
                       </div>
 
@@ -159,7 +159,7 @@ function LandingPage() {
             From concern to confidence
           </h2>
           <p className="text-charcoal-600 text-lg">
-            We designed SkinScope around real human experiences, not workflows.
+            We designed DermaAI around real human experiences, not workflows.
           </p>
         </div>
 
@@ -232,7 +232,7 @@ function LandingPage() {
               </h2>
               <p className="text-charcoal-600 text-lg leading-relaxed mb-6">
                 We believe technology should enhance human connection, not replace it.
-                Every dermatologist on SkinScope is board-certified, practicing, and
+                Every dermatologist on DermaAI is board-certified, practicing, and
                 genuinely invested in your skin health.
               </p>
               <ul className="space-y-3">

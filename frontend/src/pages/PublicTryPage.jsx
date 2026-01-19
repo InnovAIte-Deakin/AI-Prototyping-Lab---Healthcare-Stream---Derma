@@ -109,7 +109,7 @@ function PublicTryPage() {
             </svg>
             Anonymous Preview
           </span>
-          <h1 className="mt-3 text-3xl font-semibold text-charcoal-900">Try SkinScope</h1>
+          <h1 className="mt-3 text-3xl font-semibold text-charcoal-900">Try DermaAI</h1>
           <p className="mt-2 text-charcoal-500 max-w-2xl">
             Upload a photo to see how our AI analyzes skin conditions. Nothing is saved until you create an account.
           </p>

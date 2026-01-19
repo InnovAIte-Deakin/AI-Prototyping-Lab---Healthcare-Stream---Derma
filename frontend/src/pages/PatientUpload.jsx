@@ -233,7 +233,7 @@ const PatientUpload = () => {
               type="button"
               className="btn-warm w-full py-3.5 text-base"
               disabled={!selectedFile || isAnalyzing}
-              onClick={handleAnalyze}
+              onClick={() => handleAnalyze()}
             >
               {isAnalyzing ? (
                 <span className="flex items-center justify-center gap-2">
@@ -255,7 +255,7 @@ const PatientUpload = () => {
 
             {/* Error */}
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4" role="alert">
                 <svg className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                 </svg>

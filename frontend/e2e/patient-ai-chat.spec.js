@@ -23,7 +23,7 @@ test.describe('Patient AI Chat', () => {
         // Open the first case - cases are article elements with onClick, not links
         // Click on "View Details" text which is inside the clickable card
         const caseCard = page.getByText('View Details').first();
-        await expect(caseCard).toBeVisible({ timeout: 10000 });
+        await expect(caseCard).toBeVisible();
         await caseCard.click();
 
         // Verify case page loads
@@ -31,7 +31,7 @@ test.describe('Patient AI Chat', () => {
 
         // Verify case is NOT escalated (Request Review button should be visible)
         // This confirms we're in AI-only chat mode
-        await expect(page.getByRole('button', { name: /Request Physician Review/i })).toBeVisible({ timeout: 10000 });
+        await expect(page.getByRole('button', { name: /Request Physician Review/i })).toBeVisible();
 
         // Send message to AI
         const question = `Is this condition serious? ${Date.now()}`;
@@ -45,7 +45,7 @@ test.describe('Patient AI Chat', () => {
         // Mock AI response contains "Mock AI" prefix
         await expect(
             page.getByText(/Mock AI|recommend|condition|monitor/i).first()
-        ).toBeVisible({ timeout: 15000 });
+        ).toBeVisible();
 
         console.log('✅ Patient AI Chat Test Complete');
     });
