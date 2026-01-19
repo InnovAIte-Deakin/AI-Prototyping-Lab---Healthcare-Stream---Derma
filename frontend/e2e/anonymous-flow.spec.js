@@ -22,7 +22,7 @@ test.describe('Anonymous Flow', () => {
     test('Anonymous user can analyze image and sign up to save results', async ({ page }) => {
         // 1. Navigate to Anonymous Try Page
         await page.goto('/try-anonymous');
-        await expect(page.getByRole('heading', { name: 'Try SkinScope' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Try DermaAI' })).toBeVisible();
 
         // 2. Upload Image (using accessible selector)
         console.log('Step 2: Uploading Image...');
@@ -67,7 +67,7 @@ test.describe('Anonymous Flow', () => {
         
         // 6. Complete Signup Flow
         console.log('Step 6: Filling Signup Form...');
-        await expect(page).toHaveURL(/.*login.*mode=signup/);
+        await expect(page).toHaveURL(/.*\/login.*mode=signup/);
         
         // Generate unique email
         const timestamp = new Date().getTime();
@@ -89,7 +89,8 @@ test.describe('Anonymous Flow', () => {
         
         // Verify the saved case exists
         console.log('Step 7: Verifying History...');
-        await page.getByRole('button', { name: 'View Scan History' }).click();
+        await page.waitForTimeout(1000); // Wait for dashboard transitions
+        await page.getByText('View History').click();
         
         // Verify at least one case exists (cases are article elements with onClick, not links)
         await expect(page.getByText('View Details').first()).toBeVisible({ timeout: 10000 });

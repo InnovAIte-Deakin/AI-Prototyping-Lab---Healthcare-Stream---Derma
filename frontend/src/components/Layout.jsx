@@ -3,10 +3,10 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SkinScope Design Tokens — Warm & Human-Centered
+   DermaAI Design Tokens — Warm & Human-Centered
 
    These tokens ensure consistency across the app while maintaining
-   the warm, approachable aesthetic that sets SkinScope apart.
+   the warm, approachable aesthetic that sets DermaAI apart.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 export const uiTokens = {
@@ -42,7 +42,7 @@ export const uiTokens = {
   badgeNeutral: 'bg-charcoal-100 border border-charcoal-200 text-charcoal-600 text-xs font-semibold px-3 py-1 rounded-full',
 };
 
-// SkinScope Logo - warm, distinctive
+// DermaAI Logo - warm, distinctive
 const LogoMark = () => (
   <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Outer ring - skin/warmth */}
@@ -82,7 +82,7 @@ const Layout = () => {
             <LogoMark />
             <div className="flex flex-col">
               <span className="text-lg font-semibold text-charcoal-900 tracking-tight">
-                SkinScope
+                DermaAI
               </span>
               <span className="hidden sm:block text-[10px] font-medium uppercase tracking-widest text-warm-600">
                 Dermatology Insights
@@ -167,10 +167,13 @@ const Layout = () => {
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center gap-3 text-sm text-charcoal-500">
               <LogoMark />
-              <span className="font-medium text-charcoal-600">SkinScope</span>
+              <span className="font-medium text-charcoal-600">DermaAI</span>
               <span className="text-charcoal-300">·</span>
               <span>Understanding your skin, together</span>
             </div>
+            <nav className="flex gap-4 text-sm text-charcoal-500">
+              <Link to="/faq" className="hover:text-warm-600 transition-colors">FAQ</Link>
+            </nav>
             <p className="text-xs text-charcoal-400">
               Not a substitute for professional medical advice
             </p>
