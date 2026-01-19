@@ -32,7 +32,7 @@ test.describe('Anonymous Flow', () => {
         
         // 3. Click Analyze
         console.log('Step 3: Clicking Analyze...');
-        await page.getByRole('button', { name: 'Run quick analysis' }).click();
+        await page.getByRole('button', { name: /run quick analysis/i }).click();
 
         // Check for errors using role='alert' selector
         const errorAlert = page.getByRole('alert');
