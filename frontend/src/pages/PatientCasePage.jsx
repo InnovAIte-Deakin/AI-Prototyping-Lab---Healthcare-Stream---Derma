@@ -72,11 +72,9 @@ function PatientCasePage() {
   }, [report?.patient_rating, report?.patient_feedback]);
 
   const handleStatusChange = useCallback(() => {
-    console.log('PatientCasePage: handleStatusChange triggered');
     /* Set refreshing state to visible */
     setIsRefreshing(true);
     setTimeout(() => {
-      console.log('PatientCasePage: Calling fetchReport from handleStatusChange');
       fetchReport();
     }, 500);
   }, [fetchReport]);
@@ -171,7 +169,7 @@ function PatientCasePage() {
     reviewStatus === 'reviewed' ? 'text-sage-600' :
     reviewStatus === 'pending' ? 'text-amber-600' : 'text-charcoal-500';
 
-  console.log(`PatientCasePage: Render. Report: ${report?.report_id}, Status: ${report?.review_status}`);
+
 
   return (
     <div className="space-y-6 animate-enter">

@@ -59,7 +59,6 @@ const UnifiedChat = ({
 
     // Prevent reconnecting if nothing changed
     if (wsRef.current && wsRef.current.url.includes(reportId.toString()) && wsRef.current.readyState === WebSocket.OPEN) {
-      console.log(`[WS] ${userRole} connection already open for report ${reportId}, skipping reconnect`);
       return;
     }
 
@@ -71,24 +70,20 @@ const UnifiedChat = ({
       // Close existing connection if it exists and is for a different report
       if (wsRef.current) {
         if (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING) {
-           console.log('[WS] Closing existing connection before new connect');
            wsRef.current.close();
         }
         wsRef.current = null;
       }
 
       const wsUrl = `ws://127.0.0.1:8000/ws/chat/${reportId}`;
-      console.log(`[WS] ${userRole} connecting to ${wsUrl}`);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
         if (!mountedRef.current) {
-          console.log('[WS] Component unmounted during connect, closing');
           ws.close(1000, 'Component unmounted');
           return;
         }
-        console.log('[WS] Connection opened, sending auth');
         ws.send(JSON.stringify({ token }));
       };
 
@@ -99,7 +94,6 @@ const UnifiedChat = ({
           const data = JSON.parse(event.data);
 
           if (data.type === 'connected') {
-            console.log('[WS] Connected/Auth success');
             setIsConnected(true);
             setMessages(data.messages || []);
             scrollToBottom();
@@ -114,17 +108,12 @@ const UnifiedChat = ({
             scrollToBottom();
 
             if (data.sender_role === 'system' && onStatusChangeRef.current) {
-              console.log('[WS] System message received, triggering status change');
               onStatusChangeRef.current();
             }
           } else if (data.type === 'status_update') {
-            console.log('[WS] Received status_update:', data);
             // Verify we have a handler
             if (onStatusChangeRef.current) {
-              console.log('[WS] Triggering onStatusChange from status_update');
               onStatusChangeRef.current();
-            } else {
-              console.warn('[WS] No onStatusChangeRef handler available');
             }
           } else if (data.error) {
             console.error('[WS] Error from server:', data.error);
@@ -137,8 +126,7 @@ const UnifiedChat = ({
 
       ws.onclose = (event) => {
         if (!mountedRef.current) return;
-        console.log('[WS] Connection closed', event.code, event.reason);
-
+        
         setIsConnected(false);
         wsRef.current = null;
 
@@ -146,7 +134,6 @@ const UnifiedChat = ({
           clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = setTimeout(() => {
             if (mountedRef.current) {
-              console.log('[WS] Attempting reconnect...');
               connect();
             }
           }, 2000);
@@ -165,14 +152,12 @@ const UnifiedChat = ({
     }, 100);
 
     return () => {
-      console.log('[WS] Effect cleanup');
       mountedRef.current = false;
       clearTimeout(initialTimeout);
       clearTimeout(reconnectTimeoutRef.current);
 
       if (wsRef.current) {
         // Only close if we are truly unmounting or changing reports
-        console.log('[WS] Closing connection on cleanup');
         wsRef.current.close(1000, 'Effect cleanup');
         wsRef.current = null;
       }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiClient } from '../context/AuthContext';
 import DisclaimerBanner from '../components/DisclaimerBanner';
 import UnifiedChat from '../components/UnifiedChat';
@@ -14,6 +14,7 @@ const PatientUpload = () => {
   const [result, setResult] = useState(null);
   const [reviewStatus, setReviewStatus] = useState('none');
   const { pushToast } = useToast();
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0] || null;
@@ -76,8 +77,13 @@ const PatientUpload = () => {
 
       const analyzeRes = await apiClient.post(`/api/analysis/${imageId}`);
       setResult(analyzeRes.data);
+      
+      // Redirect to full case page immediately
       if (analyzeRes.data?.report_id) {
-        setReviewStatus(analyzeRes.data.review_status || 'none');
+        navigate(`/patient/case/${analyzeRes.data.image_id}`);
+      } else if (analyzeRes.data?.image_id) {
+         // Fallback if report_id isn't at top level (though it should be)
+         navigate(`/patient/case/${analyzeRes.data.image_id}`);
       }
     } catch (err) {
       console.error('Analysis Error:', err.response?.data || err.message);
@@ -301,78 +307,6 @@ const PatientUpload = () => {
         </div>
       </div>
 
-      {/* Results & Chat Section */}
-      {result && result.report_id && (
-        <div className="space-y-6">
-          <UnifiedChat
-            imageId={result.image_id}
-            reportId={result.report_id}
-            isPaused={reviewStatus === 'accepted'}
-            userRole="patient"
-            onStatusChange={async () => {
-              try {
-                const res = await apiClient.get(`/api/analysis/report/${result.report_id}`);
-                if (res.data?.review_status) {
-                  setReviewStatus(res.data.review_status);
-                }
-              } catch (err) {
-                console.error('Failed to refresh status:', err);
-              }
-            }}
-          />
-
-          {/* Request Review CTA */}
-          {reviewStatus === 'none' && result.report_id && (
-            <div className="card-warm p-6 bg-deep-50 border-deep-200">
-              <div className="flex flex-col sm:flex-row items-center gap-4 justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-deep-100 flex-shrink-0">
-                    <svg className="h-6 w-6 text-deep-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-deep-900">Want a professional opinion?</h3>
-                    <p className="text-sm text-deep-700 mt-0.5">
-                      Request a review from a board-certified dermatologist
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn-deep whitespace-nowrap"
-                  disabled={isRequestingReview}
-                  onClick={handleRequestReview}
-                >
-                  {isRequestingReview ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Requesting...
-                    </span>
-                  ) : (
-                    'Request Physician Review'
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Pending Status */}
-          {reviewStatus === 'pending' && (
-            <div className="card-warm p-6 bg-amber-50 border-amber-200 text-center">
-              <div className="flex items-center justify-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-500 status-dot" />
-                <p className="font-semibold text-amber-800">
-                  Review Pending - A physician will be with you shortly
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
