@@ -28,7 +28,7 @@ jobs:
     - name: Seed Database
       run: |
         cd backend
-        python -m app.seed_data
+        python -m app.reset_db
         python -m app.seed_e2e_fixtures
       env:
         DATABASE_URL: sqlite:///./derma.db
@@ -99,6 +99,7 @@ jobs:
       run: |
         echo "=== Environment ==="
         echo "DATABASE_URL: $DATABASE_URL"
+        echo "MOCK_AI: $MOCK_AI"
         echo "BASE_URL: $BASE_URL"
         echo "=== Backend Logs ==="
         cat backend/uvicorn.log 2>/dev/null || echo "No backend log found"
@@ -107,6 +108,7 @@ jobs:
         curl -s http://127.0.0.1:5173 | head -20 || echo "Frontend not responding"
       env:
         DATABASE_URL: sqlite:///./derma.db
+        MOCK_AI: "true"
         BASE_URL: http://127.0.0.1:5173
 
     # --- Artifacts ---
