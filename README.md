@@ -25,6 +25,7 @@ DERMA (internally referred to as **DermaAI**) is a containerized web application
 - **[docs/OPERATIONS.md](docs/OPERATIONS.md):** Operations runbook (health checks, logs, migrations).
 - **[docs/WEEK_6_STATUS_REPORT.md](docs/WEEK_6_STATUS_REPORT.md):** Week 6 Project Status Report.
 - **[TASKS.md](TASKS.md):** Active Task Checklist.
+- **[docs/USER_GUIDE.md](docs/USER_GUIDE.md):** Detailed Patient & Doctor usage guide.
 
 ## 🛠 Tech Stack
 
