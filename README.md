@@ -21,24 +21,25 @@ DERMA (internally referred to as **DermaAI**) is a containerized web application
 
 - **[AGENTS.md](AGENTS.md):** Master context for AI Agents (Mission, Rules, Tech Stack).
 - **[docs/SRS.md](docs/SRS.md):** Software Requirements Specification.
-- **[docs/TESTING.md](docs/TESTING.md):** Testing Strategy and Commands.
-- **[docs/OPERATIONS.md](docs/OPERATIONS.md):** Operations runbook (health checks, logs, migrations).
-- **[docs/WEEK_6_STATUS_REPORT.md](docs/WEEK_6_STATUS_REPORT.md):** Week 6 Project Status Report.
-- **[TASKS.md](TASKS.md):** Active Task Checklist.
 - **[docs/USER_GUIDE.md](docs/USER_GUIDE.md):** Detailed Patient & Doctor usage guide.
+- **[docs/DEVELOPMENT_PROCESS_REPORT.md](docs/DEVELOPMENT_PROCESS_REPORT.md):** Implementation & Process Review.
+- **[docs/CLINIC.md](docs/CLINIC.md):** Clinic Branding & Style Guide.
+- **[docs/TESTING.md](docs/TESTING.md):** Testing Strategy and Commands.
+- **[docs/OPERATIONS.md](docs/OPERATIONS.md):** Operations runbook & Troubleshooting.
+- **[TASKS.md](TASKS.md):** Active Task Checklist.
 
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Framework:** React (Vite)
-- **Styling:** Tailwind CSS
-- **Routing:** React Router DOM
+- **Framework:** React 19 (Vite)
+- **Styling:** Tailwind CSS v4
+- **Routing:** React Router v7
 
 ### Backend
 - **Framework:** FastAPI (Python 3.10+)
 - **Database:** PostgreSQL (via Docker)
 - **ORM:** SQLAlchemy + Alembic (Migrations)
-- **Auth:** RBAC (Patient vs. Doctor) via LocalStorage & Custom Headers (POC Level)
+- **Auth:** JWT-based Authentication (python-jose, bcrypt) with RBAC
 
 ### Infrastructure
 - **Containerization:** Docker & Docker Compose
