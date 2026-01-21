@@ -24,6 +24,8 @@ def seed_admin(
     db: Optional[Session] = None,
     bind_engine: Optional[Engine] = None,
 ) -> None:
+    from app.config import DATABASE_URL
+    print(f"DEBUG SEED: DATABASE_URL={DATABASE_URL}")
     """Insert or update the admin user from environment variables."""
     Base.metadata.create_all(bind=bind_engine or engine)
     session = db or SessionLocal()

@@ -21,21 +21,32 @@ test.describe('Doctor Review', () => {
         await expect(page.getByRole('heading', { name: 'Doctor Dashboard' })).toBeVisible();
         console.log('Step 2: Dashboard heading visible');
         
-        // Find a pending case (the e2e_patient_pending fixture)
-        console.log('Step 3: Looking for pending case...');
-        const pendingCase = page.getByRole('article', { name: /e2e_patient_pending/i });
+        // Find a pending case - Dashboard uses a TABLE, not cards (articles)
+        console.log('Step 3: Looking for pending case in table...');
         
-        // If the specific fixture case isn't visible, just use any pending case
-        const caseCard = await pendingCase.isVisible() 
-            ? pendingCase 
-            : page.getByRole('article').first();
+        // Find row with specific patient
+        const patientRow = page.getByRole('row').filter({ hasText: 'e2e_patient_pending' });
         
-        await expect(caseCard).toBeVisible({ timeout: 10000 });
-        console.log('Step 3: Found case card, clicking...');
-        await caseCard.click();
+        // Fallback to first data row if specific one not found (robustness)
+        const targetRow = await patientRow.isVisible() 
+            ? patientRow 
+            : page.getByRole('row').nth(1); // 0 is header
+            
+        await expect(targetRow).toBeVisible({ timeout: 10000 });
+        
+        console.log('Step 3: Found patient row, clicking View Reports...');
+        await targetRow.getByRole('button', { name: 'View Reports' }).click();
+        
+        // Verify patient reports list loads
+        console.log('Step 4: Waiting for Patient Reports list...');
+        await expect(page.getByRole('heading', { name: 'Patient Reports' })).toBeVisible({ timeout: 10000 });
+        
+        // Click on the specific case
+        console.log('Step 4b: Clicking on the case...');
+        await page.getByText('E2E Test Condition').click();
         
         // Verify case page loads
-        console.log('Step 4: Waiting for case page heading...');
+        console.log('Step 4c: Waiting for case page heading...');
         await expect(page.getByRole('heading', { name: /Case #/ })).toBeVisible({ timeout: 30000 });
         console.log('Step 4: Case page loaded');
         

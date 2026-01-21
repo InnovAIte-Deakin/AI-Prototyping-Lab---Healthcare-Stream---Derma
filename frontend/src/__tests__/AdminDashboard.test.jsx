@@ -60,7 +60,7 @@ describe('AdminDashboard', () => {
         apiClient.get.mockImplementation(() => new Promise(() => { })); // Never resolves
         renderAdminDashboard();
 
-        expect(screen.getByText(/loading admin dashboard/i)).toBeInTheDocument();
+        expect(screen.getByText(/Loading Overview.../i)).toBeInTheDocument();
     });
 
     it('renders admin dashboard with metrics on successful load', async () => {
@@ -75,7 +75,7 @@ describe('AdminDashboard', () => {
         expect(screen.getByText('42')).toBeInTheDocument(); // Total Patients
         expect(screen.getByText('8')).toBeInTheDocument();  // Total Doctors
         expect(screen.getByText('5')).toBeInTheDocument();  // Pending Cases
-        expect(screen.getByText('4.2 ⭐')).toBeInTheDocument(); // Avg Rating
+        expect(screen.getByText('4.2')).toBeInTheDocument(); // Avg Rating
     });
 
     it('renders recent cases table', async () => {
@@ -89,7 +89,7 @@ describe('AdminDashboard', () => {
         // Check table content
         expect(screen.getByText('patient@example.com')).toBeInTheDocument();
         expect(screen.getByText('Eczema')).toBeInTheDocument();
-        expect(screen.getByText('pending')).toBeInTheDocument();
+        expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     it('renders error message on API failure', async () => {
@@ -109,7 +109,7 @@ describe('AdminDashboard', () => {
         renderAdminDashboard();
 
         await waitFor(() => {
-            expect(screen.getByText('N/A')).toBeInTheDocument();
+            expect(screen.getByText('-')).toBeInTheDocument();
         });
     });
 

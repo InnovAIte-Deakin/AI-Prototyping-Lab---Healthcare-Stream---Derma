@@ -54,6 +54,8 @@ function LoginPage() {
       const userRole = user.role;
       if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
+      } else if (userRole === 'admin') {
+        navigate('/admin-dashboard');
       } else {
         navigate('/patient-dashboard');
       }
