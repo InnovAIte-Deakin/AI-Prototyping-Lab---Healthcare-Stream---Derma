@@ -151,6 +151,21 @@ async def accept_case(
         except Exception as e:
             print(f"[Cases] Error broadcasting to {user_id}: {e}")
 
+    # Explicitly broadcast status update to trigger frontend refresh
+    status_update_msg = {
+        "type": "status_update",
+        "status": report.review_status,
+        "report_id": report.id
+    }
+    print(f"[Cases] ACCEPT: sending status_update to {len(conns)} lists")
+    for user_id, ws in conns.items():
+        try:
+            print(f"[Cases] Sending status_update to user {user_id}")
+            asyncio.create_task(ws.send_json(status_update_msg))
+        except Exception as e:
+            print(f"[Cases] Error sending status_update to {user_id}: {e}")
+            pass
+
     return {
         "message": "Case accepted",
         "report_id": report.id,
@@ -213,6 +228,21 @@ async def complete_case(
             asyncio.create_task(ws.send_json(broadcast_data))
         except Exception as e:
              print(f"[Cases] Error broadcasting to {user_id}: {e}")
+
+    # Explicitly broadcast status update to trigger frontend refresh
+    status_update_msg = {
+        "type": "status_update",
+        "status": report.review_status,
+        "report_id": report.id
+    }
+    print(f"[Cases] COMPLETE: sending status_update to {len(conns)} clients")
+    for user_id, ws in conns.items():
+        try:
+            print(f"[Cases] Sending status_update to user {user_id}")
+            asyncio.create_task(ws.send_json(status_update_msg))
+        except Exception as e:
+            print(f"[Cases] Error sending status_update to {user_id}: {e}")
+            pass
 
     return {
         "message": "Case review completed",

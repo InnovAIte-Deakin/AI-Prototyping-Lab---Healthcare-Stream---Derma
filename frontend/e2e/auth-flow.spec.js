@@ -16,28 +16,28 @@ test.describe('Authentication Flow', () => {
         await page.goto('/login');
         
         // 2. Log In
-        await page.getByLabel('Email').clear();
-        await page.getByLabel('Email').fill(email);
+        await page.getByLabel('Email address').clear();
+        await page.getByLabel('Email address').fill(email);
         await page.getByLabel('Password').clear();
         await page.getByLabel('Password').fill(password);
-        await page.getByRole('button', { name: 'Log In' }).click();
+        await page.getByRole('button', { name: 'Sign In' }).click();
 
         // 3. Verify Dashboard
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
 
         // 4. Click Logout
-        await page.getByRole('button', { name: /Logout/i }).click();
+        await page.getByRole('button', { name: /Sign out/i }).click();
 
         // 5. Verify Redirect to Landing Page (or Login)
         // Adjust regex to match your actual landing page URL pattern (often just /)
-        await expect(page).toHaveURL(/^http:\/\/localhost:5173\/?$/);
+        await expect(page).toHaveURL(/^http:\/\/(localhost|127\.0\.0\.1):5173\/?$/);
         
         // Verify Dashboard access is revoked
         // Try to navigate back to protected route
         await page.goto('/patient-dashboard');
         
         // Should be redirected back to landing/login
-        await expect(page).toHaveURL(/^http:\/\/localhost:5173\/?$/);
+        await expect(page).toHaveURL(/^http:\/\/(localhost|127\.0\.0\.1):5173\/?$/);
         
         console.log('✅ Logout verified successfully');
     });
