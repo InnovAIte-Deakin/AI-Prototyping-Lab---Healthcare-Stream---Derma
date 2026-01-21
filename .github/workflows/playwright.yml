@@ -30,6 +30,7 @@ jobs:
         cd backend
         python -m app.reset_db
         python -m app.seed_e2e_fixtures
+        python -m app.seed_admin
       env:
         DATABASE_URL: sqlite:///./derma.db
         MOCK_AI: "true"

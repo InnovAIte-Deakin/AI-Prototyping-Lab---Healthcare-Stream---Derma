@@ -66,7 +66,14 @@ if ($LASTEXITCODE -ne 0) {
 # Seed E2E specific fixtures
 python -m app.seed_e2e_fixtures
 if ($LASTEXITCODE -ne 0) {
-    Write-Host " [ERROR] Seeding failed. Stopping." -ForegroundColor Red
+    Write-Host " [ERROR] E2E Fixture Seeding failed. Stopping." -ForegroundColor Red
+    Set-Location $OriginalDir
+    exit 1
+}
+
+python -m app.seed_admin
+if ($LASTEXITCODE -ne 0) {
+    Write-Host " [ERROR] Admin Seeding failed. Stopping." -ForegroundColor Red
     Set-Location $OriginalDir
     exit 1
 }

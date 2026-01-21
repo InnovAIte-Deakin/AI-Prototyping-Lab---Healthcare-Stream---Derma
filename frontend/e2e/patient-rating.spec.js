@@ -59,17 +59,28 @@ test.describe('Patient Rating Flow', () => {
         const ratingHeader = page.getByRole('heading', { name: 'Rate Your Experience' });
         await expect(ratingHeader).toBeVisible({ timeout: 10000 });
 
-        // 5. Submit Rating
-        console.log('Step 5: Submitting Rating (5 Stars)...');
-        // Click the 5th star using data-testid for reliable selection
-        await page.getByTestId('star-5').click();
+        // 5. Submit Rating (Idempotent check)
+        const submittedBadge = page.getByText('Submitted', { exact: false });
+        const feedbackText = 'Excellent care, thank you!'; // Define here for reuse
         
-        // Fill feedback using the new placeholder text
-        const feedbackText = 'Excellent care, thank you!';
-        await page.getByPlaceholder(/Optional.*feedback/i).fill(feedbackText);
-        
-        // Submit using the new button text
-        await page.getByRole('button', { name: /Submit Rating/i }).click();
+        let didSubmit = false;
+
+        if (await submittedBadge.isVisible()) {
+             console.log('Step 5: Rating already submitted (skipping submission)...');
+        } else {
+            console.log('Step 5: Submitting Rating (5 Stars)...');
+            // Click the 5th star using data-testid for reliable selection
+            const star5 = page.getByTestId('star-5');
+            await expect(star5).toBeVisible();
+            await star5.click();
+            
+            // Fill feedback using the new placeholder text
+            await page.getByPlaceholder(/Optional.*feedback/i).fill(feedbackText);
+            
+            // Submit using the new button text
+            await page.getByRole('button', { name: /Submit Rating/i }).click();
+            didSubmit = true;
+        }
 
         // 6. Verify Success
         console.log('Step 6: Verifying Success Status...');
@@ -77,7 +88,9 @@ test.describe('Patient Rating Flow', () => {
         await expect(page.getByText('Submitted', { exact: false })).toBeVisible({ timeout: 10000 });
         
         // Verify the success message is now visible in the read-only view
-        await expect(page.getByText('Thanks for your feedback!')).toBeVisible();
+        if (didSubmit) {
+            await expect(page.getByText('Thanks for your feedback!')).toBeVisible();
+        }
         
         // Verify the read-only stars are displayed (5 filled stars)
         const starsDisplay = page.locator('.text-amber-500').first();

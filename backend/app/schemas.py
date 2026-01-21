@@ -25,14 +25,14 @@ class UserSignup(BaseModel):
     """
     email: EmailStr
     password: str = Field(..., min_length=6, description="Sprint 1: min 6 chars. Sprint 2: Add complexity rules")
-    role: Literal["patient", "doctor"] = Field(..., description="User role: patient or doctor")
+    role: Literal["patient", "doctor", "admin"] = Field(..., description="User role: patient, doctor, or admin")
     public_session_id: Optional[str] = Field(None, description="Link anonymous session on signup")
 
     @field_validator('role')
     @classmethod
     def validate_role(cls, v):
-        if v not in ["patient", "doctor"]:
-            raise ValueError('Role must be either "patient" or "doctor"')
+        if v not in ["patient", "doctor", "admin"]:
+            raise ValueError('Role must be either "patient", "doctor", or "admin"')
         return v
 
 

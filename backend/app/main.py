@@ -14,6 +14,7 @@ from app.routes import (
     health,
     media,
     patients,
+    admin,
 )  # Registered routers
 
 app = FastAPI(
@@ -60,6 +61,7 @@ app.include_router(doctor_dashboard.router)
 app.include_router(health.router)
 app.include_router(media.router)
 app.include_router(patients.router)
+app.include_router(admin.router)
 
 @app.get("/")
 def read_root():
