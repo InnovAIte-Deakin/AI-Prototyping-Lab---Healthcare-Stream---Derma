@@ -41,6 +41,7 @@ docker-compose down
 cd backend
 alembic upgrade head
 python -m app.seed_doctors
+python -m app.seed_admin
 python -m app.seed_data
 python -m app.seed_e2e_fixtures
 ```
@@ -85,6 +86,7 @@ alembic upgrade head
 python -m app.seed_doctors
 
 # (Optional) Seed Admin or E2E data
+python -m app.seed_admin
 python -m app.seed_data
 ```
 

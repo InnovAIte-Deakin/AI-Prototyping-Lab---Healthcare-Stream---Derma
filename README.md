@@ -92,6 +92,7 @@ docker-compose up -d
 # 6. Setup Database
 alembic upgrade head
 python -m app.seed_doctors
+python -m app.seed_admin
 
 # 7. Run Server
 uvicorn app.main:app --reload
