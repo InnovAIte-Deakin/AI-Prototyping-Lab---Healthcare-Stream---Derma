@@ -765,8 +765,8 @@ I need to Apply Styling and Layout
 - [x] F11 – E2E Coverage (Playwright)
 
 ### Sprint 2 Advanced (Plug & Play)
-- [ ] S2-1 – UI Improvements
-- [ ] S2-2 – Usage Guides
+- [x] S2-1 – UI Improvements
+- [x] S2-2 – Usage Guides
 - [x] S2-3 – Clinic Branding
 - [x] S2-4 – Safe Doctor Switch
 - [x] S2-5 – Post-Consultation Doctor Rating
