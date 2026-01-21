@@ -120,6 +120,7 @@ Open your browser to **http://localhost:5173**.
 **Test Credentials:**
 - **Patient:** Register a new account.
 - **Doctors:** `alice@derma.com` / `password123` (See `seed_doctors.py` for more).
+- **Admin:** `admin@derma.com` / `adminpass123` (Run `python -m app.seed_admin` to create. Env-configurable via `ADMIN_EMAIL` / `ADMIN_PASSWORD`).
 
 ---
 

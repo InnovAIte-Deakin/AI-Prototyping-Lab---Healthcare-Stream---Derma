@@ -75,3 +75,15 @@ def get_current_doctor(
             detail="Access denied. Doctor role required."
         )
     return current_user
+
+
+def get_current_admin(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    """Verify that the current user is an admin."""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Admin role required."
+        )
+    return current_user

@@ -16,6 +16,7 @@ import DoctorsPage from './pages/DoctorsPage';
 import ServicesPage from './pages/ServicesPage';
 import ContactPage from './pages/ContactPage';
 import FAQPage from './pages/FAQPage';
+import AdminDashboard from './pages/AdminDashboard';
 
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -99,6 +100,12 @@ export const routes = [
         path: '/doctor/case/:reportId',
         element: (
           <PrivateRoute allowedRoles={['doctor']} element={<DoctorCasePage />} />
+        ),
+      },
+      {
+        path: '/admin-dashboard',
+        element: (
+          <PrivateRoute allowedRoles={['admin']} element={<AdminDashboard />} />
         ),
       },
     ],
