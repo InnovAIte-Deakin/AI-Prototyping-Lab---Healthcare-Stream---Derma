@@ -33,6 +33,7 @@ def get_health_response(db: Session) -> Tuple[Dict[str, Any], int]:
     env_checks = _check_env()
     database_ok = _check_database(db)
     env_ok = all(env_checks.values())
+    mock_ai = os.getenv("MOCK_AI", "").lower() == "true"
 
     status_label = "ok" if database_ok and env_ok else "degraded"
     payload = {
@@ -41,6 +42,7 @@ def get_health_response(db: Session) -> Tuple[Dict[str, Any], int]:
             "database": "ok" if database_ok else "error",
             "env": env_checks,
         },
+        "mock_ai": mock_ai,
     }
     http_status = (
         status.HTTP_200_OK

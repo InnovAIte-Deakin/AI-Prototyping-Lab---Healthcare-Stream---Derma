@@ -28,7 +28,7 @@ jobs:
     - name: Seed Database
       run: |
         cd backend
-        python -m app.seed_data
+        python -m app.reset_db
         python -m app.seed_e2e_fixtures
       env:
         DATABASE_URL: sqlite:///./derma.db
@@ -61,14 +61,15 @@ jobs:
     - name: Start Frontend
       run: |
         cd frontend
-        npm run dev -- --port 5173 &
+        npm run dev -- --host 127.0.0.1 --port 5173 &
 
+    # --- Wait for Services (using healthcheck) ---
     # --- Wait for Services (using healthcheck) ---
     - name: Wait for Backend
       run: |
         echo "Waiting for backend to be ready..."
         for i in {1..30}; do
-          if curl -sf http://localhost:8000/health; then
+          if curl -sf http://127.0.0.1:8000/health; then
             echo "Backend is ready!"
             break
           fi
@@ -81,7 +82,7 @@ jobs:
 
     - name: Wait for Frontend
       run: |
-        until curl -sf http://localhost:5173; do sleep 1; done
+        until curl -sf http://127.0.0.1:5173; do sleep 1; done
 
     # --- Run Tests ---
     - name: Run Playwright tests
@@ -89,7 +90,7 @@ jobs:
         cd frontend
         npx playwright test
       env:
-        BASE_URL: http://localhost:5173
+        BASE_URL: http://127.0.0.1:5173
         CI: true
 
     # --- Debug Info (on failure) ---
@@ -98,15 +99,17 @@ jobs:
       run: |
         echo "=== Environment ==="
         echo "DATABASE_URL: $DATABASE_URL"
+        echo "MOCK_AI: $MOCK_AI"
         echo "BASE_URL: $BASE_URL"
         echo "=== Backend Logs ==="
         cat backend/uvicorn.log 2>/dev/null || echo "No backend log found"
         echo "=== Check Services ==="
-        curl -s http://localhost:8000/health || echo "Backend not responding"
-        curl -s http://localhost:5173 | head -20 || echo "Frontend not responding"
+        curl -s http://127.0.0.1:8000/health || echo "Backend not responding"
+        curl -s http://127.0.0.1:5173 | head -20 || echo "Frontend not responding"
       env:
         DATABASE_URL: sqlite:///./derma.db
-        BASE_URL: http://localhost:5173
+        MOCK_AI: "true"
+        BASE_URL: http://127.0.0.1:5173
 
     # --- Artifacts ---
     - name: Upload Report

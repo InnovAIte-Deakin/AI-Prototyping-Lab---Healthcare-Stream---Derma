@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 // Shared Axios client for the whole frontend
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'http://127.0.0.1:8000',
 });
 
 // Helper functions for managing API client headers (defined outside component to avoid re-creation)

@@ -22,7 +22,7 @@ test.describe('Anonymous Flow', () => {
     test('Anonymous user can analyze image and sign up to save results', async ({ page }) => {
         // 1. Navigate to Anonymous Try Page
         await page.goto('/try-anonymous');
-        await expect(page.getByRole('heading', { name: 'Try DermaAI without signing up' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Try DermaAI' })).toBeVisible();
 
         // 2. Upload Image (using accessible selector)
         console.log('Step 2: Uploading Image...');
@@ -32,7 +32,7 @@ test.describe('Anonymous Flow', () => {
         
         // 3. Click Analyze
         console.log('Step 3: Clicking Analyze...');
-        await page.getByRole('button', { name: 'Run quick analysis' }).click();
+        await page.getByRole('button', { name: /run quick analysis/i }).click();
 
         // Check for errors using role='alert' selector
         const errorAlert = page.getByRole('alert');
@@ -53,7 +53,7 @@ test.describe('Anonymous Flow', () => {
 
         // 5. Sign up to save
         console.log('Step 5: Clicking Sign Up Link...');
-        const signupLink = page.getByRole('link', { name: /Sign up to save this case/i });
+        const signupLink = page.getByRole('link', { name: /Sign up to save/i });
         await expect(signupLink).toBeVisible();
         
         // Debug: Verify session ID is in link
@@ -67,32 +67,33 @@ test.describe('Anonymous Flow', () => {
         
         // 6. Complete Signup Flow
         console.log('Step 6: Filling Signup Form...');
-        await expect(page).toHaveURL(/.*login.*mode=signup/);
+        await expect(page).toHaveURL(/.*\/login.*mode=signup/);
         
         // Generate unique email
         const timestamp = new Date().getTime();
         const email = `anon_saved_${timestamp}@test.com`;
         
-        await page.getByLabel('Email').clear();
-        await page.getByLabel('Email').fill(email); 
+        await page.getByLabel('Email address').clear();
+        await page.getByLabel('Email address').fill(email); 
         
         await page.getByLabel('Password').clear();
         await page.getByLabel('Password').fill('password123');
         
         console.log('Step 6: Submitting Form...');
-        await page.getByRole('button', { name: 'Sign Up' }).click();
+        await page.getByRole('button', { name: 'Create Account' }).click();
 
         // 7. Verify Dashboard & Persistence
         console.log('Step 7: Verifying Dashboard Redirect...');
         await expect(page).toHaveURL(/.*patient-dashboard/, { timeout: 30000 });
-        await expect(page.getByRole('heading', { name: 'Patient Dashboard' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Your Dashboard' })).toBeVisible();
         
         // Verify the saved case exists
         console.log('Step 7: Verifying History...');
-        await page.getByRole('button', { name: 'View History' }).click();
+        await page.waitForTimeout(1000); // Wait for dashboard transitions
+        await page.getByText('View History').click();
         
-        // Verify at least one case exists (using resilient selector)
-        await expect(page.getByRole('link', { name: /Open/i }).first()).toBeVisible({ timeout: 10000 });
+        // Verify at least one case exists (cases are article elements with onClick, not links)
+        await expect(page.getByText('View Details').first()).toBeVisible({ timeout: 10000 });
         console.log('Test Complete: Success - Anonymous case saved');
     });
 });

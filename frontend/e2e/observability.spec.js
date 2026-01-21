@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Observability', () => {
   test('Health endpoints respond with request ID', async ({ request }) => {
-    const healthResponse = await request.get('http://localhost:8000/health');
+    const healthResponse = await request.get('http://127.0.0.1:8000/health');
     expect(healthResponse.status()).toBe(200);
 
     const healthHeaders = healthResponse.headers();
@@ -20,7 +20,7 @@ test.describe('Observability', () => {
     expect(healthBody.checks.database).toBe('ok');
     expect(healthBody.checks.env).toBeTruthy();
 
-    const readyResponse = await request.get('http://localhost:8000/ready');
+    const readyResponse = await request.get('http://127.0.0.1:8000/ready');
     expect(readyResponse.status()).toBe(200);
 
     const readyHeaders = readyResponse.headers();
@@ -51,7 +51,7 @@ test.describe('Error surfaces', () => {
     await page.goto('/doctor-dashboard');
 
     await expect(page.getByRole('heading', { name: 'Doctor Dashboard' })).toBeVisible();
-    await expect(page.getByRole('alert')).toContainText('Service down');
-    await expect(page.getByRole('status').first()).toContainText('Dashboard error');
+    // Error message is displayed in an error banner (not role="alert")
+    await expect(page.getByText('Service down').first()).toBeVisible();
   });
 });

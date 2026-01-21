@@ -1,9 +1,4 @@
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load env vars
-dotenv.config();
 
 /**
  * See https://playwright.dev/docs/test-configuration
@@ -35,9 +30,9 @@ export default defineConfig({
     // Force headed mode for local tests (Methodology Requirement)
     headless: process.env.CI ? true : false,
 
-    // Slow down operations by 1000ms to allow visual inspection (local only)
+    // Slow down operations by 100ms to allow visual inspection (local only)
     launchOptions: {
-      slowMo: process.env.CI ? 0 : 1000,
+      slowMo: process.env.CI ? 0 : 100,
     },
   },
 
@@ -69,8 +64,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
+    command: 'npm run dev -- --host 127.0.0.1',
+    url: 'http://127.0.0.1:5173',
     reuseExistingServer: true,
   },
 });
